@@ -6,7 +6,7 @@ data class Event(
     val name_event: String,
     val email_contact: String = "",
     val phone : Int? = 0,
-    val category : String,
+    val category : Category,
     val location: String,
     val date: String,
 )
