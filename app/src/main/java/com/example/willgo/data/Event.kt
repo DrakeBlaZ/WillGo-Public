@@ -1,5 +1,7 @@
 package com.example.willgo.data
 
+import java.util.Date
+
 data class Event(
     val id: Int,
     val description: String,
@@ -8,5 +10,5 @@ data class Event(
     val phone : Int? = 0,
     val category : Category,
     val location: String,
-    val date: String,
+    val date: Date,
 )

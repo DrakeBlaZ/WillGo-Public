@@ -19,6 +19,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.willgo.data.Category
+import com.example.willgo.data.Event
 import com.example.willgo.ui.theme.WillGoTheme
 import com.example.willgo.view.screens.HomeScreen
 import io.github.jan.supabase.createSupabaseClient
@@ -56,8 +58,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
-
 
 @Preview(showBackground = true)
 @Composable

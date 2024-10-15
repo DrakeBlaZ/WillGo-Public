@@ -1,4 +1,10 @@
 package com.example.willgo.data
 
-class Category {
+enum class Category {
+    Actuacion_musical,
+    Comedia,
+    Cultura,
+    Deporte,
+    Discoteca,
+    Teatro
 }
