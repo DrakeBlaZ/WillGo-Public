@@ -41,14 +41,14 @@ class MainActivity : ComponentActivity() {
         }
     }*/
 
-    private fun getClient(){
-        val client = createSupabaseClient(
-            supabaseUrl = "https://trpgyhwsghxnaakpoftt.supabase.co",
-            supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRycGd5aHdzZ2h4bmFha3BvZnR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjgwMjgwNDcsImV4cCI6MjA0MzYwNDA0N30.IJthecg-DH9rwOob2XE6ANunb6IskxCbMAacducBVPE"
-        ){
-            install(Postgrest)
-        }
+
+    val client = createSupabaseClient(
+        supabaseUrl = "https://trpgyhwsghxnaakpoftt.supabase.co",
+        supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRycGd5aHdzZ2h4bmFha3BvZnR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjgwMjgwNDcsImV4cCI6MjA0MzYwNDA0N30.IJthecg-DH9rwOob2XE6ANunb6IskxCbMAacducBVPE"
+    ){
+        install(Postgrest)
     }
+
 }
 
 @Composable
