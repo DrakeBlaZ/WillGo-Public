@@ -23,6 +23,7 @@ import com.example.willgo.data.Category
 import com.example.willgo.data.Event
 import com.example.willgo.ui.theme.WillGoTheme
 import com.example.willgo.view.screens.HomeScreen
+import com.example.willgo.view.screens.Profile
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
 
