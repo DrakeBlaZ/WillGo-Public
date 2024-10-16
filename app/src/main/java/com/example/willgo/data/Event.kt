@@ -1,9 +1,14 @@
 package com.example.willgo.data
 
+import java.util.Date
+
 data class Event(
     val id: Int,
-    val name: String,
+    val description: String,
+    val name_event: String,
+    val email_contact: String = "",
+    val phone : Int? = 0,
+    val category : Category,
     val location: String,
-    val date: String,
-    val description: String
+    val date: Date,
 )
