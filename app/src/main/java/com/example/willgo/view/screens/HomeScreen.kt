@@ -46,7 +46,11 @@ fun HomeScreen(paddingValues: PaddingValues){
     )
     {
         TopBar()
-        Search()
+        Box(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)
+        ){
+            Search()
+        }
         Spacer(Modifier.height(16.dp))
         SectionTitle(title = "Popular")
         Spacer(modifier = Modifier.height(16.dp))
@@ -65,7 +69,7 @@ fun HomeScreen(paddingValues: PaddingValues){
 }
 
 @Composable
-fun SectionTitle(title: String) {
+private fun SectionTitle(title: String) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(horizontal = 12.dp)
@@ -89,9 +93,9 @@ fun SectionTitle(title: String) {
 }
 
 @Composable
-fun TopBar() {
+ private fun TopBar() {
     Box(
-        modifier = Modifier.padding(12.dp)
+        modifier = Modifier.padding(top = 12.dp, start = 12.dp, end = 12.dp)
             .fillMaxWidth()
     ) {
 
@@ -149,7 +153,7 @@ fun Search(){
 
 
 @Composable
-fun PopularSection() {
+private fun PopularSection() {
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -162,7 +166,7 @@ fun PopularSection() {
 }
 
 @Composable
-fun ConcertsSection() {
+private fun ConcertsSection() {
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -175,7 +179,7 @@ fun ConcertsSection() {
 }
 
 @Composable
-fun VerticalSeparator(){
+private fun VerticalSeparator(){
     Box(modifier = Modifier
         .height(164.dp)
         .width(4.dp))
