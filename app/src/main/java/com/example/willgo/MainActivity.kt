@@ -1,6 +1,7 @@
 package com.example.willgo
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -19,16 +20,23 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.lifecycleScope
 import com.example.willgo.data.Category
 import com.example.willgo.data.Event
+import com.example.willgo.data.User
+import com.example.willgo.retrofit.RetrofitClient
 import com.example.willgo.ui.theme.WillGoTheme
 import com.example.willgo.view.screens.HomeScreen
+import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
+import io.github.jan.supabase.postgrest.postgrest
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        getData()
         enableEdgeToEdge()
         setContent {
             WillGoTheme {
@@ -43,22 +51,23 @@ class MainActivity : ComponentActivity() {
     }
 
 
-    /*private fun getData(){
+    private fun getData(){
         lifecycleScope.launch{
             val client = getClient()
             val supabaseResponse = client.postgrest["Usuario"].select()
+            val data = supabaseResponse.decodeList<User>()
+            Log.e("supabase", data.toString())
         }
-    }*/
-
-
-    val supabase = createSupabaseClient(
-        supabaseUrl = "https://trpgyhwsghxnaakpoftt.supabase.co",
-        supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRycGd5aHdzZ2h4bmFha3BvZnR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjgwMjgwNDcsImV4cCI6MjA0MzYwNDA0N30.IJthecg-DH9rwOob2XE6ANunb6IskxCbMAacducBVPE"
-    ){
-        install(Postgrest)
     }
 
-
+    private fun getClient(): SupabaseClient{
+        return createSupabaseClient(
+            supabaseUrl = "https://trpgyhwsghxnaakpoftt.supabase.co",
+            supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRycGd5aHdzZ2h4bmFha3BvZnR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjgwMjgwNDcsImV4cCI6MjA0MzYwNDA0N30.IJthecg-DH9rwOob2XE6ANunb6IskxCbMAacducBVPE"
+        ){
+            install(Postgrest)
+        }
+    }
 }
 
 @Preview(showBackground = true)
