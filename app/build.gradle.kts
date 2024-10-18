@@ -1,6 +1,11 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    // plugin para la serialization
+    //id("org.jetbrains.kotlin.plugin.serialization") version "1.5.10"
+    //kotlin("jvm") version "2.0.21"
+    kotlin("plugin.serialization") version "2.0.21"
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
@@ -70,6 +75,9 @@ dependencies {
     //DB
     implementation("io.github.jan-tennert.supabase:postgrest-kt:3.0.0")
     implementation("io.ktor:ktor-client-android:3.0.0-rc-1")
+
+    //SERIALIZATION
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0")
 
     //APIS
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
