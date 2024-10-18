@@ -2,9 +2,10 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     // plugin para la serialization
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.5.10"
+    //id("org.jetbrains.kotlin.plugin.serialization") version "1.5.10"
     //kotlin("jvm") version "2.0.21"
-    //kotlin("plugin.serialization") version "2.0.21"
+    kotlin("plugin.serialization") version "2.0.21"
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
