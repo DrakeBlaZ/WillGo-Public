@@ -1,7 +1,9 @@
 package com.example.willgo.data
 
+import kotlinx.serialization.Serializable
 import java.util.Date
 
+@Serializable
 data class Event(
     val id: Int,
     val description: String,
@@ -10,5 +12,6 @@ data class Event(
     val phone : Int? = 0,
     val category : Category,
     val location: String,
-    val date: Date,
+    val date: String,
+    val price : Float
 )

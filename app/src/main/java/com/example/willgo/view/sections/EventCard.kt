@@ -1,0 +1,110 @@
+package com.example.willgo.view.sections
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CardElevation
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.layoutId
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.willgo.R
+
+@Composable
+fun CommonEventCard(){
+    Card(
+        modifier = Modifier
+            .background(Color.Transparent)
+            .height(242.dp)
+            .width(284.dp),
+        elevation = CardDefaults.cardElevation(8.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .weight(3/2f)
+                .background(Color.Transparent)
+        ){
+            Image(painter = painterResource(id = R.drawable.ac_dc),
+                contentDescription = "Imagen de fondo",
+                modifier = Modifier
+                    .fillMaxSize()
+                    ,
+                contentScale = ContentScale.Crop)
+
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .weight(1f)
+                .background(Color.White)
+        ){
+            Text(
+                text = "06/05/2025",
+                color = Color.Black,
+                fontSize = 10.sp,
+                modifier = Modifier.align(Alignment.TopStart)
+                    .padding(start = 8.dp)
+            )
+
+            Text(
+                text = "Concierto AC/DC 2025 Valencia",
+                color = Color.Black,
+                fontSize = 10.sp,
+                modifier = Modifier
+                        .padding(start = 8.dp, end = 8.dp, top = 24.dp, bottom = 8.dp)
+            )
+
+            Box(
+                modifier = Modifier
+                    .height(32.dp)
+                    .width(72.dp)
+                    .align(alignment = Alignment.BottomEnd)
+                    .padding(4.dp))
+            {
+                Icon(
+                    imageVector = Icons.Default.FavoriteBorder,
+                    contentDescription = "Fav",
+                    modifier = Modifier.size(32.dp)
+                        .align(alignment = Alignment.CenterEnd)
+                        .padding(start = 4.dp),
+                    tint = Color.Black
+                )
+                Icon(
+                    imageVector = Icons.Default.Share,
+                    contentDescription = "Share",
+                    tint = Color.Black
+                )
+            }
+
+
+        }
+
+    }
+}
+
+@Preview
+@Composable
+fun EventCard(){
+    CommonEventCard()
+}
