@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -61,8 +62,9 @@ fun CommonEventCard(){
         ){
             Text(
                 text = "06/05/2025",
-                color = Color.Black,
-                fontSize = 10.sp,
+                color = Color.Blue,
+                fontWeight = FontWeight.Bold,
+                fontSize = 12.sp,
                 modifier = Modifier.align(Alignment.TopStart)
                     .padding(start = 8.dp)
             )
@@ -70,7 +72,8 @@ fun CommonEventCard(){
             Text(
                 text = "Concierto AC/DC 2025 Valencia",
                 color = Color.Black,
-                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+                fontSize = 12.sp,
                 modifier = Modifier
                         .padding(start = 8.dp, end = 8.dp, top = 24.dp, bottom = 8.dp)
             )
