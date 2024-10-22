@@ -30,9 +30,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.willgo.R
+import com.example.willgo.data.Category
+import com.example.willgo.data.Event
 
 @Composable
-fun CommonEventCard(){
+fun CommonEventCard(event: Event){
     Card(
         modifier = Modifier
             .background(Color.Transparent)
@@ -70,7 +72,8 @@ fun CommonEventCard(){
             )
 
             Text(
-                text = "Concierto AC/DC 2025 Valencia",
+                //text = "Concierto AC/DC 2025 Valencia",
+                text = event.name_event,
                 color = Color.Black,
                 fontWeight = FontWeight.Bold,
                 fontSize = 12.sp,
@@ -109,5 +112,5 @@ fun CommonEventCard(){
 @Preview
 @Composable
 fun EventCard(){
-    CommonEventCard()
+    CommonEventCard(event = Event(3, "Concierto AC/DC 2025 Valencia", "Concierto AC/DC 2025 Valencia", "gmail", 111111111, Category.Actuacion_musical, "Valencia", "06/05/2025", 20.0f))
 }

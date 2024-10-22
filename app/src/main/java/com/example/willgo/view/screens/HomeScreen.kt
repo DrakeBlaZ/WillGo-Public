@@ -1,5 +1,6 @@
 package com.example.willgo.view.screens
 
+import android.util.Log
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -45,10 +46,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.willgo.data.Event
+import com.example.willgo.view.sections.CommonEventCard
 import com.example.willgo.view.sections.EventCard
 
 @Composable
-fun HomeScreen(paddingValues: PaddingValues){
+fun HomeScreen(paddingValues: PaddingValues, events: List<Event>){
+    var filteredEvents by remember { mutableStateOf(events) }
+
     Box(modifier = Modifier
         .fillMaxSize()
         .padding(top = paddingValues.calculateTopPadding())
@@ -58,7 +63,16 @@ fun HomeScreen(paddingValues: PaddingValues){
                 .fillMaxWidth()
         ) {
             TopBar()
-            Search()
+            Search(events) { query ->
+                filteredEvents = if (query.isEmpty()) {
+                    events
+                } else {
+                    events.filter {
+                        it.name_event.contains(query, ignoreCase = true)
+                    }
+                }
+                Log.d("Search", "Query de búsqueda: $query, eventos filtrados: ${filteredEvents.size}")
+            }
             Spacer(modifier = Modifier.height(12.dp))
             //HorizontalDivider(color = Color.LightGray, thickness = 1.dp)
             LazyColumn(modifier = Modifier
@@ -80,6 +94,10 @@ fun HomeScreen(paddingValues: PaddingValues){
                     Spacer(Modifier.height(16.dp))
                     EventSection()
                     Spacer(Modifier.height(16.dp))
+
+                    SectionTitle(title = "Resultados de la búsqueda")
+                    Spacer(Modifier.height(16.dp))
+                    EventList(filteredEvents)
                 }
 
             }
@@ -143,15 +161,20 @@ private fun SectionTitle(title: String) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Search(){
+fun Search(events: List<Event>, onQueryChange: (String) -> Unit){
     var text by remember { mutableStateOf("") }
     var active by remember { mutableStateOf(false) }
+
+    Log.d("Search", "Función de búsqueda inicializada")
+
     val searchBarPadding by animateDpAsState(targetValue = if (active) 0.dp else 16.dp, label = "")
 
     SearchBar(
         query = text,
-        onQueryChange = {
-            text = it
+        onQueryChange = {query ->
+            text = query
+            onQueryChange(query)
+            Log.d("SearchBar", "Texto cambiado: $text")
         },
         onSearch = {
             active = false
@@ -168,13 +191,29 @@ fun Search(){
         },
         trailingIcon = if(active && text.isNotEmpty()){{
             Icon(imageVector = Icons.Default.Close, contentDescription = "Close icon",
-                modifier = Modifier.clickable{text = ""})
+                modifier = Modifier.clickable{
+                    text = ""
+                    onQueryChange("")
+                })
         }}else{@Composable {}},
         modifier = Modifier.padding( horizontal = searchBarPadding),
         windowInsets = WindowInsets(top = 0.dp, bottom = 0.dp)
     ) { }
 }
 
+@Composable
+fun EventList(events: List<Event>){
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Log.d("EventList", "Mostrando ${events.size} eventos en la lista")
+        items(events.size){
+                index ->
+            CommonEventCard(event = events[index])
+            Log.d("EventList", "Evento mostrado: ${events[index].name_event}")
+        }
+    }
+}
 
 @Composable
 private fun EventSection() {
