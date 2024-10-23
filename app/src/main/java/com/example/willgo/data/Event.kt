@@ -12,6 +12,7 @@ data class Event(
     val phone : Int? = 0,
     val category : Category?,
     val location: String?,
-    val date: String?,
-    val price : Float?
+    val date: String? = "",
+    val price : Float?,
+    val image: String?
 )
