@@ -17,12 +17,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -30,11 +27,11 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,13 +44,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.willgo.data.Event
-import com.example.willgo.view.sections.CommonEventCard
 import com.example.willgo.view.sections.EventCard
+import com.example.willgo.view.sections.CommonEventCard
 
 @Composable
 fun HomeScreen(paddingValues: PaddingValues, events: List<Event>){
     var filteredEvents by remember { mutableStateOf(events) }
-
     Box(modifier = Modifier
         .fillMaxSize()
         .padding(top = paddingValues.calculateTopPadding())
@@ -74,7 +70,6 @@ fun HomeScreen(paddingValues: PaddingValues, events: List<Event>){
                 Log.d("Search", "Query de búsqueda: $query, eventos filtrados: ${filteredEvents.size}")
             }
             Spacer(modifier = Modifier.height(12.dp))
-            //HorizontalDivider(color = Color.LightGray, thickness = 1.dp)
             LazyColumn(modifier = Modifier
                 .padding(bottom = paddingValues.calculateBottomPadding())
                 .fillMaxSize()
@@ -111,6 +106,9 @@ private fun SectionTitle(title: String) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(horizontal = 12.dp)
+            .clickable {
+
+            }
     ) {
         Text(
             text = title,

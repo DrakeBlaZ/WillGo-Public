@@ -15,7 +15,6 @@ import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,14 +22,10 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
-import com.example.willgo.data.Category
-import com.example.willgo.data.Event
 import com.example.willgo.data.User
-import com.example.willgo.retrofit.RetrofitClient
+import com.example.willgo.graphs.RootNavigationGraph
 import com.example.willgo.ui.theme.WillGoTheme
-import com.example.willgo.view.screens.HomeScreen
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
@@ -45,15 +40,12 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             WillGoTheme {
+
                Surface(
                    modifier = Modifier.fillMaxSize(),
                    color = MaterialTheme.colorScheme.background
                ) {
-                   val events = remember { mutableStateOf(listOf<Event>()) }
-                   LaunchedEffect(Unit) {
-                       loadEventsFromSupabase(events)
-                   }
-                    Main(events = events.value)
+                   RootNavigationGraph()
                }
             }
         }
@@ -91,37 +83,38 @@ class MainActivity : ComponentActivity() {
             install(Postgrest)
         }
     }
+
 }
 
 //@Preview(showBackground = true)
-@Composable
-fun Main(events: List<Event>) {
-    Scaffold(
-        bottomBar = {NavBar()},
-    ){
-        HomeScreen(it, events = events)
-    }
-}
+//@Composable
+//fun Main() {
+//    Scaffold(
+//        bottomBar = {NavBar()},
+//    ){
+//        HomeScreen(it)
+//    }
+//}
 
-@Composable
-fun NavBar(){
-    BottomAppBar {
-        NavigationBarItem(selected = true, onClick = { /*TODO*/ }, icon = { Icon(
-            imageVector = Icons.Default.Home,
-            contentDescription = "home"
-        ) })
-        NavigationBarItem(selected = false, onClick = { /*TODO*/ }, icon = { Icon(
-            imageVector = Icons.Default.Star,
-            contentDescription = "favorites"
-        ) })
-        NavigationBarItem(selected = false, onClick = { /*TODO*/ }, icon = { Icon(
-            imageVector = Icons.Default.LocationOn,
-            contentDescription = "location"
-        ) })
-        NavigationBarItem(selected = false, onClick = { /*TODO*/ }, icon = { Icon(
-            imageVector = Icons.Default.Person,
-            contentDescription = "profile"
-        ) })
-    }
-
-}
+//@Composable
+//fun NavBar(){
+//    BottomAppBar {
+//        NavigationBarItem(selected = true, onClick = { /*TODO*/ }, icon = { Icon(
+//            imageVector = Icons.Default.Home,
+//            contentDescription = "home"
+//        ) })
+//        NavigationBarItem(selected = false, onClick = { /*TODO*/ }, icon = { Icon(
+//            imageVector = Icons.Default.Star,
+//            contentDescription = "favorites"
+//        ) })
+//        NavigationBarItem(selected = false, onClick = { /*TODO*/ }, icon = { Icon(
+//            imageVector = Icons.Default.LocationOn,
+//            contentDescription = "location"
+//        ) })
+//        NavigationBarItem(selected = false, onClick = { /*TODO*/ }, icon = { Icon(
+//            imageVector = Icons.Default.Person,
+//            contentDescription = "profile"
+//        ) })
+//    }
+//
+//}
