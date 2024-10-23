@@ -42,6 +42,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.app.Dialog
+import android.os.Bundle
+import android.view.Gravity
+import android.view.ViewGroup
+import android.widget.ImageButton
+import android.widget.LinearLayout
+import android.widget.TextView
+//import androidx.appcompat.app.AppCompatActivity
+import android.widget.Button
 
 @Preview
 @Composable
@@ -56,7 +65,7 @@ fun Profile(/*paddingValues: PaddingValues, User: user*/){
         ProfilePic2()
         DataSection(name = "Nombre Apellido" /*user.name*/)
         Spacer(Modifier.height(16.dp))
-        ButtonsSection(onSeguirClick = { }, onMensajeClick = {})
+        ButtonsSection(onSeguirClick = { }, onComentariosClick = {})
         Spacer(modifier = Modifier.height(16.dp))
         FollowsSection(12,12)
         Spacer(Modifier.height(16.dp))
@@ -95,7 +104,7 @@ private fun DataSection(name: String) {
 }
 
 @Composable
-private fun ButtonsSection(onSeguirClick: () -> Unit, onMensajeClick: () -> Unit) {
+private fun ButtonsSection(onSeguirClick: () -> Unit, onComentariosClick: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
@@ -103,11 +112,66 @@ private fun ButtonsSection(onSeguirClick: () -> Unit, onMensajeClick: () -> Unit
         Button(onClick = onSeguirClick) {
             Text(text = "Seguir")
         }
-        Button(onClick = onMensajeClick) {
-            Text(text = "Mensaje")
+        Button(onClick = onComentariosClick) {
+            Text(text = "Comentarios")
+
         }
     }
 }
+
+@Composable
+private fun onComentariosClick(){
+    val dialog = Dialog(this)
+
+    val dialogLayout = LinearLayout(this).apply {
+        orientation = LinearLayout.VERTICAL
+        setPadding(50, 50, 50, 50)
+        layoutParams = ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+    }
+
+    val closeButton = ImageButton(this).apply {
+        setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
+        layoutParams = LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        ).apply {
+            gravity = Gravity.END
+        }
+        setOnClickListener {
+            dialog.dismiss()
+        }
+    }
+
+    val titleText = TextView(this).apply {
+        text = "Comentarios"
+        textSize = 18f
+        setPadding(0, 0, 0, 20)
+    }
+
+    // Comentarios de ejemplo
+    val comment1 = TextView(this).apply {
+        text = "Comentario de ejemplo 1"
+    }
+
+    val comment2 = TextView(this).apply {
+        text = "Comentario de ejemplo 2"
+    }
+
+    dialogLayout.addView(closeButton)
+    dialogLayout.addView(titleText)
+    dialogLayout.addView(comment1)
+    dialogLayout.addView(comment2)
+
+    dialog.setContentView(dialogLayout)
+    dialog.show()
+
+
+
+}
+
 
 @Composable
 private fun FollowsSection(number1: Int, number2: Int) {
@@ -115,26 +179,21 @@ private fun FollowsSection(number1: Int, number2: Int) {
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        Column(modifier = Modifier
-            //  .padding(paddingValues)
-            .background(Color.White)
-        )
-        {
-        }
+
 
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally // Centrar los textos en la columna
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(text = number1.toString())
-            Text(text = "Title")
+            Text(text = "Seguidores")
         }
 
         // Segunda columna
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally // Centrar los textos en la columna
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = number2.toString()) // Número dinámico de la segunda columna
-            Text(text = "Title") // Título fijo
+            Text(text = number2.toString())
+            Text(text = "Seguidos")
         }
 
       }
