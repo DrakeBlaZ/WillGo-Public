@@ -27,7 +27,7 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
     }
     NavHost(navController = navController, startDestination = BottomBarScreen.Home.route, route = Graph.MAIN) {
         composable(route = BottomBarScreen.Home.route) {
-            HomeScreen(paddingValues = paddingValues, events)
+            HomeScreen(paddingValues = paddingValues, events.value)
         }
 
         composable(route = BottomBarScreen.Location.route) {
