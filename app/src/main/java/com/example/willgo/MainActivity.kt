@@ -52,21 +52,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    //Función para cargar eventos desde Supabase
-    private fun loadEventsFromSupabase(eventsState: MutableState<List<Event>>){
-        lifecycleScope.launch {
-            try{
-                val client = getClient()
-                val supabaseResponse = client.postgrest["Evento"].select()
-                val events = supabaseResponse.decodeList<Event>()
-                Log.d("Supabase", "Eventos obtenidos: ${events.size}")
-                eventsState.value = events
-            } catch (e: Exception) {
-                Log.e("Supabase", "Error al obtener eventos: ${e.message}")
-            }
-        }
-    }
-
     private fun getData(){
         lifecycleScope.launch{
             val client = getClient()
