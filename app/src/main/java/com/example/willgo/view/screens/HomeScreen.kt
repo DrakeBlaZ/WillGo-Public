@@ -3,6 +3,7 @@ package com.example.willgo.view.screens
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -69,15 +70,15 @@ fun HomeScreen(paddingValues: PaddingValues){
                 items(1)  {
                     SectionTitle(title = "Popular")
                     Spacer(modifier = Modifier.height(16.dp))
-                    PopularSection()
+                    EventSection()
                     Spacer(Modifier.height(16.dp))
                     SectionTitle(title = "Conciertos")
                     Spacer(Modifier.height(16.dp))
-                    ConcertsSection()
+                    EventSection()
                     Spacer(Modifier.height(16.dp))
                     SectionTitle(title = "Deportes")
                     Spacer(Modifier.height(16.dp))
-                    PopularSection()
+                    EventSection()
                     Spacer(Modifier.height(16.dp))
                 }
 
@@ -166,7 +167,8 @@ fun Search(){
             Icon(imageVector = Icons.Default.Search, contentDescription = "Search icon")
         },
         trailingIcon = if(active && text.isNotEmpty()){{
-            Icon(imageVector = Icons.Default.Close, contentDescription = "Close icon")
+            Icon(imageVector = Icons.Default.Close, contentDescription = "Close icon",
+                modifier = Modifier.clickable{text = ""})
         }}else{@Composable {}},
         modifier = Modifier.padding( horizontal = searchBarPadding),
         windowInsets = WindowInsets(top = 0.dp, bottom = 0.dp)
@@ -175,26 +177,13 @@ fun Search(){
 
 
 @Composable
-private fun PopularSection() {
+private fun EventSection() {
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         item{VerticalSeparator()}
         items(6){
             EventCard()
-        }
-        item{VerticalSeparator()}
-
-    }
-}
-
-@Composable
-private fun ConcertsSection() {
-    LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        item{VerticalSeparator()}
-        items(6){
         }
         item{VerticalSeparator()}
 
