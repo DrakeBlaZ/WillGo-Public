@@ -76,15 +76,15 @@ class MainActivity : ComponentActivity() {
 
 }
 
-@Preview(showBackground = true)
-@Composable
-fun Main() {
-    Scaffold(
-        bottomBar = {NavBar()},
-    ){
-        HomeScreen(it)
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun Main() {
+//    Scaffold(
+//        bottomBar = {NavBar()},
+//    ){
+//        HomeScreen(it)
+//    }
+//}
 
 @Composable
 fun NavBar(){
