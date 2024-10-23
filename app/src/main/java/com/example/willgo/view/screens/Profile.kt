@@ -1,5 +1,6 @@
 package com.example.willgo.view.screens
 
+import android.app.Dialog
 import android.provider.ContactsContract.Profile
 import android.text.style.BackgroundColorSpan
 import androidx.compose.foundation.Image
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -42,33 +44,44 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.willgo.view.sections.EventCard
 
-@Preview
+//@Preview
 @Composable
-fun Profile(/*paddingValues: PaddingValues, User: user*/){
+fun Profile(paddingValues: PaddingValues/* , User: user*/){
     Column(modifier = Modifier
-      //  .padding(paddingValues)
+       // .padding(paddingValues)
         .fillMaxSize()
         .background(Color.White)
     )
     {
         TopBar2()
-        ProfilePic2()
-        DataSection(name = "Nombre Apellido" /*user.name*/)
-        Spacer(Modifier.height(16.dp))
-        ButtonsSection(onSeguirClick = { }, onMensajeClick = {})
-        Spacer(modifier = Modifier.height(16.dp))
-        FollowsSection(12,12)
-        Spacer(Modifier.height(16.dp))
-        SectionTitle2(title = "Asistirá próximamente")
-        Spacer(Modifier.height(16.dp))
-        ConcertsSection2()
-        Spacer(Modifier.height(16.dp))
-        SectionTitle2(title = "Eventos asistidos")
-        Spacer(Modifier.height(16.dp))
-        PopularSection2()
-        Spacer(Modifier.height(16.dp))
+        LazyColumn(
+            modifier = Modifier
+                .padding(bottom = paddingValues.calculateBottomPadding())
+                .fillMaxSize()
+                .background(Color.White)
+        )
+        {
+            items(1){
 
+            ProfilePic2()
+            DataSection(name = "Nombre Apellido" /*user.name*/)
+            Spacer(Modifier.height(16.dp))
+            ButtonsSection(onSeguirClick = { }, onMensajeClick = {})
+            Spacer(modifier = Modifier.height(16.dp))
+            FollowsSection(12, 12)
+            Spacer(Modifier.height(16.dp))
+            SectionTitle2(title = "Asistirá próximamente")
+            Spacer(Modifier.height(16.dp))
+            ConcertsSection2()
+            Spacer(Modifier.height(16.dp))
+            SectionTitle2(title = "Eventos asistidos")
+            Spacer(Modifier.height(16.dp))
+            PopularSection2()
+            Spacer(Modifier.height(16.dp))
+            }
+        }
     }
 }
 
@@ -115,26 +128,27 @@ private fun FollowsSection(number1: Int, number2: Int) {
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
+
+/*
         Column(modifier = Modifier
             //  .padding(paddingValues)
             .background(Color.White)
         )
         {
         }
-
+*/
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally // Centrar los textos en la columna
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(text = number1.toString())
-            Text(text = "Title")
+            Text(text = "Seguidores")
         }
 
-        // Segunda columna
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally // Centrar los textos en la columna
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = number2.toString()) // Número dinámico de la segunda columna
-            Text(text = "Title") // Título fijo
+            Text(text = number2.toString())
+            Text(text = "Seguidos")
         }
 
       }
@@ -181,16 +195,7 @@ fun TopBar2() {
             textAlign = TextAlign.Center,
             modifier = Modifier.align(Alignment.Center)
         )
-        Box(
-            modifier = Modifier
-                .background(Color.White, shape = RoundedCornerShape(16.dp))
-                .align(Alignment.TopEnd)
 
-        ) {
-            Image(
-                imageVector =  Icons.Default.AccountCircle, contentDescription = null
-            )
-        }
     }
 }
 
@@ -231,6 +236,7 @@ fun PopularSection2() {
     ) {
         item{VerticalSeparator2()}
         items(6){
+            EventCard()
         }
         item{VerticalSeparator2()}
 
@@ -244,6 +250,7 @@ fun ConcertsSection2() {
     ) {
         item{VerticalSeparator2()}
         items(6){
+            EventCard()
         }
         item{VerticalSeparator2()}
 
@@ -256,3 +263,8 @@ fun VerticalSeparator2(){
         .height(164.dp)
         .width(4.dp))
 }
+
+
+
+
+
