@@ -229,10 +229,10 @@ fun PopularSection2() {
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        item{VerticalSeparator()}
+        item{VerticalSeparator2()}
         items(6){
         }
-        item{VerticalSeparator()}
+        item{VerticalSeparator2()}
 
     }
 }
@@ -242,10 +242,10 @@ fun ConcertsSection2() {
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        item{VerticalSeparator()}
+        item{VerticalSeparator2()}
         items(6){
         }
-        item{VerticalSeparator()}
+        item{VerticalSeparator2()}
 
     }
 }
