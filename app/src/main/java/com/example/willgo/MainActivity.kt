@@ -18,6 +18,10 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
@@ -31,6 +35,7 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.postgrest.postgrest
+import io.ktor.events.Events
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -44,12 +49,30 @@ class MainActivity : ComponentActivity() {
                    modifier = Modifier.fillMaxSize(),
                    color = MaterialTheme.colorScheme.background
                ) {
-                    Main()
+                   val events = remember { mutableStateOf(listOf<Event>()) }
+                   LaunchedEffect(Unit) {
+                       loadEventsFromSupabase(events)
+                   }
+                    Main(events = events.value)
                }
             }
         }
     }
 
+    //Función para cargar eventos desde Supabase
+    private fun loadEventsFromSupabase(eventsState: MutableState<List<Event>>){
+        lifecycleScope.launch {
+            try{
+                val client = getClient()
+                val supabaseResponse = client.postgrest["Evento"].select()
+                val events = supabaseResponse.decodeList<Event>()
+                Log.d("Supabase", "Eventos obtenidos: ${events.size}")
+                eventsState.value = events
+            } catch (e: Exception) {
+                Log.e("Supabase", "Error al obtener eventos: ${e.message}")
+            }
+        }
+    }
 
     private fun getData(){
         lifecycleScope.launch{
@@ -70,13 +93,13 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Preview(showBackground = true)
+//@Preview(showBackground = true)
 @Composable
-fun Main() {
+fun Main(events: List<Event>) {
     Scaffold(
         bottomBar = {NavBar()},
     ){
-        HomeScreen(it)
+        HomeScreen(it, events = events)
     }
 }
 

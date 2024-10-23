@@ -30,9 +30,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.willgo.R
+import com.example.willgo.data.Category
+import com.example.willgo.data.Event
+import coil.compose.rememberImagePainter
+import coil.compose.AsyncImage
+import androidx.compose.foundation.Image
+import coil.compose.rememberAsyncImagePainter
 
 @Composable
-fun CommonEventCard(){
+fun CommonEventCard(event: Event){
     Card(
         modifier = Modifier
             .background(Color.Transparent)
@@ -46,13 +52,21 @@ fun CommonEventCard(){
                 .weight(3/2f)
                 .background(Color.Transparent)
         ){
-            Image(painter = painterResource(id = R.drawable.ac_dc),
+            /*Image(painter = painterResource(id = R.drawable.ac_dc),
                 contentDescription = "Imagen de fondo",
                 modifier = Modifier
                     .fillMaxSize()
                     ,
-                contentScale = ContentScale.Crop)
+                contentScale = ContentScale.Crop)*/
 
+            // Usa Coil para cargar la imagen desde la URL
+            AsyncImage(
+                model = event.image, // Cargar la imagen desde la URL de tu base de datos
+                contentDescription = "Imagen del evento",
+                modifier = Modifier
+                    .fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
         }
         Box(
             modifier = Modifier
@@ -61,7 +75,7 @@ fun CommonEventCard(){
                 .background(Color.White)
         ){
             Text(
-                text = "06/05/2025",
+                text = event.date?:"",
                 color = Color.Blue,
                 fontWeight = FontWeight.Bold,
                 fontSize = 12.sp,
@@ -70,7 +84,7 @@ fun CommonEventCard(){
             )
 
             Text(
-                text = "Concierto AC/DC 2025 Valencia",
+                text = event.name_event,
                 color = Color.Black,
                 fontWeight = FontWeight.Bold,
                 fontSize = 12.sp,
@@ -109,5 +123,5 @@ fun CommonEventCard(){
 @Preview
 @Composable
 fun EventCard(){
-    CommonEventCard()
+    CommonEventCard(event = Event(3, "Concierto AC/DC 2025 Valencia", "Concierto AC/DC 2025 Valencia", "gmail", 111111111, Category.Actuacion_musical, "Valencia", "06/05/2025", 20.0f, "https://trpgyhwsghxnaakpoftt.supabase.co/storage/v1/object/public/EventImage/ac_dc.jpg"))
 }
