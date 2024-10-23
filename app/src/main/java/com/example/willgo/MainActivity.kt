@@ -23,6 +23,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
+import com.example.willgo.data.Event
 import com.example.willgo.data.User
 import com.example.willgo.graphs.RootNavigationGraph
 import com.example.willgo.ui.theme.WillGoTheme
