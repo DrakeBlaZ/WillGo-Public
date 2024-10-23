@@ -21,14 +21,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.example.willgo.data.Category
-import com.example.willgo.data.Event
 import com.example.willgo.data.User
 import com.example.willgo.graphs.RootNavigationGraph
-import com.example.willgo.retrofit.RetrofitClient
 import com.example.willgo.ui.theme.WillGoTheme
 import com.example.willgo.view.screens.HomeScreen
 import io.github.jan.supabase.SupabaseClient
@@ -49,7 +43,8 @@ class MainActivity : ComponentActivity() {
                    modifier = Modifier.fillMaxSize(),
                    color = MaterialTheme.colorScheme.background
                ) {
-                    RootNavigationGraph()
+                   RootNavigationGraph()
+
                }
             }
         }
@@ -73,6 +68,12 @@ class MainActivity : ComponentActivity() {
             install(Postgrest)
         }
     }
+
+
+
+
+
+
 }
 
 @Preview(showBackground = true)
