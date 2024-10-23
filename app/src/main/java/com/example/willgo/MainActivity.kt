@@ -15,16 +15,13 @@ import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
 import com.example.willgo.data.User
 import com.example.willgo.graphs.RootNavigationGraph
 import com.example.willgo.ui.theme.WillGoTheme
-import com.example.willgo.view.screens.HomeScreen
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
@@ -86,25 +83,25 @@ class MainActivity : ComponentActivity() {
 //    }
 //}
 
-@Composable
-fun NavBar(){
-    BottomAppBar {
-        NavigationBarItem(selected = true, onClick = { /*TODO*/ }, icon = { Icon(
-            imageVector = Icons.Default.Home,
-            contentDescription = "home"
-        ) })
-        NavigationBarItem(selected = false, onClick = { /*TODO*/ }, icon = { Icon(
-            imageVector = Icons.Default.Star,
-            contentDescription = "favorites"
-        ) })
-        NavigationBarItem(selected = false, onClick = { /*TODO*/ }, icon = { Icon(
-            imageVector = Icons.Default.LocationOn,
-            contentDescription = "location"
-        ) })
-        NavigationBarItem(selected = false, onClick = { /*TODO*/ }, icon = { Icon(
-            imageVector = Icons.Default.Person,
-            contentDescription = "profile"
-        ) })
-    }
-
-}
+//@Composable
+//fun NavBar(){
+//    BottomAppBar {
+//        NavigationBarItem(selected = true, onClick = { /*TODO*/ }, icon = { Icon(
+//            imageVector = Icons.Default.Home,
+//            contentDescription = "home"
+//        ) })
+//        NavigationBarItem(selected = false, onClick = { /*TODO*/ }, icon = { Icon(
+//            imageVector = Icons.Default.Star,
+//            contentDescription = "favorites"
+//        ) })
+//        NavigationBarItem(selected = false, onClick = { /*TODO*/ }, icon = { Icon(
+//            imageVector = Icons.Default.LocationOn,
+//            contentDescription = "location"
+//        ) })
+//        NavigationBarItem(selected = false, onClick = { /*TODO*/ }, icon = { Icon(
+//            imageVector = Icons.Default.Person,
+//            contentDescription = "profile"
+//        ) })
+//    }
+//
+//}
