@@ -1,19 +1,12 @@
 package com.example.willgo.view.screens
 
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -27,7 +20,7 @@ import com.example.willgo.graphs.MainNavGraph
 @Composable
 fun MainScreen(navController: NavHostController = rememberNavController()){
     Scaffold(
-        bottomBar = {NavBar(navController )}
+        bottomBar = { NavBar(navController ) }
     )
     {
         MainNavGraph(navController = navController, paddingValues = it)

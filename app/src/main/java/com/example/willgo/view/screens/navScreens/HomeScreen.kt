@@ -1,4 +1,4 @@
-package com.example.willgo.view.screens
+package com.example.willgo.view.screens.navScreens
 
 import android.util.Log
 import androidx.compose.animation.core.animateDpAsState
@@ -31,7 +31,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -218,11 +217,11 @@ private fun EventSection() {
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        item{VerticalSeparator()}
+        item{ VerticalSeparator() }
         items(6){
             EventCard()
         }
-        item{VerticalSeparator()}
+        item{ VerticalSeparator() }
 
     }
 }

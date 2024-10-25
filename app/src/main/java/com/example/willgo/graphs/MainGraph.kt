@@ -10,10 +10,11 @@ import androidx.compose.runtime.remember
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.willgo.data.Category
 import com.example.willgo.data.Event
-import com.example.willgo.view.screens.HomeScreen
-import com.example.willgo.view.screens.MapScreen
-import com.example.willgo.view.screens.ProfileScreen
+import com.example.willgo.view.screens.navScreens.HomeScreen
+import com.example.willgo.view.screens.navScreens.MapScreen
+import com.example.willgo.view.screens.navScreens.ProfileScreen
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
@@ -39,7 +40,9 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
         }
 
     }
+    
 }
+
 
 suspend fun loadEventsFromSupabase(eventsState: MutableState<List<Event>>){
 
