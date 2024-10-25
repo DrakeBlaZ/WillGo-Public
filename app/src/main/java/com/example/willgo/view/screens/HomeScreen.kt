@@ -63,9 +63,10 @@ fun HomeScreen(paddingValues: PaddingValues, events: List<Event>, navController:
         ) {
             TopBar()
             SearchBar(
+                text = query,
                 events = events,
-                onQueryChange = { searchQuery ->
-                    query = searchQuery
+                onQueryChange = { newQuery ->
+                    query = newQuery
                 },
                 onSearch = {
                     navController.navigate("searchResults/$query")
@@ -102,8 +103,8 @@ fun HomeScreen(paddingValues: PaddingValues, events: List<Event>, navController:
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchBar(events: List<Event>, onQueryChange: (String) -> Unit, onSearch: () -> Unit) {
-    var text by remember { mutableStateOf("") }
+fun SearchBar(text:String, events: List<Event>, onQueryChange: (String) -> Unit, onSearch: () -> Unit) {
+    var query by remember { mutableStateOf(text) }
     var active by remember { mutableStateOf(false) }
 
     Log.d("Search", "Función de búsqueda inicializada")
@@ -111,10 +112,10 @@ fun SearchBar(events: List<Event>, onQueryChange: (String) -> Unit, onSearch: ()
     val searchBarPadding by animateDpAsState(targetValue = if (active) 0.dp else 16.dp, label = "")
 
     SearchBar(
-        query = text,
-        onQueryChange = { query ->
-            text = query
-            onQueryChange(query)
+        query = query,
+        onQueryChange = { newQuery ->
+            query = newQuery
+            onQueryChange(newQuery)
             Log.d("SearchBar", "Texto cambiado: $text")
         },
         onSearch = {
@@ -136,7 +137,7 @@ fun SearchBar(events: List<Event>, onQueryChange: (String) -> Unit, onSearch: ()
                 Icon(
                     imageVector = Icons.Default.Close, contentDescription = "Close icon",
                     modifier = Modifier.clickable {
-                        text = ""
+                        query = ""
                         onQueryChange("")
                     }
                 )

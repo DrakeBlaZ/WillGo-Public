@@ -43,7 +43,17 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
         composable(route = "searchResults/{query}") { backStackEntry ->
             val query = backStackEntry.arguments?.getString("query") ?: ""
             val filteredEvents = events.value.filter { it.name_event.contains(query, ignoreCase = true) } // Filtrar eventos
-            SearchResultsScreen(paddingValues, events = filteredEvents)
+            SearchResultsScreen(
+                paddingValues,
+                events = filteredEvents,
+                initialQuery = query,
+                onQueryChange = { newQuery ->
+                    navController.navigate("searchResults/$newQuery")
+                },
+                onSearch = { searchQuery ->
+                    navController.navigate("searchResults/$searchQuery")
+                }
+            )
         }
     }
 }
