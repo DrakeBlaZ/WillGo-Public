@@ -43,13 +43,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.willgo.data.Event
 import com.example.willgo.view.sections.EventCard
 import com.example.willgo.view.sections.CommonEventCard
 
 @Composable
-fun HomeScreen(paddingValues: PaddingValues, events: List<Event>){
-    var filteredEvents by remember { mutableStateOf(events) }
+fun HomeScreen(paddingValues: PaddingValues, events: List<Event>, navController: NavController){
+    //var filteredEvents by remember { mutableStateOf(events) }
+    var query by remember { mutableStateOf("") }
+
     Box(modifier = Modifier
         .fillMaxSize()
         .padding(top = paddingValues.calculateTopPadding())
@@ -59,16 +62,16 @@ fun HomeScreen(paddingValues: PaddingValues, events: List<Event>){
                 .fillMaxWidth()
         ) {
             TopBar()
-            Search(events) { query ->
-                filteredEvents = if (query.isEmpty()) {
-                    events
-                } else {
-                    events.filter {
-                        it.name_event.contains(query, ignoreCase = true)
-                    }
+            SearchBar(
+                events = events,
+                onQueryChange = { searchQuery ->
+                    query = searchQuery
+                },
+                onSearch = {
+                    navController.navigate("searchResults/$query")
                 }
-                Log.d("Search", "Query de búsqueda: $query, eventos filtrados: ${filteredEvents.size}")
-            }
+            )
+
             Spacer(modifier = Modifier.height(12.dp))
             LazyColumn(modifier = Modifier
                 .padding(bottom = paddingValues.calculateBottomPadding())
@@ -89,10 +92,6 @@ fun HomeScreen(paddingValues: PaddingValues, events: List<Event>){
                     Spacer(Modifier.height(16.dp))
                     EventSection()
                     Spacer(Modifier.height(16.dp))
-
-                    SectionTitle(title = "Resultados de la búsqueda")
-                    Spacer(Modifier.height(16.dp))
-                    EventList(filteredEvents)
                 }
 
             }
@@ -101,8 +100,55 @@ fun HomeScreen(paddingValues: PaddingValues, events: List<Event>){
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SectionTitle(title: String) {
+fun SearchBar(events: List<Event>, onQueryChange: (String) -> Unit, onSearch: () -> Unit) {
+    var text by remember { mutableStateOf("") }
+    var active by remember { mutableStateOf(false) }
+
+    Log.d("Search", "Función de búsqueda inicializada")
+
+    val searchBarPadding by animateDpAsState(targetValue = if (active) 0.dp else 16.dp, label = "")
+
+    SearchBar(
+        query = text,
+        onQueryChange = { query ->
+            text = query
+            onQueryChange(query)
+            Log.d("SearchBar", "Texto cambiado: $text")
+        },
+        onSearch = {
+            active = false
+            onSearch() // Navegar a la pantalla de resultados
+        },
+        active = active,
+        onActiveChange = {
+            active = it
+        },
+        placeholder = {
+            Text("Buscar evento")
+        },
+        leadingIcon = {
+            Icon(imageVector = Icons.Default.Search, contentDescription = "Search icon")
+        },
+        trailingIcon = {
+            if (active && text.isNotEmpty()) {
+                Icon(
+                    imageVector = Icons.Default.Close, contentDescription = "Close icon",
+                    modifier = Modifier.clickable {
+                        text = ""
+                        onQueryChange("")
+                    }
+                )
+            } else null
+        },
+        modifier = Modifier.padding(horizontal = searchBarPadding),
+        windowInsets = WindowInsets(top = 0.dp, bottom = 0.dp)
+    ) {}
+}
+
+@Composable
+fun SectionTitle(title: String) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(horizontal = 12.dp)
@@ -129,7 +175,7 @@ private fun SectionTitle(title: String) {
 }
 
 @Composable
- private fun TopBar() {
+fun TopBar() {
     Box(
         modifier = Modifier.padding(top = 12.dp, start = 12.dp, end = 12.dp)
             .fillMaxWidth()
@@ -157,48 +203,6 @@ private fun SectionTitle(title: String) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun Search(events: List<Event>, onQueryChange: (String) -> Unit){
-    var text by remember { mutableStateOf("") }
-    var active by remember { mutableStateOf(false) }
-
-    Log.d("Search", "Función de búsqueda inicializada")
-
-    val searchBarPadding by animateDpAsState(targetValue = if (active) 0.dp else 16.dp, label = "")
-
-    SearchBar(
-        query = text,
-        onQueryChange = {query ->
-            text = query
-            onQueryChange(query)
-            Log.d("SearchBar", "Texto cambiado: $text")
-        },
-        onSearch = {
-            active = false
-        },
-        active = active,
-        onActiveChange = {
-            active = it
-        },
-        placeholder = {
-            Text("Buscar evento")
-        },
-        leadingIcon = {
-            Icon(imageVector = Icons.Default.Search, contentDescription = "Search icon")
-        },
-        trailingIcon = if(active && text.isNotEmpty()){{
-            Icon(imageVector = Icons.Default.Close, contentDescription = "Close icon",
-                modifier = Modifier.clickable{
-                    text = ""
-                    onQueryChange("")
-                })
-        }}else{@Composable {}},
-        modifier = Modifier.padding( horizontal = searchBarPadding),
-        windowInsets = WindowInsets(top = 0.dp, bottom = 0.dp)
-    ) { }
-}
-
 @Composable
 fun EventList(events: List<Event>){
     LazyRow(
@@ -214,7 +218,7 @@ fun EventList(events: List<Event>){
 }
 
 @Composable
-private fun EventSection() {
+fun EventSection() {
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {

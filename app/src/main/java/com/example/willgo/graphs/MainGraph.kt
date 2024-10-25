@@ -1,5 +1,6 @@
 package com.example.willgo.graphs
 
+import android.app.appsearch.SearchResults
 import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
@@ -14,6 +15,7 @@ import com.example.willgo.data.Event
 import com.example.willgo.view.screens.HomeScreen
 import com.example.willgo.view.screens.MapScreen
 import com.example.willgo.view.screens.ProfileScreen
+import com.example.willgo.view.screens.SearchResultsScreen
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
@@ -27,7 +29,7 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
     }
     NavHost(navController = navController, startDestination = BottomBarScreen.Home.route, route = Graph.MAIN) {
         composable(route = BottomBarScreen.Home.route) {
-            HomeScreen(paddingValues = paddingValues, events.value)
+            HomeScreen(paddingValues = paddingValues, events.value, navController)
         }
 
         composable(route = BottomBarScreen.Location.route) {
@@ -38,6 +40,11 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
             ProfileScreen()
         }
 
+        composable(route = "searchResults/{query}") { backStackEntry ->
+            val query = backStackEntry.arguments?.getString("query") ?: ""
+            val filteredEvents = events.value.filter { it.name_event.contains(query, ignoreCase = true) } // Filtrar eventos
+            SearchResultsScreen(paddingValues, events = filteredEvents)
+        }
     }
 }
 
