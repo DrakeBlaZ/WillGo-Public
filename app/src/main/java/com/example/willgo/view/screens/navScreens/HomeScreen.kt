@@ -43,8 +43,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.willgo.data.Event
-import com.example.willgo.view.sections.EventCard
 import com.example.willgo.view.sections.CommonEventCard
+import com.example.willgo.view.sections.EventSection
+import com.example.willgo.view.sections.SectionTitle
 
 @Composable
 fun HomeScreen(paddingValues: PaddingValues, events: List<Event>){
@@ -76,55 +77,24 @@ fun HomeScreen(paddingValues: PaddingValues, events: List<Event>){
             )
             {
                 items(1)  {
-                    SectionTitle(title = "Popular")
-                    Spacer(modifier = Modifier.height(16.dp))
-                    EventSection()
                     Spacer(Modifier.height(16.dp))
-                    SectionTitle(title = "Conciertos")
+                    EventSection("Popular")
                     Spacer(Modifier.height(16.dp))
-                    EventSection()
+                    EventSection("Conciertos")
                     Spacer(Modifier.height(16.dp))
-                    SectionTitle(title = "Deportes")
-                    Spacer(Modifier.height(16.dp))
-                    EventSection()
+                    EventSection("Deportes")
                     Spacer(Modifier.height(16.dp))
 
                     SectionTitle(title = "Resultados de la búsqueda")
                     Spacer(Modifier.height(16.dp))
                     EventList(filteredEvents)
+                    Spacer(Modifier.height(16.dp))
                 }
 
             }
         }
     }
 
-}
-
-@Composable
-private fun SectionTitle(title: String) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(horizontal = 12.dp)
-            .clickable {
-
-            }
-    ) {
-        Text(
-            text = title,
-            color = Color.Black,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-        )
-        Spacer(modifier = Modifier.weight(1f))
-        Box(
-            modifier = Modifier
-                .background(Color.White, shape = RoundedCornerShape(16.dp))
-        ) {
-            Image(
-                imageVector =  Icons.Default.ChevronRight, contentDescription = null
-            )
-        }
-    }
 }
 
 @Composable
@@ -212,25 +182,7 @@ fun EventList(events: List<Event>){
     }
 }
 
-@Composable
-private fun EventSection() {
-    LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        item{ VerticalSeparator() }
-        items(6){
-            EventCard()
-        }
-        item{ VerticalSeparator() }
 
-    }
-}
 
-@Composable
-private fun VerticalSeparator(){
-    Box(modifier = Modifier
-        .height(164.dp)
-        .width(4.dp))
-}
 
 

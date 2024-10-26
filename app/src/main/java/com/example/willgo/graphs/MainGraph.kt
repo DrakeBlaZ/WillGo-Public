@@ -15,6 +15,7 @@ import com.example.willgo.data.Event
 import com.example.willgo.view.screens.navScreens.HomeScreen
 import com.example.willgo.view.screens.navScreens.MapScreen
 import com.example.willgo.view.screens.navScreens.ProfileScreen
+import com.example.willgo.view.screens.other.CategoryScreen
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
@@ -38,9 +39,8 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
         composable(route = BottomBarScreen.Profile.route) {
             ProfileScreen()
         }
-
-    }
     
+    }
 }
 
 
@@ -64,4 +64,9 @@ private fun getClient(): SupabaseClient {
     ){
         install(Postgrest)
     }
+}
+
+sealed class HomeScreenRoutes(val route: String){
+    object Category: HomeScreenRoutes("Category_Section")
+    object DetailEvent: HomeScreenRoutes("Detail_Event")
 }
