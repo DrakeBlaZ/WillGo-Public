@@ -8,14 +8,17 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.example.willgo.data.Category
 import com.example.willgo.data.Event
 import com.example.willgo.view.screens.navScreens.HomeScreen
 import com.example.willgo.view.screens.navScreens.MapScreen
 import com.example.willgo.view.screens.navScreens.ProfileScreen
 import com.example.willgo.view.screens.other.CategoryScreen
+import com.example.willgo.view.screens.other.DetailEventScreen
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
@@ -29,7 +32,7 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
     }
     NavHost(navController = navController, startDestination = BottomBarScreen.Home.route, route = Graph.MAIN) {
         composable(route = BottomBarScreen.Home.route) {
-            HomeScreen(paddingValues = paddingValues, events.value)
+            HomeScreen(paddingValues = paddingValues, events.value, navController)
         }
 
         composable(route = BottomBarScreen.Location.route) {
@@ -39,10 +42,37 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
         composable(route = BottomBarScreen.Profile.route) {
             ProfileScreen()
         }
+
+        composable(
+            route = HomeScreenRoutes.Category.route,
+            arguments = listOf(navArgument("categoryName") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val categoryName = backStackEntry.arguments?.getString("categoryName") ?: "DEFAULT"
+            val category = getCategory(categoryName)
+            CategoryScreen(onBack = { navController.popBackStack() }, category = category, events.value, navController)
+        }
+
+        composable(
+            route = HomeScreenRoutes.DetailEvent.route,
+        ) {
+            DetailEventScreen(onBack = { navController.popBackStack() }, events.value[0])
+        }
     
     }
 }
 
+
+fun getCategory(categoryName: String): Category{
+     return when(categoryName){
+        "Actuacion musical" ->  Category.Actuacion_musical
+        "Comedia" ->  Category.Comedia
+        "Cultura" ->  Category.Cultura
+        "Deporte" ->  Category.Deporte
+        "Discoteca" ->  Category.Discoteca
+        "Teatro" ->  Category.Teatro
+        else ->  Category.Actuacion_musical
+    }
+}
 
 suspend fun loadEventsFromSupabase(eventsState: MutableState<List<Event>>){
 
@@ -67,6 +97,6 @@ private fun getClient(): SupabaseClient {
 }
 
 sealed class HomeScreenRoutes(val route: String){
-    object Category: HomeScreenRoutes("Category_Section")
+    object Category: HomeScreenRoutes("Category_Section/{categoryName}")
     object DetailEvent: HomeScreenRoutes("Detail_Event")
 }

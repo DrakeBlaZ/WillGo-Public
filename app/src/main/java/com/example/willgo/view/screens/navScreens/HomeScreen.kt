@@ -42,13 +42,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.example.willgo.data.Event
 import com.example.willgo.view.sections.CommonEventCard
 import com.example.willgo.view.sections.EventSection
 import com.example.willgo.view.sections.SectionTitle
 
 @Composable
-fun HomeScreen(paddingValues: PaddingValues, events: List<Event>){
+fun HomeScreen(paddingValues: PaddingValues, events: List<Event>, navController: NavHostController){
     var filteredEvents by remember { mutableStateOf(events) }
     Box(modifier = Modifier
         .fillMaxSize()
@@ -78,16 +79,16 @@ fun HomeScreen(paddingValues: PaddingValues, events: List<Event>){
             {
                 items(1)  {
                     Spacer(Modifier.height(16.dp))
-                    EventSection("Popular")
+                    EventSection("Popular", navController)
                     Spacer(Modifier.height(16.dp))
-                    EventSection("Conciertos")
+                    EventSection("Conciertos", navController)
                     Spacer(Modifier.height(16.dp))
-                    EventSection("Deportes")
+                    EventSection("Deportes", navController)
                     Spacer(Modifier.height(16.dp))
 
-                    SectionTitle(title = "Resultados de la búsqueda")
+                    SectionTitle(title = "Resultados de la búsqueda", navController = navController)
                     Spacer(Modifier.height(16.dp))
-                    EventList(filteredEvents)
+                    EventList(filteredEvents, navController)
                     Spacer(Modifier.height(16.dp))
                 }
 
@@ -169,14 +170,14 @@ fun Search(events: List<Event>, onQueryChange: (String) -> Unit){
 }
 
 @Composable
-fun EventList(events: List<Event>){
+fun EventList(events: List<Event>, navController: NavHostController){
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Log.d("EventList", "Mostrando ${events.size} eventos en la lista")
         items(events.size){
                 index ->
-            CommonEventCard(event = events[index])
+            CommonEventCard(event = events[index], navController)
             Log.d("EventList", "Evento mostrado: ${events[index].name_event}")
         }
     }

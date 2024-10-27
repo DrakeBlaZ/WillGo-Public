@@ -22,10 +22,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import com.example.willgo.graphs.HomeScreenRoutes
 
 @Composable
-fun EventSection(title: String) {
-    SectionTitle(title = title)
+fun EventSection(title: String, navController: NavHostController) {
+    SectionTitle(title = title, navController = navController)
     Spacer(modifier = Modifier.height(16.dp))
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -40,12 +43,12 @@ fun EventSection(title: String) {
 }
 
 @Composable
-fun SectionTitle(title: String) {
+fun SectionTitle(title: String, navController: NavHostController) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(horizontal = 12.dp)
             .clickable {
-
+                navController.navigate(HomeScreenRoutes.Category.route.replace("{categoryName}", title))
             }
     ) {
         Text(
