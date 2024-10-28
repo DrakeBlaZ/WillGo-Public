@@ -1,6 +1,7 @@
 package com.example.willgo.view.screens
 
 import android.util.Log
+import android.widget.ImageButton
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -175,12 +176,14 @@ fun SectionTitle(title: String) {
 }
 
 @Composable
-fun TopBar() {
+fun TopBar(navigationIcon: @Composable () -> Unit = {}) {
     Box(
         modifier = Modifier.padding(top = 12.dp, start = 12.dp, end = 12.dp)
             .fillMaxWidth()
     ) {
-
+        Box(modifier = Modifier.align(Alignment.TopStart).padding(start = 12.dp)){
+            navigationIcon()
+        }
         Text(
             text = "WILLGO",
             color = Color.Black,
