@@ -1,4 +1,4 @@
-package com.example.willgo.view.screens
+package com.example.willgo.view.screens.navScreens
 
 import android.util.Log
 import androidx.compose.animation.core.animateDpAsState
@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,20 +16,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
@@ -46,14 +39,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.example.willgo.data.Event
 import com.example.willgo.view.sections.CommonEventCard
-import com.example.willgo.view.sections.EventCard
+import com.example.willgo.view.sections.EventSection
+import com.example.willgo.view.sections.SectionTitle
 
 @Composable
-fun HomeScreen(paddingValues: PaddingValues, events: List<Event>){
+fun HomeScreen(paddingValues: PaddingValues, events: List<Event>, navController: NavHostController){
     var filteredEvents by remember { mutableStateOf(events) }
-
     Box(modifier = Modifier
         .fillMaxSize()
         .padding(top = paddingValues.calculateTopPadding())
@@ -74,7 +68,6 @@ fun HomeScreen(paddingValues: PaddingValues, events: List<Event>){
                 Log.d("Search", "Query de búsqueda: $query, eventos filtrados: ${filteredEvents.size}")
             }
             Spacer(modifier = Modifier.height(12.dp))
-            //HorizontalDivider(color = Color.LightGray, thickness = 1.dp)
             LazyColumn(modifier = Modifier
                 .padding(bottom = paddingValues.calculateBottomPadding())
                 .fillMaxSize()
@@ -82,52 +75,24 @@ fun HomeScreen(paddingValues: PaddingValues, events: List<Event>){
             )
             {
                 items(1)  {
-                    SectionTitle(title = "Popular")
-                    Spacer(modifier = Modifier.height(16.dp))
-                    EventSection()
                     Spacer(Modifier.height(16.dp))
-                    SectionTitle(title = "Conciertos")
+                    EventSection("Popular", navController)
                     Spacer(Modifier.height(16.dp))
-                    EventSection()
+                    EventSection("Conciertos", navController)
                     Spacer(Modifier.height(16.dp))
-                    SectionTitle(title = "Deportes")
-                    Spacer(Modifier.height(16.dp))
-                    EventSection()
+                    EventSection("Deportes", navController)
                     Spacer(Modifier.height(16.dp))
 
-                    SectionTitle(title = "Resultados de la búsqueda")
+                    SectionTitle(title = "Resultados de la búsqueda", navController = navController)
                     Spacer(Modifier.height(16.dp))
-                    EventList(filteredEvents)
+                    EventList(filteredEvents, navController)
+                    Spacer(Modifier.height(16.dp))
                 }
 
             }
         }
     }
 
-}
-
-@Composable
-private fun SectionTitle(title: String) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(horizontal = 12.dp)
-    ) {
-        Text(
-            text = title,
-            color = Color.Black,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-        )
-        Spacer(modifier = Modifier.weight(1f))
-        Box(
-            modifier = Modifier
-                .background(Color.White, shape = RoundedCornerShape(16.dp))
-        ) {
-            Image(
-                imageVector =  Icons.Default.ChevronRight, contentDescription = null
-            )
-        }
-    }
 }
 
 @Composable
@@ -202,38 +167,20 @@ fun Search(events: List<Event>, onQueryChange: (String) -> Unit){
 }
 
 @Composable
-fun EventList(events: List<Event>){
+fun EventList(events: List<Event>, navController: NavHostController){
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Log.d("EventList", "Mostrando ${events.size} eventos en la lista")
         items(events.size){
                 index ->
-            CommonEventCard(event = events[index])
+            CommonEventCard(event = events[index], navController)
             Log.d("EventList", "Evento mostrado: ${events[index].name_event}")
         }
     }
 }
 
-@Composable
-private fun EventSection() {
-    LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        item{VerticalSeparator()}
-        items(6){
-            EventCard()
-        }
-        item{VerticalSeparator()}
 
-    }
-}
 
-@Composable
-private fun VerticalSeparator(){
-    Box(modifier = Modifier
-        .height(164.dp)
-        .width(4.dp))
-}
 
 

@@ -1,4 +1,4 @@
-package com.example.willgo.ui.theme
+    package com.example.willgo.ui.theme
 
 import android.app.Activity
 import android.os.Build

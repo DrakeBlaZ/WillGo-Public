@@ -10,4 +10,6 @@ data class User (
     val email: String,
     val followers: Int,
     val followed: Int
-)
+) {
+
+}
