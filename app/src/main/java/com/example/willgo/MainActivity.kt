@@ -11,6 +11,8 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -21,12 +23,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import com.example.willgo.data.Category
 import com.example.willgo.data.Event
 import com.example.willgo.data.User
 import com.example.willgo.retrofit.RetrofitClient
 import com.example.willgo.ui.theme.WillGoTheme
 import com.example.willgo.view.screens.HomeScreen
+import com.example.willgo.view.screens.Profile
+import com.example.willgo.view.screens.Comments
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
@@ -73,11 +81,29 @@ class MainActivity : ComponentActivity() {
 @Preview(showBackground = true)
 @Composable
 fun Main() {
+    /* PARA PROFILE
     Scaffold(
         bottomBar = {NavBar()},
     ){
-        HomeScreen(it)
+        Profile(it)
+    }*/
+
+    // PARA COMMENTS
+    val navController = rememberNavController()
+
+    Scaffold(
+        bottomBar = { NavBar() },
+    ) { paddingValues ->
+        NavHost(
+            navController = navController,
+            startDestination = "profile", // Ruta inicial
+            Modifier.padding(paddingValues)
+        ) {
+            composable("profile") { Profile(navController, paddingValues) }
+            composable("comments") { Comments(navController) }
+        }
     }
+
 }
 
 @Composable

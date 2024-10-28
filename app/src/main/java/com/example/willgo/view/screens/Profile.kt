@@ -1,8 +1,12 @@
 package com.example.willgo.view.screens
 
+
 import android.app.Dialog
 import android.provider.ContactsContract.Profile
 import android.text.style.BackgroundColorSpan
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -31,6 +35,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Label
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,18 +49,45 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.willgo.view.sections.EventCard
 
 //@Preview
 @Composable
-fun Profile(paddingValues: PaddingValues/* , User: user*/){
+fun Profile(navController: NavController, paddingValues: PaddingValues/* , User: user*/){
+
+
+    var comentariosDialog by remember { mutableStateOf(false) }
     Column(modifier = Modifier
-       // .padding(paddingValues)
+        .padding(paddingValues)
         .fillMaxSize()
         .background(Color.White)
+
     )
     {
         TopBar2()
+
+        if(comentariosDialog){
+            AlertDialog(
+                onDismissRequest = {comentariosDialog=false},
+                title = {
+                    Text(text = "Comentarios")
+                },
+                text = {
+                    Column {
+                        Text(text = "Holaa")
+                        Text(text = "Adioos")
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = {comentariosDialog = false}
+                    ) {
+                        Text("Cerrar")
+                    }
+                }
+            )
+        }
+
         LazyColumn(
             modifier = Modifier
                 .padding(bottom = paddingValues.calculateBottomPadding())
@@ -68,7 +100,10 @@ fun Profile(paddingValues: PaddingValues/* , User: user*/){
             ProfilePic2()
             DataSection(name = "Nombre Apellido" /*user.name*/)
             Spacer(Modifier.height(16.dp))
-            ButtonsSection(onSeguirClick = { }, onMensajeClick = {})
+            ButtonsSection(
+                onSeguirClick = { },
+                onComentariosClick = {navController.navigate("comments")}
+            )
             Spacer(modifier = Modifier.height(16.dp))
             FollowsSection(12, 12)
             Spacer(Modifier.height(16.dp))
@@ -108,7 +143,7 @@ private fun DataSection(name: String) {
 }
 
 @Composable
-private fun ButtonsSection(onSeguirClick: () -> Unit, onMensajeClick: () -> Unit) {
+private fun ButtonsSection(onSeguirClick: () -> Unit, onComentariosClick: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
@@ -116,8 +151,8 @@ private fun ButtonsSection(onSeguirClick: () -> Unit, onMensajeClick: () -> Unit
         Button(onClick = onSeguirClick) {
             Text(text = "Seguir")
         }
-        Button(onClick = onMensajeClick) {
-            Text(text = "Mensaje")
+        Button(onClick = onComentariosClick) {
+            Text(text = "Comentarios")
         }
     }
 }
