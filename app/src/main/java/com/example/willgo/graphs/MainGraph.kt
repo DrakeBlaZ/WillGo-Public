@@ -52,7 +52,8 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
                 },
                 onSearch = { searchQuery ->
                     navController.navigate("searchResults/$searchQuery")
-                }
+                },
+                navController
             )
         }
     }

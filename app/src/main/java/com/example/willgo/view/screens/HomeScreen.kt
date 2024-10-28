@@ -115,7 +115,7 @@ fun SearchBar(text:String, events: List<Event>, onQueryChange: (String) -> Unit,
         query = query,
         onQueryChange = { newQuery ->
             query = newQuery
-            onQueryChange(newQuery)
+            onQueryChange(normalizeText(newQuery))
             Log.d("SearchBar", "Texto cambiado: $text")
         },
         onSearch = {
