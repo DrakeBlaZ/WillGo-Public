@@ -30,7 +30,11 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarColors
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -144,8 +148,10 @@ fun SearchBar(text:String, events: List<Event>, onQueryChange: (String) -> Unit,
             } else null
         },
         modifier = Modifier.padding(horizontal = searchBarPadding),
-        windowInsets = WindowInsets(top = 0.dp, bottom = 0.dp)
-    ) {}
+        windowInsets = WindowInsets(top = 0.dp, bottom = 0.dp),
+    ) {
+
+    }
 }
 
 @Composable

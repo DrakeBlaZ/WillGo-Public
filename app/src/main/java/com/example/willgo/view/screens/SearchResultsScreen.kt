@@ -42,6 +42,7 @@ import com.example.willgo.graphs.BottomBarScreen
 import com.example.willgo.graphs.Graph
 import com.example.willgo.view.sections.CommonEventCard
 import com.example.willgo.view.sections.EventCard
+import com.example.willgo.view.sections.FiltersView
 import java.text.Normalizer
 
 @Composable
@@ -73,6 +74,7 @@ fun SearchResultsScreen(paddingValues: PaddingValues, events: List<Event>, initi
             )
             Spacer(modifier = Modifier.height(16.dp))
 
+            FiltersView()
             Text(
                 text = "Resultados de la búsqueda:",
                 color = Color.Black,
