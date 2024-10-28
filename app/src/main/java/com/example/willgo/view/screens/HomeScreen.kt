@@ -66,7 +66,7 @@ fun HomeScreen(paddingValues: PaddingValues, events: List<Event>, navController:
                 text = query,
                 events = events,
                 onQueryChange = { newQuery ->
-                    query = newQuery
+                    query = normalizeText(newQuery)
                 },
                 onSearch = {
                     navController.navigate("searchResults/${normalizeText(query)}")
