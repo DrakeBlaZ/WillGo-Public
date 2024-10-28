@@ -69,7 +69,7 @@ fun HomeScreen(paddingValues: PaddingValues, events: List<Event>, navController:
                     query = newQuery
                 },
                 onSearch = {
-                    navController.navigate("searchResults/$query")
+                    navController.navigate("searchResults/${normalizeText(query)}")
                 }
             )
 
@@ -98,7 +98,6 @@ fun HomeScreen(paddingValues: PaddingValues, events: List<Event>, navController:
             }
         }
     }
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

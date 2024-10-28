@@ -35,6 +35,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.willgo.data.Event
+import com.example.willgo.graphs.BottomBarScreen
+import com.example.willgo.graphs.Graph
 import com.example.willgo.view.sections.CommonEventCard
 import com.example.willgo.view.sections.EventCard
 import java.text.Normalizer
@@ -126,7 +128,12 @@ fun TopBarSearch(navController: NavController) {
             modifier = Modifier
                 .background(Color.White, shape = RoundedCornerShape(16.dp))
                 .align(Alignment.TopStart)
-                .clickable{navController.navigateUp()}
+                .clickable {
+                    navController.navigate(BottomBarScreen.Home.route) {
+                        popUpTo(Graph.MAIN) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
         ) {
             Image(
                 imageVector =  Icons.Default.ArrowBackIosNew,
