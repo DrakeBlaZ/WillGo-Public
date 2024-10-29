@@ -15,7 +15,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -32,6 +37,7 @@ fun FiltersPreview(navController: NavController){
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val coroutineScope = rememberCoroutineScope()
     val keyboard = LocalSoftwareKeyboardController.current
+    var selectedCategory by remember { mutableStateOf<Category?>(null) } // Estado de categoría seleccionada
 
     if (bottomSheetState.isVisible) {
         MyModalBottomSheet(
@@ -53,41 +59,47 @@ fun FiltersPreview(navController: NavController){
         Text(text = "Categorías",
             modifier = Modifier.padding(8.dp),
             fontWeight = FontWeight.Bold)
-        FilterGrid(navController)
+
+        //FilterGrid(navController)
+        FilterGrid(navController, selectedCategory) { newCategory ->
+            selectedCategory = newCategory  // Actualiza la categoría seleccionada
+        }
     }
 }
 
 @Composable
-fun FilterGrid(navController: NavController){
+fun FilterGrid(navController: NavController, selectedCategory: Category?, onCategorySelected: (Category) -> Unit){
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         modifier = Modifier.fillMaxSize().padding(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(Category.entries.toTypedArray()) { category ->
+        /*items(Category.entries.toTypedArray()) { category ->
             CategoryItem(category = category, navController)
+        }*/
+        items(Category.entries.toTypedArray()) { category ->
+            CategoryItem(
+                category = category,
+                isSelected = category == selectedCategory,
+                navController = navController,
+                onClick = { onCategorySelected(category) }  // Llama a la selección de categoría
+            )
         }
     }
 }
 
-/*@Composable
-fun CategoryItem(category: Category){
-    ElevatedButton(
-        onClick = {},
-        colors = ButtonDefaults.elevatedButtonColors(containerColor = Color.Gray)
-    ){
-        Text(text = category.name)
-    }
-}*/
-
 @Composable
-fun CategoryItem(category: Category, navController: NavController) {
+fun CategoryItem(category: Category, isSelected: Boolean, navController: NavController, onClick: () -> Unit) {
+
+    val buttonColor = if (isSelected) Color.Blue else Color.Gray  // Cambia el color si está seleccionada
+
     ElevatedButton(
         onClick = {
+            onClick()
             navController.navigate("searchResults?query=&category=${category.name}")
         },
-        colors = ButtonDefaults.elevatedButtonColors(containerColor = Color.Gray)
+        colors = ButtonDefaults.elevatedButtonColors(containerColor = buttonColor)
     ) {
         Text(text = category.name)
     }
