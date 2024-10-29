@@ -30,11 +30,11 @@ fun FiltersNavGraph(navController: NavHostController){
         }
 
         composable(route = FiltersScreen.Date.route){
-            MapScreen()
+
         }
 
         composable(route = FiltersScreen.Hour.route) {
-            ProfileScreen()
+
         }
 
         composable(route = FiltersScreen.Distance.route) {

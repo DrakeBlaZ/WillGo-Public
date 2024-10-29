@@ -7,12 +7,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.Icons
@@ -25,8 +23,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
@@ -37,9 +33,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
-import com.example.willgo.view.screens.NavBar
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import com.example.willgo.graphs.FiltersScreen
+import com.example.willgo.graphs.Graph
+import com.example.willgo.view.sections.FiltersNavScreens.AllFilters
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -52,6 +54,7 @@ fun FiltersTagView(sheetState: SheetState, coroutineScope: CoroutineScope){
             onDismiss = { coroutineScope.launch { sheetState.hide() } },
             sheetState = sheetState,
             onBack = { coroutineScope.launch { sheetState.hide() } },
+            navHostController = NavHostController(LocalContext.current)
         )
     }
 
@@ -78,13 +81,13 @@ fun FilterButton(onClick: () -> Unit, modifier: Modifier){
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyModalBottomSheet(onDismiss: () -> Unit, sheetState: SheetState, onBack: () -> Unit) {
+fun MyModalBottomSheet(onDismiss: () -> Unit, sheetState: SheetState, onBack: () -> Unit, navHostController: NavHostController) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         windowInsets = WindowInsets(bottom = 0.dp),
     ) {
-        FilterPanel(onBack = onBack)
+        FilterPanel(onBack = onBack, navHostController)
     }
 }
 
@@ -102,7 +105,7 @@ fun FilterAddedCard(filter: String){
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FilterPanel(onBack:() -> Unit){
+fun FilterPanel(onBack:() -> Unit, navHostController: NavHostController){
     Scaffold(
         topBar = {
             TopAppBar(
@@ -121,19 +124,19 @@ fun FilterPanel(onBack:() -> Unit){
                     .height(56.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
             )
         }
-    ) {
-        Column(modifier = Modifier.padding(it)) {
-            FilterRow(modifier = Modifier.fillMaxWidth().weight(1f), filterName = "Categoria", value = "Todos")
-            FilterRow(modifier = Modifier.fillMaxWidth().weight(1f), filterName = "Precio", value = "Todos")
-            FilterRow(modifier = Modifier.fillMaxWidth().weight(1f), filterName = "Distancia", value = "Todos")
-            FilterRow(modifier = Modifier.fillMaxWidth().weight(1f), filterName = "Hora", value = "Todos")
-            FilterRow(modifier = Modifier.fillMaxWidth().weight(1f), filterName = "Tipo de lugar", value = "Todos")
-            FilterRow(modifier = Modifier.fillMaxWidth().weight(1f), filterName = "Fecha", value = "10/10/2023")
-            FilterRow(modifier = Modifier.fillMaxWidth().weight(1f), filterName = "Fecha", value = "10/10/2023")
-            FilterRow(modifier = Modifier.fillMaxWidth().weight(1f), filterName = "Fecha", value = "10/10/2023")
+    ) {val modifier = Modifier.padding(it)
+        NavHost(navController = navHostController, startDestination = FiltersScreen.Categories.route, route = Graph.MAIN) {
+            composable(route = FiltersScreen.Categories.route) {
+                AllFilters(modifier)
+            }
+            composable(route = FiltersScreen.Price.route) {
+                AllFilters(modifier)
+            }
         }
     }
 }
+
+
 
 @Composable
 private fun ResultFilterButton(modifier: Modifier){
@@ -165,5 +168,22 @@ fun FilterRow(modifier: Modifier, filterName: String, value: String){
     ){
         Text(text = filterName, modifier = Modifier.align(Alignment.CenterStart).padding(start = 8.dp))
         Text(text = value, modifier = Modifier.align(Alignment.CenterEnd).padding(end = 8.dp))
+    }
+}
+
+@Composable
+fun FilterValueRow(modifier: Modifier, value: String){
+    Box(modifier = modifier
+        .drawBehind {
+            drawLine(
+                color = Color.Gray,
+                start = Offset(0f, size.height),
+                end = Offset(size.width, size.height),
+                strokeWidth = 1.dp.toPx()
+            )
+        }
+        .clickable {  }
+    ){
+        Text(text = value, modifier = Modifier.align(Alignment.CenterStart).padding(start = 8.dp))
     }
 }
