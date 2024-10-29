@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -49,6 +50,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.willgo.data.Category
 import com.example.willgo.data.Event
 import com.example.willgo.view.sections.EventCard
 import com.example.willgo.view.sections.CommonEventCard
@@ -87,24 +89,57 @@ fun HomeScreen(paddingValues: PaddingValues, events: List<Event>, navController:
                 .background(Color.White)
             )
             {
-                items(1)  {
-                    SectionTitle(title = "Popular")
+                /*items(1)  {
+                    SectionTitle(title = "Actuación musical")
+                    Spacer(Modifier.height(16.dp))
+                    EventSection()
+                    Spacer(Modifier.height(16.dp))
+                    SectionTitle(title = "Comedia")
+                    Spacer(Modifier.height(16.dp))
+                    EventSection()
+                    Spacer(Modifier.height(16.dp))
+                    SectionTitle(title = "Cultura")
                     Spacer(modifier = Modifier.height(16.dp))
                     EventSection()
                     Spacer(Modifier.height(16.dp))
-                    SectionTitle(title = "Conciertos")
-                    Spacer(Modifier.height(16.dp))
+                    SectionTitle(title = "Deporte")
+                    Spacer(modifier = Modifier.height(16.dp))
                     EventSection()
                     Spacer(Modifier.height(16.dp))
-                    SectionTitle(title = "Deportes")
-                    Spacer(Modifier.height(16.dp))
+                    SectionTitle(title = "Discoteca")
+                    Spacer(modifier = Modifier.height(16.dp))
                     EventSection()
                     Spacer(Modifier.height(16.dp))
+                    SectionTitle(title = "Teatro")
+                    Spacer(modifier = Modifier.height(16.dp))
+                    EventSection()
+                    Spacer(Modifier.height(16.dp))
+                }*/
+                items(1) {
+                    CategorySection(title = "Actuación musical", events = getEventsByCategory(events, Category.Actuacion_musical))
+                    CategorySection(title = "Comedia", events = getEventsByCategory(events, Category.Comedia))
+                    CategorySection(title = "Cultura", events = getEventsByCategory(events, Category.Cultura))
+                    CategorySection(title = "Deporte", events = getEventsByCategory(events, Category.Deporte))
+                    CategorySection(title = "Discoteca", events = getEventsByCategory(events, Category.Discoteca))
+                    CategorySection(title = "Teatro", events = getEventsByCategory(events, Category.Teatro))
                 }
-
             }
         }
     }
+}
+
+@Composable
+fun CategorySection(title: String, events: List<Event>) {
+    SectionTitle(title = title)
+    Spacer(modifier = Modifier.height(16.dp))
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(events) { event ->
+            CommonEventCard(event = event)  // Muestra cada evento en su tarjeta
+        }
+    }
+    Spacer(modifier = Modifier.height(16.dp))
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -241,6 +276,10 @@ fun EventSection() {
         item{VerticalSeparator()}
 
     }
+}
+
+fun getEventsByCategory(events: List<Event>, category: Category): List<Event> {
+    return events.filter { it.category == category }
 }
 
 @Composable
