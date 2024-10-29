@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.willgo.data.Event
+import com.example.willgo.graphs.BottomBarScreen
 import com.example.willgo.view.sections.CommonEventCard
 import com.example.willgo.view.sections.FiltersTagView
 import java.text.Normalizer
@@ -57,7 +58,7 @@ fun SearchResultsScreen(paddingValues: PaddingValues, events: List<Event>, initi
         ) {
             TopBar(navigationIcon = {
                 IconButton(
-                    onClick = {navController.popBackStack()})
+                    onClick = {navController.navigate(BottomBarScreen.Home.route)})
                 {
                     Icon(
                         modifier = Modifier,
