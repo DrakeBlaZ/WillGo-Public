@@ -36,6 +36,7 @@ import com.example.willgo.data.Category
 import com.example.willgo.data.Event
 import com.example.willgo.graphs.BottomBarScreen
 import com.example.willgo.view.sections.CommonEventCard
+import com.example.willgo.view.sections.FiltersPreview
 import com.example.willgo.view.sections.FiltersTagView
 import java.text.Normalizer
 
@@ -84,6 +85,7 @@ fun SearchResultsScreen(paddingValues: PaddingValues, events: List<Event>, initi
             Spacer(modifier = Modifier.height(16.dp))
 
             FiltersTagView(bottomSheetState, coroutineScope)
+
             Text(
                 text = "Resultados de la búsqueda:",
                 color = Color.Black,

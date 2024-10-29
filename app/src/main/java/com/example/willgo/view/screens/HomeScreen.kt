@@ -194,7 +194,7 @@ fun SearchBar(text:String, events: List<Event>, onQueryChange: (String) -> Unit,
         modifier = Modifier.padding(horizontal = searchBarPadding),
         windowInsets = WindowInsets(top = 0.dp, bottom = 0.dp),
     ) {
-        FiltersPreview(navController)
+        FiltersPreview(navController, null)
     }
 }
 

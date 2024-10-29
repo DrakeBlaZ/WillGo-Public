@@ -33,11 +33,11 @@ import androidx.navigation.NavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FiltersPreview(navController: NavController){
+fun FiltersPreview(navController: NavController, selectedCategory: Category?){
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val coroutineScope = rememberCoroutineScope()
     val keyboard = LocalSoftwareKeyboardController.current
-    var selectedCategory by remember { mutableStateOf<Category?>(null) } // Estado de categoría seleccionada
+    var selectedCategoryState by remember { mutableStateOf(selectedCategory) } // Estado inicial de categoría seleccionada
 
     if (bottomSheetState.isVisible) {
         MyModalBottomSheet(
@@ -60,9 +60,8 @@ fun FiltersPreview(navController: NavController){
             modifier = Modifier.padding(8.dp),
             fontWeight = FontWeight.Bold)
 
-        //FilterGrid(navController)
-        FilterGrid(navController, selectedCategory) { newCategory ->
-            selectedCategory = newCategory  // Actualiza la categoría seleccionada
+        FilterGrid(navController, selectedCategoryState) { newCategory ->
+            selectedCategoryState = newCategory  // Actualiza la categoría seleccionada
         }
     }
 }
@@ -75,9 +74,7 @@ fun FilterGrid(navController: NavController, selectedCategory: Category?, onCate
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        /*items(Category.entries.toTypedArray()) { category ->
-            CategoryItem(category = category, navController)
-        }*/
+
         items(Category.entries.toTypedArray()) { category ->
             CategoryItem(
                 category = category,

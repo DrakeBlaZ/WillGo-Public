@@ -62,23 +62,6 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
         }
 
         /*composable(
-            route = "filteredEvents/{category}",
-            arguments = listOf(navArgument("category") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val categoryName = backStackEntry.arguments?.getString("category")
-            val category = Category.entries.firstOrNull { it.name == categoryName }
-
-            if (category != null) {
-                FilteredEventsScreen(
-                    category = category,
-                    events = events.value,
-                    paddingValues = paddingValues,
-                    navController = navController
-                )
-            }
-        }*/
-
-        composable(
             route = "searchResults?query={query}&category={category}",
             arguments = listOf(
                 navArgument("query") { defaultValue = "" },
@@ -94,6 +77,37 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
                 events = events.value,
                 initialQuery = query,
                 initialCategory = category,
+                onQueryChange = { newQuery ->
+                    navController.navigate("searchResults?query=$newQuery&category=${category?.name ?: ""}")
+                },
+                onSearch = { searchQuery ->
+                    navController.navigate("searchResults?query=$searchQuery&category=${category?.name ?: ""}")
+                },
+                navController = navController
+            )
+        }*/
+
+        composable(
+            route = "searchResults?query={query}&category={category}",
+            arguments = listOf(
+                navArgument("query") { defaultValue = "" },
+                navArgument("category") { defaultValue = "" }
+            )
+        ) { backStackEntry ->
+            val query = backStackEntry.arguments?.getString("query") ?: ""
+            val categoryName = backStackEntry.arguments?.getString("category")
+            val category = Category.entries.firstOrNull { it.name == categoryName }
+
+            val filteredEvents = events.value.filter { event ->
+                (category == null || event.category == category) &&
+                        event.name_event.contains(query, ignoreCase = true)
+            }
+
+            SearchResultsScreen(
+                paddingValues = paddingValues,
+                events = filteredEvents,
+                initialQuery = query,
+                initialCategory = category,  // Pasa la categoría seleccionada
                 onQueryChange = { newQuery ->
                     navController.navigate("searchResults?query=$newQuery&category=${category?.name ?: ""}")
                 },
