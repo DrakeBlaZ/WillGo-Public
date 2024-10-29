@@ -36,8 +36,15 @@ fun MainScreen(navController: NavHostController = rememberNavController()){
 
 @Composable
 fun RowScope.AddItems(screen: BottomBarScreen, currentDestination: NavDestination?, navController: NavController) {
+    val isSearchResults = currentDestination?.route?.contains("searchResults") == true
+    val isSelected = if (isSearchResults) {
+        screen == BottomBarScreen.Home // Seleccionar Home cuando estamos en searchResults
+    } else {
+        currentDestination?.hierarchy?.any { it.route == screen.route } == true
+    }
+
     NavigationBarItem(
-        selected = currentDestination?.hierarchy?.any{it.route == screen.route} == true,
+        selected =  isSelected,
         onClick = {
             navController.navigate(screen.route){
                 popUpTo(navController.graph.findStartDestination().id)
