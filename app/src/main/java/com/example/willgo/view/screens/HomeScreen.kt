@@ -52,6 +52,8 @@ import androidx.navigation.NavController
 import com.example.willgo.data.Event
 import com.example.willgo.view.sections.EventCard
 import com.example.willgo.view.sections.CommonEventCard
+import com.example.willgo.view.sections.FilterGrid
+import com.example.willgo.view.sections.FiltersPreview
 
 @Composable
 fun HomeScreen(paddingValues: PaddingValues, events: List<Event>, navController: NavController){
@@ -150,7 +152,7 @@ fun SearchBar(text:String, events: List<Event>, onQueryChange: (String) -> Unit,
         modifier = Modifier.padding(horizontal = searchBarPadding),
         windowInsets = WindowInsets(top = 0.dp, bottom = 0.dp),
     ) {
-
+        FiltersPreview()
     }
 }
 
@@ -186,8 +188,9 @@ fun TopBar(navigationIcon: @Composable () -> Unit = {}) {
     Box(
         modifier = Modifier.padding(top = 12.dp, start = 12.dp, end = 12.dp)
             .fillMaxWidth()
+            .height(48.dp)
     ) {
-        Box(modifier = Modifier.align(Alignment.TopStart).padding(start = 12.dp)){
+        Box(modifier = Modifier.align(Alignment.TopStart)){
             navigationIcon()
         }
         Text(
