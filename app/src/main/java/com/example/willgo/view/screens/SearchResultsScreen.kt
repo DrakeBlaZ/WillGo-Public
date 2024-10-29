@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.willgo.data.Category
 import com.example.willgo.data.Event
 import com.example.willgo.graphs.BottomBarScreen
 import com.example.willgo.view.sections.CommonEventCard
@@ -40,9 +41,10 @@ import java.text.Normalizer
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchResultsScreen(paddingValues: PaddingValues, events: List<Event>, initialQuery: String, onQueryChange: (String) -> Unit, onSearch: (String) -> Unit, navController: NavController) {
+fun SearchResultsScreen(paddingValues: PaddingValues, events: List<Event>, initialQuery: String, initialCategory: Category? = null, onQueryChange: (String) -> Unit, onSearch: (String) -> Unit, navController: NavController) {
 
     var query by remember { mutableStateOf(initialQuery) }
+    var selectedCategory by remember { mutableStateOf(initialCategory) }  // Estado de categoría
 
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val coroutineScope = rememberCoroutineScope()
@@ -72,10 +74,12 @@ fun SearchResultsScreen(paddingValues: PaddingValues, events: List<Event>, initi
                 events = events,
                 onQueryChange = { newQuery ->
                     query = newQuery
+                    selectedCategory = null
                 },
                 onSearch = {
                     onSearch(query)
-                }
+                },
+                navController = navController
             )
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -89,7 +93,8 @@ fun SearchResultsScreen(paddingValues: PaddingValues, events: List<Event>, initi
             )
 
             val filteredEvents = events.filter { event ->
-                normalizeText(event.name_event).contains(normalizeText(query))
+                (selectedCategory == null || event.category == selectedCategory) &&
+                        normalizeText(event.name_event).contains(normalizeText(query))
             }
 
             if (filteredEvents.isEmpty()) {

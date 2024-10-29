@@ -9,8 +9,11 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import com.example.willgo.data.Category
 import com.example.willgo.data.Event
 import com.example.willgo.view.screens.HomeScreen
 import com.example.willgo.view.screens.MapScreen
@@ -47,6 +50,7 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
                 paddingValues,
                 events = filteredEvents,
                 initialQuery = query,
+                initialCategory = null,
                 onQueryChange = { newQuery ->
                     navController.navigate("searchResults/$newQuery")
                 },
@@ -54,6 +58,49 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
                     navController.navigate("searchResults/$searchQuery")
                 },
                 navController
+            )
+        }
+
+        /*composable(
+            route = "filteredEvents/{category}",
+            arguments = listOf(navArgument("category") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val categoryName = backStackEntry.arguments?.getString("category")
+            val category = Category.entries.firstOrNull { it.name == categoryName }
+
+            if (category != null) {
+                FilteredEventsScreen(
+                    category = category,
+                    events = events.value,
+                    paddingValues = paddingValues,
+                    navController = navController
+                )
+            }
+        }*/
+
+        composable(
+            route = "searchResults?query={query}&category={category}",
+            arguments = listOf(
+                navArgument("query") { defaultValue = "" },
+                navArgument("category") { defaultValue = "" }
+            )
+        ) { backStackEntry ->
+            val query = backStackEntry.arguments?.getString("query") ?: ""
+            val categoryName = backStackEntry.arguments?.getString("category") ?: ""
+            val category = Category.entries.firstOrNull { it.name == categoryName }
+
+            SearchResultsScreen(
+                paddingValues = paddingValues,
+                events = events.value,
+                initialQuery = query,
+                initialCategory = category,
+                onQueryChange = { newQuery ->
+                    navController.navigate("searchResults?query=$newQuery&category=${category?.name ?: ""}")
+                },
+                onSearch = { searchQuery ->
+                    navController.navigate("searchResults?query=$searchQuery&category=${category?.name ?: ""}")
+                },
+                navController = navController
             )
         }
     }

@@ -79,7 +79,8 @@ fun HomeScreen(paddingValues: PaddingValues, events: List<Event>, navController:
                 },
                 onSearch = {
                     navController.navigate("searchResults/${normalizeText(query)}")
-                }
+                },
+                navController = navController
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -129,6 +130,38 @@ fun HomeScreen(paddingValues: PaddingValues, events: List<Event>, navController:
 }
 
 @Composable
+fun TopBar(navigationIcon: @Composable () -> Unit = {}) {
+    Box(
+        modifier = Modifier.padding(top = 12.dp, start = 12.dp, end = 12.dp)
+            .fillMaxWidth()
+            .height(48.dp)
+    ) {
+        Box(modifier = Modifier.align(Alignment.TopStart)){
+            navigationIcon()
+        }
+        Text(
+            text = "WILLGO",
+            color = Color.Black,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.align(Alignment.Center)
+        )
+        Box(
+            modifier = Modifier
+                .background(Color.White, shape = RoundedCornerShape(16.dp))
+                .align(Alignment.TopEnd)
+
+        ) {
+            Image(
+                imageVector =  Icons.Default.AccountCircle, contentDescription = null,
+                modifier = Modifier.size(36.dp)
+            )
+        }
+    }
+}
+
+@Composable
 fun CategorySection(title: String, events: List<Event>) {
     SectionTitle(title = title)
     Spacer(modifier = Modifier.height(16.dp))
@@ -144,7 +177,7 @@ fun CategorySection(title: String, events: List<Event>) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchBar(text:String, events: List<Event>, onQueryChange: (String) -> Unit, onSearch: () -> Unit) {
+fun SearchBar(text:String, events: List<Event>, onQueryChange: (String) -> Unit, onSearch: () -> Unit, navController: NavController){
     var query by remember { mutableStateOf(text) }
     var active by remember { mutableStateOf(false) }
 
@@ -187,7 +220,7 @@ fun SearchBar(text:String, events: List<Event>, onQueryChange: (String) -> Unit,
         modifier = Modifier.padding(horizontal = searchBarPadding),
         windowInsets = WindowInsets(top = 0.dp, bottom = 0.dp),
     ) {
-        FiltersPreview()
+        FiltersPreview(navController)
     }
 }
 
@@ -213,38 +246,6 @@ fun SectionTitle(title: String) {
         ) {
             Image(
                 imageVector =  Icons.Default.ChevronRight, contentDescription = null
-            )
-        }
-    }
-}
-
-@Composable
-fun TopBar(navigationIcon: @Composable () -> Unit = {}) {
-    Box(
-        modifier = Modifier.padding(top = 12.dp, start = 12.dp, end = 12.dp)
-            .fillMaxWidth()
-            .height(48.dp)
-    ) {
-        Box(modifier = Modifier.align(Alignment.TopStart)){
-            navigationIcon()
-        }
-        Text(
-            text = "WILLGO",
-            color = Color.Black,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.align(Alignment.Center)
-        )
-        Box(
-            modifier = Modifier
-                .background(Color.White, shape = RoundedCornerShape(16.dp))
-                .align(Alignment.TopEnd)
-
-        ) {
-            Image(
-                imageVector =  Icons.Default.AccountCircle, contentDescription = null,
-                modifier = Modifier.size(36.dp)
             )
         }
     }
@@ -283,10 +284,11 @@ fun getEventsByCategory(events: List<Event>, category: Category): List<Event> {
 }
 
 @Composable
-private fun VerticalSeparator(){
+fun VerticalSeparator(){
     Box(modifier = Modifier
         .height(164.dp)
         .width(4.dp))
 }
+
 
 

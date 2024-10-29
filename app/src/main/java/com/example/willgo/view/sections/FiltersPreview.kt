@@ -24,11 +24,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.willgo.data.Category
 import kotlinx.coroutines.launch
+import androidx.navigation.NavController
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview
 @Composable
-fun FiltersPreview(){
+fun FiltersPreview(navController: NavController){
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val coroutineScope = rememberCoroutineScope()
     val keyboard = LocalSoftwareKeyboardController.current
@@ -53,13 +53,12 @@ fun FiltersPreview(){
         Text(text = "Categorías",
             modifier = Modifier.padding(8.dp),
             fontWeight = FontWeight.Bold)
-        FilterGrid()
+        FilterGrid(navController)
     }
 }
 
-@Preview
 @Composable
-fun FilterGrid(){
+fun FilterGrid(navController: NavController){
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         modifier = Modifier.fillMaxSize().padding(8.dp),
@@ -67,18 +66,29 @@ fun FilterGrid(){
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(Category.entries.toTypedArray()) { category ->
-            CategoryItem(category = category)
+            CategoryItem(category = category, navController)
         }
     }
 }
 
-
-@Composable
+/*@Composable
 fun CategoryItem(category: Category){
     ElevatedButton(
         onClick = {},
         colors = ButtonDefaults.elevatedButtonColors(containerColor = Color.Gray)
     ){
+        Text(text = category.name)
+    }
+}*/
+
+@Composable
+fun CategoryItem(category: Category, navController: NavController) {
+    ElevatedButton(
+        onClick = {
+            navController.navigate("searchResults?query=&category=${category.name}")
+        },
+        colors = ButtonDefaults.elevatedButtonColors(containerColor = Color.Gray)
+    ) {
         Text(text = category.name)
     }
 }
