@@ -60,7 +60,8 @@ fun NavBar(navController: NavController){
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
-    val bottomBarDestination = screens.any{it.route == currentDestination?.route}
+    val bottomBarDestination = screens.any{it.route == currentDestination?.route} ||
+            currentDestination?.route?.contains("searchResults") == true
     if(bottomBarDestination) {
         BottomAppBar {
             screens.forEach { screen ->
