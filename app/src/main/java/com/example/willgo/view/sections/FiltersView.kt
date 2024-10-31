@@ -36,9 +36,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.willgo.graphs.FiltersNavGraph
 import com.example.willgo.graphs.FiltersScreen
 import com.example.willgo.graphs.Graph
 import com.example.willgo.view.sections.FiltersNavScreens.AllFilters
@@ -52,9 +55,7 @@ fun FiltersTagView(sheetState: SheetState, coroutineScope: CoroutineScope){
     if (sheetState.isVisible) {
         MyModalBottomSheet(
             onDismiss = { coroutineScope.launch { sheetState.hide() } },
-            sheetState = sheetState,
-            onBack = { coroutineScope.launch { sheetState.hide() } },
-            navHostController = NavHostController(LocalContext.current)
+            sheetState = sheetState
         )
     }
 
@@ -81,13 +82,14 @@ fun FilterButton(onClick: () -> Unit, modifier: Modifier){
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyModalBottomSheet(onDismiss: () -> Unit, sheetState: SheetState, onBack: () -> Unit, navHostController: NavHostController) {
+fun MyModalBottomSheet(onDismiss: () -> Unit, sheetState: SheetState) {
+    val navHostController = rememberNavController()
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         windowInsets = WindowInsets(bottom = 0.dp),
     ) {
-        FilterPanel(onBack = onBack, navHostController)
+        FilterPanel(navHostController = navHostController)
     }
 }
 
@@ -105,52 +107,8 @@ fun FilterAddedCard(filter: String){
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FilterPanel(onBack:() -> Unit, navHostController: NavHostController){
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Filtros") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(imageVector = Icons.Default.ArrowBackIosNew, contentDescription = null)
-                    }
-                }
-            )
-        },
-        bottomBar = {
-            ResultFilterButton(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
-            )
-        }
-    ) {val modifier = Modifier.padding(it)
-        NavHost(navController = navHostController, startDestination = FiltersScreen.Categories.route, route = Graph.MAIN) {
-            composable(route = FiltersScreen.Categories.route) {
-                AllFilters(modifier)
-            }
-            composable(route = FiltersScreen.Price.route) {
-                AllFilters(modifier)
-            }
-        }
-    }
-}
-
-
-
-@Composable
-private fun ResultFilterButton(modifier: Modifier){
-    Box(modifier = modifier){
-        Button(
-            onClick = { /*TODO*/ },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-        ) {
-            Text(text = "Aplicar filtros")
-        }
-    }
-
+fun FilterPanel(navHostController: NavHostController ){
+        FiltersNavGraph(navHostController)
 }
 
 @Composable
@@ -164,7 +122,6 @@ fun FilterRow(modifier: Modifier, filterName: String, value: String){
                 strokeWidth = 1.dp.toPx()
             )
         }
-        .clickable {  }
     ){
         Text(text = filterName, modifier = Modifier.align(Alignment.CenterStart).padding(start = 8.dp))
         Text(text = value, modifier = Modifier.align(Alignment.CenterEnd).padding(end = 8.dp))
