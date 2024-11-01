@@ -131,6 +131,7 @@ fun FilterRow(modifier: Modifier, filterName: String, value: String){
 @Composable
 fun FilterValueRow(modifier: Modifier, value: String){
     Box(modifier = modifier
+        .fillMaxWidth()
         .drawBehind {
             drawLine(
                 color = Color.Gray,
@@ -139,7 +140,6 @@ fun FilterValueRow(modifier: Modifier, value: String){
                 strokeWidth = 1.dp.toPx()
             )
         }
-        .clickable {  }
     ){
         Text(text = value, modifier = Modifier.align(Alignment.CenterStart).padding(start = 8.dp))
     }

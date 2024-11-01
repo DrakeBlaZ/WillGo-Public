@@ -22,6 +22,7 @@ import com.example.willgo.view.sections.FiltersNavScreens.AllFilters
 import com.example.willgo.view.sections.FiltersNavScreens.CategoriesNavScreen
 import com.example.willgo.view.sections.FiltersNavScreens.DateNavScreen
 import com.example.willgo.view.sections.FiltersNavScreens.PriceNavScreen
+import com.example.willgo.view.sections.FiltersNavScreens.TypeNavScreen
 
 sealed class FiltersScreen(val route: String){
     object Filters: FiltersScreen("filters_screen")
@@ -63,7 +64,7 @@ fun FiltersNavGraph(navController: NavHostController){
         }
 
         composable(route = FiltersScreen.Type.route) {
-
+            TypeNavScreen(onBack = onBack, modifier)
         }
     }
 }

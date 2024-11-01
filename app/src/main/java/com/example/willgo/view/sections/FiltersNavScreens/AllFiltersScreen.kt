@@ -44,11 +44,11 @@ fun AllFilters(navController: NavController){
             FilterRow(modifier = Modifier.fillMaxWidth().weight(1f).clickable {  navController.navigate(FiltersScreen.Categories.route) }, filterName = "Categoria", value = "Todos")
             FilterRow(modifier = Modifier.fillMaxWidth().weight(1f).clickable{ navController.navigate(FiltersScreen.Price.route) }, filterName = "Precio", value = "Todos")
             //FilterRow(modifier = Modifier.fillMaxWidth().weight(1f).clickable{ navController.navigate(FiltersScreen.Price.route) }, filterName = "Distancia", value = "Todos")
-            FilterRow(modifier = Modifier.fillMaxWidth().weight(1f).clickable{ navController.navigate(FiltersScreen.Hour.route) }, filterName = "Hora", value = "Todos")
+            //FilterRow(modifier = Modifier.fillMaxWidth().weight(1f).clickable{ navController.navigate(FiltersScreen.Hour.route) }, filterName = "Hora", value = "Todos")
             FilterRow(modifier = Modifier.fillMaxWidth().weight(1f).clickable{ navController.navigate(FiltersScreen.Type.route) }, filterName = "Tipo de lugar", value = "Todos")
             FilterRow(modifier = Modifier.fillMaxWidth().weight(1f).clickable{ navController.navigate(FiltersScreen.Date.route) }, filterName = "Fecha", value = "10/10/2023")
-            FilterRow(modifier = Modifier.fillMaxWidth().weight(1f), filterName = "Fecha", value = "10/10/2023")
-            FilterRow(modifier = Modifier.fillMaxWidth().weight(1f), filterName = "Fecha", value = "10/10/2023")
+//            FilterRow(modifier = Modifier.fillMaxWidth().weight(1f), filterName = "Fecha", value = "10/10/2023")
+//            FilterRow(modifier = Modifier.fillMaxWidth().weight(1f), filterName = "Fecha", value = "10/10/2023")
         }
     }
 }

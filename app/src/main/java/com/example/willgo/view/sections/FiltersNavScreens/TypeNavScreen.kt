@@ -1,6 +1,5 @@
 package com.example.willgo.view.sections.FiltersNavScreens
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -20,13 +19,12 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.willgo.data.Category
-import com.example.willgo.view.sections.FilterRow
 import com.example.willgo.view.sections.FilterValueRow
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PriceNavScreen(onBack: () -> Unit, modifier: Modifier){
+fun TypeNavScreen(onBack: () -> Unit, modifier: Modifier){
     Scaffold(
         topBar = {
             TopAppBar(
@@ -43,16 +41,12 @@ fun PriceNavScreen(onBack: () -> Unit, modifier: Modifier){
         }
     ) {
         Column(modifier = Modifier.padding(it)) {
-            Text("Precio")
+            Text("Tipo de lugar")
             Spacer(modifier = Modifier.height(8.dp))
             FilterValueRow(modifier = Modifier, value = "Todos")
-            FilterValueRow(modifier = Modifier, value = "Gratis")
-            FilterValueRow(modifier = Modifier, value = "5 euros")
-            FilterValueRow(modifier = Modifier, value = "10 euros")
-            FilterValueRow(modifier = Modifier, value = "20 euros")
-            FilterValueRow(modifier = Modifier, value = "50 euros")
-            FilterValueRow(modifier = Modifier, value = "100 euros")
-            FilterValueRow(modifier = Modifier, value = "200 euros")
+            FilterValueRow(modifier = Modifier, value = "En linea")
+            FilterValueRow(modifier = Modifier, value = "En interior")
+            FilterValueRow(modifier = Modifier, value = "Al aire libre")
         }
     }
 }

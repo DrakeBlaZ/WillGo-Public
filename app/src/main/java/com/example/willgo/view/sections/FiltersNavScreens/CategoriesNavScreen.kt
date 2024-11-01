@@ -1,6 +1,7 @@
 package com.example.willgo.view.sections.FiltersNavScreens
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -41,6 +42,8 @@ fun CategoriesNavScreen(onBack: () -> Unit, modifier: Modifier){
         }
     ) {
         Column(modifier = Modifier.padding(it)) {
+            Text("Categoria")
+            Spacer(modifier = Modifier.height(8.dp))
             for (category: Category in Category.entries) {
                 FilterValueRow(
                     modifier = modifier,
