@@ -12,12 +12,6 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.example.willgo.data.Event
-import com.example.willgo.view.screens.HomeScreen
-import com.example.willgo.view.screens.MapScreen
-import com.example.willgo.view.screens.ProfileScreen
-import com.example.willgo.view.screens.SearchResultsScreen
 import com.example.willgo.view.sections.FiltersNavScreens.AllFilters
 import com.example.willgo.view.sections.FiltersNavScreens.CategoriesNavScreen
 import com.example.willgo.view.sections.FiltersNavScreens.DateNavScreen
@@ -51,13 +45,6 @@ fun FiltersNavGraph(navController: NavHostController){
             DateNavScreen(onBack = onBack, modifier)
         }
 
-        composable(route = FiltersScreen.Hour.route) {
-
-        }
-
-        composable(route = FiltersScreen.Distance.route) {
-
-        }
 
         composable(route = FiltersScreen.Price.route) {
             PriceNavScreen(onBack = onBack, modifier)

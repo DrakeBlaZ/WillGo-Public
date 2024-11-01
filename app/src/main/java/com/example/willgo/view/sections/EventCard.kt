@@ -38,9 +38,9 @@ import androidx.compose.foundation.Image
 import coil.compose.rememberAsyncImagePainter
 
 @Composable
-fun CommonEventCard(event: Event){
+fun CommonEventCard(event: Event, modifier: Modifier){
     Card(
-        modifier = Modifier
+        modifier = modifier
             .background(Color.Transparent)
             .height(242.dp)
             .width(284.dp),
@@ -120,8 +120,3 @@ fun CommonEventCard(event: Event){
     }
 }
 
-@Preview
-@Composable
-fun EventCard(){
-    CommonEventCard(event = Event(3, "Concierto AC/DC 2025 Valencia", "Concierto AC/DC 2025 Valencia", "gmail", 111111111, Category.Actuacion_musical, "Valencia", "06/05/2025", 20.0f, "https://trpgyhwsghxnaakpoftt.supabase.co/storage/v1/object/public/EventImage/ac_dc.jpg"))
-}

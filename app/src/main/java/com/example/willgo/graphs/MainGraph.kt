@@ -15,6 +15,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.willgo.data.Category
 import com.example.willgo.data.Event
+import com.example.willgo.view.screens.EventDataScreen
 import com.example.willgo.view.screens.HomeScreen
 import com.example.willgo.view.screens.MapScreen
 import com.example.willgo.view.screens.ProfileScreen
@@ -45,7 +46,12 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
 
         composable(route = "searchResults/{query}") { backStackEntry ->
             val query = backStackEntry.arguments?.getString("query") ?: ""
-            val filteredEvents = events.value.filter { it.name_event.contains(query, ignoreCase = true) } // Filtrar eventos
+            val filteredEvents = events.value.filter {
+                it.name_event.contains(
+                    query,
+                    ignoreCase = true
+                )
+            } // Filtrar eventos
             SearchResultsScreen(
                 paddingValues,
                 events = filteredEvents,
@@ -117,7 +123,19 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
                 navController = navController
             )
         }
+
+        composable(
+            route = "eventDetail/{eventId}",
+            arguments = listOf(navArgument("eventId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val event = backStackEntry.arguments?.getInt("eventId") ?: -1
+            val filteredEvents = events.value.filter { it.id == event }
+            EventDataScreen(filteredEvents[0], paddingValues)
+        }
+
     }
+
+
 }
 
 suspend fun loadEventsFromSupabase(eventsState: MutableState<List<Event>>){
