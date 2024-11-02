@@ -25,12 +25,19 @@ import com.example.willgo.view.sections.FilterValueRow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CategoriesNavScreen(onBack: () -> Unit, modifier: Modifier){
+fun CategoriesNavScreen(
+    onBack: () -> Unit,
+    modifier: Modifier,
+    onCategorySelected: (Category) -> Unit
+){
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Filtros") },
-                navigationIcon = { IconButton(onClick = onBack){ Icon(imageVector = Icons.Default.ArrowBackIosNew, contentDescription = null)}}
+                navigationIcon = {
+                    IconButton(onClick = onBack){
+                        Icon(imageVector = Icons.Default.ArrowBackIosNew, contentDescription = null)}
+                }
             )
         },
         bottomBar = {
@@ -47,7 +54,8 @@ fun CategoriesNavScreen(onBack: () -> Unit, modifier: Modifier){
             for (category: Category in Category.entries) {
                 FilterValueRow(
                     modifier = modifier,
-                    value = category.name
+                    value = category.name,
+                    onClick = { onCategorySelected(category) }
                 )
             }
         }

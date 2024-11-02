@@ -57,11 +57,11 @@ fun DateNavScreen(
         Column(modifier = Modifier.padding(it)) {
             Text("Fecha")
             Spacer(modifier = Modifier.height(8.dp))
-            FilterValueRow(modifier = Modifier, value = "Todos")
-            FilterValueRow(modifier = Modifier, value = "Hoy")
-            FilterValueRow(modifier = Modifier, value = "Esta semana")
-            FilterValueRow(modifier = Modifier, value = "Este mes")
-            FilterValueRow(modifier = Modifier.clickable { showDialog = true }, value = "Selecciona dia")
+            FilterValueRow(modifier = Modifier, value = "Todos", onClick = {})
+            FilterValueRow(modifier = Modifier, value = "Hoy", onClick = {})
+            FilterValueRow(modifier = Modifier, value = "Esta semana", onClick = {})
+            FilterValueRow(modifier = Modifier, value = "Este mes", onClick = {})
+            FilterValueRow(modifier = Modifier.clickable { showDialog = true }, value = "Selecciona dia", onClick = {})
             if(showDialog){
                 DatePickerDialog(
                     onDismissRequest = { showDialog = false },

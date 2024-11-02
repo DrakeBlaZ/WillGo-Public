@@ -41,6 +41,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.willgo.data.Event
 import com.example.willgo.graphs.FiltersNavGraph
 import com.example.willgo.graphs.FiltersScreen
 import com.example.willgo.graphs.Graph
@@ -50,12 +51,13 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FiltersTagView(sheetState: SheetState, coroutineScope: CoroutineScope){
+fun FiltersTagView(sheetState: SheetState, coroutineScope: CoroutineScope, events: List<Event>){
     val keyboard = LocalSoftwareKeyboardController.current
     if (sheetState.isVisible) {
         MyModalBottomSheet(
             onDismiss = { coroutineScope.launch { sheetState.hide() } },
-            sheetState = sheetState
+            sheetState = sheetState,
+            events = events
         )
     }
 
@@ -82,14 +84,18 @@ fun FilterButton(onClick: () -> Unit, modifier: Modifier){
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyModalBottomSheet(onDismiss: () -> Unit, sheetState: SheetState) {
+fun MyModalBottomSheet(
+    onDismiss: () -> Unit,
+    sheetState: SheetState,
+    events: List<Event>
+) {
     val navHostController = rememberNavController()
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         windowInsets = WindowInsets(bottom = 0.dp),
     ) {
-        FilterPanel(navHostController = navHostController)
+        FilterPanel(navHostController = navHostController, events = events)
     }
 }
 
@@ -107,8 +113,8 @@ fun FilterAddedCard(filter: String){
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FilterPanel(navHostController: NavHostController ){
-        FiltersNavGraph(navHostController)
+fun FilterPanel(navHostController: NavHostController, events: List<Event> ){
+        FiltersNavGraph(navHostController, events)
 }
 
 @Composable
@@ -129,9 +135,10 @@ fun FilterRow(modifier: Modifier, filterName: String, value: String){
 }
 
 @Composable
-fun FilterValueRow(modifier: Modifier, value: String){
+fun FilterValueRow(modifier: Modifier, value: String, onClick: () -> Unit){
     Box(modifier = modifier
         .fillMaxWidth()
+        .clickable { onClick() }
         .drawBehind {
             drawLine(
                 color = Color.Gray,
@@ -140,6 +147,7 @@ fun FilterValueRow(modifier: Modifier, value: String){
                 strokeWidth = 1.dp.toPx()
             )
         }
+        .padding(8.dp)
     ){
         Text(text = value, modifier = Modifier.align(Alignment.CenterStart).padding(start = 8.dp))
     }

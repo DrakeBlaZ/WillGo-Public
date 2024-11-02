@@ -30,6 +30,10 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
     LaunchedEffect(Unit) {
         loadEventsFromSupabase(events)
     }
+
+    // Estado para almacenar la categoría seleccionada externamente
+    val externalSelectedCategory = remember { mutableStateOf<Category?>(null) }
+
     NavHost(navController = navController, startDestination = BottomBarScreen.Home.route, route = Graph.MAIN) {
         composable(route = BottomBarScreen.Home.route) {
             HomeScreen(paddingValues = paddingValues, events.value, navController)
@@ -43,6 +47,10 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
             ProfileScreen()
         }
 
+        composable(route = "filters") {
+            FiltersNavGraph(navController = navController, events = events.value)
+        }
+
         composable(route = "searchResults/{query}") { backStackEntry ->
             val query = backStackEntry.arguments?.getString("query") ?: ""
             val filteredEvents = events.value.filter { it.name_event.contains(query, ignoreCase = true) } // Filtrar eventos
@@ -51,6 +59,7 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
                 events = filteredEvents,
                 initialQuery = query,
                 initialCategory = null,
+                externalSelectedCategory = externalSelectedCategory.value,
                 onQueryChange = { newQuery ->
                     navController.navigate("searchResults/$newQuery")
                 },
@@ -60,32 +69,6 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
                 navController
             )
         }
-
-        /*composable(
-            route = "searchResults?query={query}&category={category}",
-            arguments = listOf(
-                navArgument("query") { defaultValue = "" },
-                navArgument("category") { defaultValue = "" }
-            )
-        ) { backStackEntry ->
-            val query = backStackEntry.arguments?.getString("query") ?: ""
-            val categoryName = backStackEntry.arguments?.getString("category") ?: ""
-            val category = Category.entries.firstOrNull { it.name == categoryName }
-
-            SearchResultsScreen(
-                paddingValues = paddingValues,
-                events = events.value,
-                initialQuery = query,
-                initialCategory = category,
-                onQueryChange = { newQuery ->
-                    navController.navigate("searchResults?query=$newQuery&category=${category?.name ?: ""}")
-                },
-                onSearch = { searchQuery ->
-                    navController.navigate("searchResults?query=$searchQuery&category=${category?.name ?: ""}")
-                },
-                navController = navController
-            )
-        }*/
 
         composable(
             route = "searchResults?query={query}&category={category}",
@@ -107,7 +90,8 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
                 paddingValues = paddingValues,
                 events = filteredEvents,
                 initialQuery = query,
-                initialCategory = category,  // Pasa la categoría seleccionada
+                initialCategory = category,
+                externalSelectedCategory = externalSelectedCategory.value,
                 onQueryChange = { newQuery ->
                     navController.navigate("searchResults?query=$newQuery&category=${category?.name ?: ""}")
                 },

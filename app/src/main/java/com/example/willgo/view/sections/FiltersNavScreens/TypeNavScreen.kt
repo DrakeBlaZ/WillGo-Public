@@ -43,10 +43,10 @@ fun TypeNavScreen(onBack: () -> Unit, modifier: Modifier){
         Column(modifier = Modifier.padding(it)) {
             Text("Tipo de lugar")
             Spacer(modifier = Modifier.height(8.dp))
-            FilterValueRow(modifier = Modifier, value = "Todos")
-            FilterValueRow(modifier = Modifier, value = "En linea")
-            FilterValueRow(modifier = Modifier, value = "En interior")
-            FilterValueRow(modifier = Modifier, value = "Al aire libre")
+            FilterValueRow(modifier = Modifier, value = "Todos", onClick = {})
+            FilterValueRow(modifier = Modifier, value = "En linea", onClick = {})
+            FilterValueRow(modifier = Modifier, value = "En interior", onClick = {})
+            FilterValueRow(modifier = Modifier, value = "Al aire libre", onClick = {})
         }
     }
 }

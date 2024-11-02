@@ -45,14 +45,14 @@ fun PriceNavScreen(onBack: () -> Unit, modifier: Modifier){
         Column(modifier = Modifier.padding(it)) {
             Text("Precio")
             Spacer(modifier = Modifier.height(8.dp))
-            FilterValueRow(modifier = Modifier, value = "Todos")
-            FilterValueRow(modifier = Modifier, value = "Gratis")
-            FilterValueRow(modifier = Modifier, value = "5 euros")
-            FilterValueRow(modifier = Modifier, value = "10 euros")
-            FilterValueRow(modifier = Modifier, value = "20 euros")
-            FilterValueRow(modifier = Modifier, value = "50 euros")
-            FilterValueRow(modifier = Modifier, value = "100 euros")
-            FilterValueRow(modifier = Modifier, value = "200 euros")
+            FilterValueRow(modifier = Modifier, value = "Todos", onClick = {})
+            FilterValueRow(modifier = Modifier, value = "Gratis", onClick = {})
+            FilterValueRow(modifier = Modifier, value = "5 euros", onClick = {})
+            FilterValueRow(modifier = Modifier, value = "10 euros", onClick = {})
+            FilterValueRow(modifier = Modifier, value = "20 euros", onClick = {})
+            FilterValueRow(modifier = Modifier, value = "50 euros", onClick = {})
+            FilterValueRow(modifier = Modifier, value = "100 euros", onClick = {})
+            FilterValueRow(modifier = Modifier, value = "200 euros", onClick = {})
         }
     }
 }
