@@ -50,7 +50,7 @@ fun EventDataScreen(event: Event, paddingValues: PaddingValues, onBack: () -> Un
         modifier = Modifier
             .background(Color.White)
             .fillMaxSize()
-            .padding(bottom = paddingValues.calculateBottomPadding())
+            .padding(paddingValues)
     ) {
         item {
             Box(modifier = Modifier
