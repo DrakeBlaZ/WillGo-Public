@@ -68,7 +68,57 @@ fun FiltersNavGraph(navController: NavHostController, events: List<Event>, paddi
         }
 
         composable(route = FiltersScreen.Price.route) {
-            PriceNavScreen(onBack = onBack, modifier)
+            PriceNavScreen(onBack = onBack, modifier, navController)
+        }
+
+        /*composable(
+            route = "searchResults?maxPrice={maxPrice}",
+            arguments = listOf(
+                navArgument("maxPrice") { defaultValue = "10000" }
+            )
+        ) { backStackEntry ->
+            val maxPrice = backStackEntry.arguments?.getString("maxPrice")?.toFloatOrNull() ?: 10000f
+            SearchResultsScreen(
+                paddingValues = paddingValues,
+                events = events,
+                initialQuery = "",
+                maxPrice = maxPrice, // Pasa el precio máximo aquí
+                onQueryChange = { newQuery ->
+                    navController.navigate("searchResults?query=$newQuery&maxPrice=$maxPrice")
+                },
+                onSearch = { searchQuery ->
+                    navController.navigate("searchResults?query=$searchQuery&maxPrice=$maxPrice")
+                },
+                navController = navController
+            )
+        }*/
+
+        composable(
+            route = "searchResults?maxPrice={maxPrice}&category={category}",
+            arguments = listOf(
+                navArgument("maxPrice") { defaultValue = "10000" },
+                navArgument("category") { defaultValue = "" }
+            )
+        ) { backStackEntry ->
+            val maxPrice = backStackEntry.arguments?.getString("maxPrice")?.toFloatOrNull() ?: 10000f
+            val categoryName = backStackEntry.arguments?.getString("category")
+            val externalCategory = categoryName?.takeIf { it.isNotBlank() }?.let { Category.valueOf(it) }
+
+            // Llama a SearchResultsScreen con maxPrice y categoría
+            SearchResultsScreen(
+                paddingValues = paddingValues,
+                events = events,
+                initialQuery = "",
+                maxPrice = maxPrice,
+                externalSelectedCategory = externalCategory,
+                onQueryChange = { newQuery ->
+                    navController.navigate("searchResults?query=$newQuery&maxPrice=$maxPrice&category=${externalCategory?.name ?: ""}")
+                },
+                onSearch = { searchQuery ->
+                    navController.navigate("searchResults?query=$searchQuery&maxPrice=$maxPrice&category=${externalCategory?.name ?: ""}")
+                },
+                navController = navController
+            )
         }
 
         composable(route = FiltersScreen.Type.route) {

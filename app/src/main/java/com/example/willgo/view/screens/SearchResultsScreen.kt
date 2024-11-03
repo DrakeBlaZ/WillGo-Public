@@ -47,6 +47,7 @@ fun SearchResultsScreen(
     events: List<Event>,
     initialQuery: String,
     initialCategory: Category? = null,
+    maxPrice: Float? = null,
     externalSelectedCategory: Category? = null,
     onQueryChange: (String) -> Unit,
     onSearch: (String) -> Unit,
@@ -55,6 +56,13 @@ fun SearchResultsScreen(
 
     var query by remember { mutableStateOf(initialQuery) }
     var selectedCategory by remember { mutableStateOf(initialCategory) }  // Estado de categoría
+    val categoryToFilter = externalSelectedCategory ?: selectedCategory
+
+    val filteredEvents = events.filter { event ->
+        (categoryToFilter == null || event.category == categoryToFilter) &&
+                (maxPrice == null || (event.price ?: 0f) <= maxPrice) &&
+                event.name_event.contains(query, ignoreCase = true)
+    }
 
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val coroutineScope = rememberCoroutineScope()
@@ -111,11 +119,11 @@ fun SearchResultsScreen(
                 fontSize = 16.sp
             )
 
-            val filteredEvents = events.filter { event ->
+            /*val filteredEvents = events.filter { event ->
                 val categoryToFilter = externalSelectedCategory ?: selectedCategory  // Prioriza externalSelectedCategory
                 (categoryToFilter == null || event.category == categoryToFilter) &&
                         normalizeText(event.name_event).contains(normalizeText(query))
-            }
+            }*/
 
             if (filteredEvents.isEmpty()) {
                 Text("No se encontraron eventos.")

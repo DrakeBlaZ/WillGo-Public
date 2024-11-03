@@ -20,13 +20,19 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.willgo.data.Category
 import com.example.willgo.view.sections.FilterRow
 import com.example.willgo.view.sections.FilterValueRow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PriceNavScreen(onBack: () -> Unit, modifier: Modifier){
+fun PriceNavScreen(
+    onBack: () -> Unit,
+    modifier: Modifier,
+    navController: NavController,
+    selectedCategory: Category? = null
+){
     Scaffold(
         topBar = {
             TopAppBar(
@@ -45,14 +51,32 @@ fun PriceNavScreen(onBack: () -> Unit, modifier: Modifier){
         Column(modifier = Modifier.padding(it)) {
             Text("Precio")
             Spacer(modifier = Modifier.height(8.dp))
-            FilterValueRow(modifier = Modifier, value = "Todos", onClick = {})
-            FilterValueRow(modifier = Modifier, value = "Gratis", onClick = {})
-            FilterValueRow(modifier = Modifier, value = "5 euros", onClick = {})
-            FilterValueRow(modifier = Modifier, value = "10 euros", onClick = {})
-            FilterValueRow(modifier = Modifier, value = "20 euros", onClick = {})
-            FilterValueRow(modifier = Modifier, value = "50 euros", onClick = {})
-            FilterValueRow(modifier = Modifier, value = "100 euros", onClick = {})
-            FilterValueRow(modifier = Modifier, value = "200 euros", onClick = {})
+
+            val categoryParam = selectedCategory?.name ?: ""
+            FilterValueRow(modifier = Modifier, value = "Todos", onClick = {
+                navController.navigate("searchResults?maxPrice=10000&category=$categoryParam")
+            })
+            FilterValueRow(modifier = Modifier, value = "Gratis", onClick = {
+                navController.navigate("searchResults?maxPrice=0&category=$categoryParam")
+            })
+            FilterValueRow(modifier = Modifier, value = "5 euros", onClick = {
+                navController.navigate("searchResults?maxPrice=5&category=$categoryParam")
+            })
+            FilterValueRow(modifier = Modifier, value = "10 euros", onClick = {
+                navController.navigate("searchResults?maxPrice=10&category=$categoryParam")
+            })
+            FilterValueRow(modifier = Modifier, value = "20 euros", onClick = {
+                navController.navigate("searchResults?maxPrice=20&category=$categoryParam")
+            })
+            FilterValueRow(modifier = Modifier, value = "50 euros", onClick = {
+                navController.navigate("searchResults?maxPrice=50&category=$categoryParam")
+            })
+            FilterValueRow(modifier = Modifier, value = "100 euros", onClick = {
+                navController.navigate("searchResults?maxPrice=100&category=$categoryParam")
+            })
+            FilterValueRow(modifier = Modifier, value = "200 euros", onClick = {
+                navController.navigate("searchResults?maxPrice=200&category=$categoryParam")
+            })
         }
     }
 }
