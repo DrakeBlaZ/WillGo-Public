@@ -15,5 +15,6 @@ data class Event(
     val date: String? = "",
     val price : Float?,
     val image: String?,
-    val type: String?
+    val type: String?,
+    val duration: Float? = 0f
 )

@@ -78,7 +78,7 @@ fun EventDataScreen(event: Event, paddingValues: PaddingValues, onBack: () -> Un
 
         }
         item {
-            Text(text = event.date.toString(), modifier = Modifier.padding(8.dp))
+            Text(text = event.date.toString(), modifier = Modifier.padding(8.dp), color = Color.Blue)
             Text(
                 text = event.name_event,
                 color = Color.Black,
@@ -95,7 +95,7 @@ fun EventDataScreen(event: Event, paddingValues: PaddingValues, onBack: () -> Un
         }
 
         item{
-           //CharacteristicEvent("Tiempo", event.Duration.toString()))
+            CharacteristicEvent("Tiempo", event.duration.toString(), modifier = Modifier.padding(start = 16.dp))
             CharacteristicEvent("Precio", event.price.toString(), modifier = Modifier.padding(start = 16.dp))
         }
 
@@ -176,13 +176,15 @@ fun CharacteristicEvent(type: String, text: String, modifier: Modifier){
         }
         else{
             image = Icons.Default.AvTimer
-            unit = "horas"
+            unit = " Horas"
         }
-        Image(imageVector = image, contentDescription = null, modifier = Modifier.size(24.dp))
+        Image(imageVector = image, contentDescription = null, modifier = Modifier.size(36.dp))
         VerticalDivider(
             modifier = Modifier.padding(horizontal = 4.dp),
             thickness = 0.dp,)
-        Text(text + unit, modifier = Modifier.align(Alignment.CenterVertically))
+        Text(text + unit,
+            fontSize = 18.sp,
+            modifier = Modifier.align(Alignment.CenterVertically))
     }
 }
 
