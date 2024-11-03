@@ -1,18 +1,20 @@
 package com.example.willgo.data
 
 import kotlinx.serialization.Serializable
-import java.util.Date
 
 @Serializable
 data class Event(
-    val id: Int,
+    val id: Long,
     val description: String?,
     val name_event: String,
     val email_contact: String? = "",
-    val phone : Int? = 0,
-    val category : Category?,
+    val phone: Long? = 0,
+    val category: Category?,
     val location: String?,
     val date: String? = "",
-    val price : Float?,
-    val image: String?
+    val price: Float?,
+    val image: String?,
+    val duration: Long?,
+    val asistance: Long?,
+    val type: String? = ""
 )

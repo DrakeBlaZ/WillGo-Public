@@ -70,7 +70,15 @@ fun SearchResultsScreen(
         ) {
             TopBar(navigationIcon = {
                 IconButton(
-                    onClick = {navController.navigate(BottomBarScreen.Home.route)})
+                    onClick = {
+                        //navController.navigate(BottomBarScreen.Home.route)
+                        navController.navigate(BottomBarScreen.Home.route) {
+                            // Establece `launchSingleTop` para evitar duplicados
+                            launchSingleTop = true
+                            // Establece `popUpTo` para limpiar el historial hasta `HomeScreen`
+                            popUpTo(BottomBarScreen.Home.route) { inclusive = true }
+                        }
+                    })
                 {
                     Icon(
                         modifier = Modifier,
