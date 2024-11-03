@@ -45,7 +45,6 @@ fun FiltersNavGraph(navController: NavHostController){
             DateNavScreen(onBack = onBack, modifier)
         }
 
-
         composable(route = FiltersScreen.Price.route) {
             PriceNavScreen(onBack = onBack, modifier)
         }

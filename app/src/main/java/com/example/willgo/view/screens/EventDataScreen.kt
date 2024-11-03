@@ -16,12 +16,16 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.AvTimer
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
@@ -38,9 +42,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.willgo.data.Event
+import com.example.willgo.graphs.BottomBarScreen
 
 @Composable
-fun EventDataScreen(event: Event, paddingValues: PaddingValues){
+fun EventDataScreen(event: Event, paddingValues: PaddingValues, onBack: () -> Unit){
     LazyColumn(
         modifier = Modifier
             .background(Color.White)
@@ -48,14 +53,29 @@ fun EventDataScreen(event: Event, paddingValues: PaddingValues){
             .padding(bottom = paddingValues.calculateBottomPadding())
     ) {
         item {
-            AsyncImage(
-                model = event.image,
-                contentDescription = "Imagen del evento",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp),
-                contentScale = ContentScale.Crop
-            )
+            Box(modifier = Modifier
+                .fillMaxWidth()){
+                AsyncImage(
+                    model = event.image,
+                    contentDescription = "Imagen del evento",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp),
+                    contentScale = ContentScale.Crop
+                )
+                IconButton(
+                    onClick = onBack,
+                    modifier = Modifier.padding(8.dp),
+                    colors = IconButtonDefaults.iconButtonColors(Color.White))
+                {
+                    Icon(
+                        modifier = Modifier,
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "ArrowBack"
+                    )
+                }
+            }
+
         }
         item {
             Text(text = event.date.toString(), modifier = Modifier.padding(8.dp))
@@ -103,7 +123,41 @@ fun EventDataScreen(event: Event, paddingValues: PaddingValues){
 
         item{ HorizontalDivider(modifier = Modifier.padding(start = 8.dp, end = 8.dp), thickness = 1.dp) }
 
-        item { Text("Ubicación")}
+        item {
+            event.location?.let {
+                Text(
+                    "Ubicación",
+                    color = Color.Black,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(top = 16.dp, start = 8.dp, bottom = 8.dp)
+                )
+
+                Text(
+                    text = it,
+                    fontSize = 16.sp,
+                    textAlign = TextAlign.Start,
+                    modifier = Modifier.padding(top = 16.dp, start = 8.dp, bottom = 8.dp)
+                )
+            }
+        }
+
+        item{
+            event.email_contact?.let {
+                Text("Contacta con nosotros",
+                    color = Color.Black,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(top = 16.dp, start = 8.dp, bottom = 8.dp))
+
+                Text(
+                    text = it,
+                    fontSize = 16.sp,
+                    textAlign = TextAlign.Start,
+                    modifier = Modifier.padding(top = 16.dp, start = 8.dp, bottom = 8.dp)
+                )
+            }
+        }
 
     }
 

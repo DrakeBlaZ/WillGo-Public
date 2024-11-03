@@ -130,7 +130,7 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
         ) { backStackEntry ->
             val event = backStackEntry.arguments?.getInt("eventId") ?: -1
             val filteredEvents = events.value.filter { it.id == event }
-            EventDataScreen(filteredEvents[0], paddingValues)
+            EventDataScreen(filteredEvents[0], paddingValues, onBack = { navController.popBackStack() })
         }
 
     }

@@ -9,10 +9,11 @@ data class Event(
     val description: String?,
     val name_event: String,
     val email_contact: String? = "",
-    val phone : Int? = 0,
+    val phone : Long? = 0,
     val category : Category?,
     val location: String?,
     val date: String? = "",
     val price : Float?,
-    val image: String?
+    val image: String?,
+    val type: String?
 )
