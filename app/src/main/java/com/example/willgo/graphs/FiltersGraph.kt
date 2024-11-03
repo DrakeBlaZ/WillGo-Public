@@ -39,7 +39,7 @@ sealed class FiltersScreen(val route: String){
 }
 
 @Composable
-fun FiltersNavGraph(navController: NavHostController, events: List<Event>){
+fun FiltersNavGraph(navController: NavHostController, events: List<Event>, paddingValues: PaddingValues){
     val onBack: () -> Unit = { navController.popBackStack() }
     val modifier = Modifier.fillMaxWidth().height(56.dp)
 
@@ -65,14 +65,6 @@ fun FiltersNavGraph(navController: NavHostController, events: List<Event>){
 
         composable(route = FiltersScreen.Date.route){
             DateNavScreen(onBack = onBack, modifier)
-        }
-
-        composable(route = FiltersScreen.Hour.route) {
-
-        }
-
-        composable(route = FiltersScreen.Distance.route) {
-
         }
 
         composable(route = FiltersScreen.Price.route) {
@@ -107,6 +99,10 @@ fun FiltersNavGraph(navController: NavHostController, events: List<Event>){
                 },
                 navController = navController
             )
+        }
+
+        composable(route = "home") {
+            HomeScreen(paddingValues = paddingValues, events, navController)
         }
     }
 }

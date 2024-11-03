@@ -72,11 +72,11 @@ fun SearchResultsScreen(
                 IconButton(
                     onClick = {
                         //navController.navigate(BottomBarScreen.Home.route)
-                        navController.navigate(BottomBarScreen.Home.route) {
+                        navController.navigate("home") {
                             // Establece `launchSingleTop` para evitar duplicados
                             launchSingleTop = true
                             // Establece `popUpTo` para limpiar el historial hasta `HomeScreen`
-                            popUpTo(BottomBarScreen.Home.route) { inclusive = true }
+                            popUpTo("home") { inclusive = true }
                         }
                     })
                 {

@@ -48,7 +48,7 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
         }
 
         composable(route = "filters") {
-            FiltersNavGraph(navController = navController, events = events.value)
+            FiltersNavGraph(navController = navController, events = events.value, paddingValues = paddingValues)
         }
 
         composable(route = "searchResults/{query}") { backStackEntry ->
