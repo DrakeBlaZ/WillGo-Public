@@ -52,7 +52,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-     fun getWillGo(event: Event){
+    fun getWillGo(event: Event){
         lifecycleScope.launch{
             val client = getClient()
             val supabaseResponse = client.postgrest["WillGo"].select(){

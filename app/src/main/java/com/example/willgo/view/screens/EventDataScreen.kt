@@ -1,8 +1,8 @@
 package com.example.willgo.view.screens
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -29,6 +27,12 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,15 +41,26 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.willgo.data.Event
-import com.example.willgo.graphs.BottomBarScreen
+import com.example.willgo.data.User
+import com.example.willgo.data.WillGo
+import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.createSupabaseClient
+import io.github.jan.supabase.postgrest.Postgrest
+import io.github.jan.supabase.postgrest.postgrest
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @Composable
 fun EventDataScreen(event: Event, paddingValues: PaddingValues, onBack: () -> Unit){
+    var willgo by remember{ mutableStateOf(false)}
+    LaunchedEffect(Unit) {
+        willgo = getWillGo(event)
+    }
+    val coroutineScope = rememberCoroutineScope()
     LazyColumn(
         modifier = Modifier
             .background(Color.White)
@@ -119,7 +134,11 @@ fun EventDataScreen(event: Event, paddingValues: PaddingValues, onBack: () -> Un
 
         item{ HorizontalDivider(modifier = Modifier.padding(start = 8.dp, end = 8.dp), thickness = 1.dp) }
 
-        item { WillGo() }
+        item {
+            WillGo(willgo, event, coroutineScope) { newWillGo ->
+                willgo = newWillGo
+            }
+        }
 
         item{ HorizontalDivider(modifier = Modifier.padding(start = 8.dp, end = 8.dp), thickness = 1.dp) }
 
@@ -169,7 +188,7 @@ fun CharacteristicEvent(type: String, text: String, modifier: Modifier){
         modifier = modifier
     ){
         val image: ImageVector
-        var unit: String? = null
+        val unit: String?
         if(type == "Precio"){
             image = Icons.Default.AttachMoney
             unit = " €"
@@ -188,20 +207,21 @@ fun CharacteristicEvent(type: String, text: String, modifier: Modifier){
     }
 }
 
-@Preview
 @Composable
-fun WillGo(){
+fun WillGo(willGo: Boolean, event: Event, coroutineScope: CoroutineScope, onWillGoChanged: (Boolean) -> Unit) {
+    var attendants by remember { mutableStateOf(0) }
+    LaunchedEffect(event) {attendants = getAttendants(event)}
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 16.dp, horizontal = 8.dp)
     ) {
         Column(modifier = Modifier.align(Alignment.TopStart)){
-            Text(text = "Asistirán")
+            Text(text = "Asistirán(${attendants})")
             Row {
-                Image(imageVector = Icons.Default.AccountCircle, contentDescription = null)
-                Image(imageVector = Icons.Default.AccountCircle, contentDescription = null)
-                Image(imageVector = Icons.Default.AccountCircle, contentDescription = null)
+                repeat(attendants){
+                    Image(imageVector = Icons.Default.AccountCircle, contentDescription = null)
+                }
             }
         }
         VerticalDivider(
@@ -213,10 +233,22 @@ fun WillGo(){
                 .height(48.dp),
         ) {
             Button(
-                onClick = {},
+                onClick = {
+                    coroutineScope.launch {
+                            if (willGo) {
+                                deleteWillGo(event)
+                                attendants--
+                            } else {
+                                addWillGo(event)
+                                attendants++
+                            }
+                            onWillGoChanged(!willGo)
+                    }
+
+                },
                 modifier = Modifier
             ) {
-                Text("WillGo")
+                Text(if (willGo) "WillGo ✔" else "WillGo")
             }
 
             VerticalSeparator()
@@ -230,6 +262,79 @@ fun WillGo(){
                 Text(text = "Voy solo")
             }
         }
+    }
+}
+
+suspend fun getWillGo(event: Event):Boolean{
+    val client = getClient()
+    val supabaseResponse = client.postgrest["WillGo"].select(){
+        filter{
+            eq("id_event", event.id)
+        }
+    }
+    val data = supabaseResponse.decodeList<WillGo>()
+    return data.isNotEmpty()
+}
+
+suspend fun getAttendants(event: Event):Int{
+    val client = getClient()
+    val supabaseResponse = client.postgrest["WillGo"].select(){
+        filter{
+            eq("id_event", event.id)
+        }
+    }
+    val data = supabaseResponse.decodeList<WillGo>()
+    return data.size
+}
+
+suspend fun addWillGo(event: Event){
+    val user = getUser()
+    val willGo = user.nickname?.let { WillGo(event.id, it) }
+    val client = getClient()
+    willGo?.let {
+        client.postgrest["WillGo"].insert(willGo)
+    }
+}
+
+
+suspend fun deleteWillGo(event: Event){
+    val user = getUser()
+    val client = getClient()
+    client.postgrest["WillGo"].delete(){
+        filter{
+            eq("id_event", event.id)
+            user.nickname?.let { eq("users", it) }
+        }
+    }
+
+
+}
+
+
+private suspend fun getUser(): User {
+    val client = getClient()
+    val supabaseResponse = client.postgrest["Usuario"].select()
+    val data = supabaseResponse.decodeList<User>()
+    Log.e("supabase", data.toString())
+    return data[0]
+
+}
+
+private suspend fun getData(){
+
+    val client = getClient()
+    val supabaseResponse = client.postgrest["Usuario"].select()
+    val data = supabaseResponse.decodeList<User>()
+    Log.e("supabase", data.toString())
+
+}
+
+private fun getClient(): SupabaseClient {
+    return createSupabaseClient(
+        supabaseUrl = "https://trpgyhwsghxnaakpoftt.supabase.co",
+        supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRycGd5aHdzZ2h4bmFha3BvZnR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjgwMjgwNDcsImV4cCI6MjA0MzYwNDA0N30.IJthecg-DH9rwOob2XE6ANunb6IskxCbMAacducBVPE"
+    ){
+        install(Postgrest)
     }
 }
 
