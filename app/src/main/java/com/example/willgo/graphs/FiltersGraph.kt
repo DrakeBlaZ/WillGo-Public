@@ -45,6 +45,7 @@ fun FiltersNavGraph(navController: NavHostController, events: List<Event>, paddi
 
     // Variable para almacenar la categoría seleccionada externamente
     val externalSelectedCategory = remember { mutableStateOf<Category?>(null) }
+    val maxPriceFilter = remember { mutableStateOf<Float?>(null) } // Añadimos estado para el precio
 
     NavHost(navController = navController, startDestination = FiltersScreen.Filters.route, route = Graph.MAIN) {
         composable(route = FiltersScreen.Filters.route) {
@@ -59,7 +60,8 @@ fun FiltersNavGraph(navController: NavHostController, events: List<Event>, paddi
                     externalSelectedCategory.value = selectedCategory
                     // Navega a SearchResultsScreen pasando la categoría seleccionada
                     navController.navigate("searchResults?externalSelectedCategory=${selectedCategory.name}")
-                }
+                },
+                navController = navController
             )
         }
 
@@ -68,7 +70,13 @@ fun FiltersNavGraph(navController: NavHostController, events: List<Event>, paddi
         }
 
         composable(route = FiltersScreen.Price.route) {
-            PriceNavScreen(onBack = onBack, modifier, navController)
+            PriceNavScreen(
+                onBack = onBack,
+                modifier, navController,
+                onPriceSelected = { maxPrice ->
+                    maxPriceFilter.value = maxPrice
+                }
+            )
         }
 
         /*composable(

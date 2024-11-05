@@ -50,7 +50,8 @@ fun DateNavScreen(
             ResultFilterButton(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
+                    .height(56.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()),
+                onClick = {}
             )
         }
     ) {

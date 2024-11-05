@@ -56,8 +56,11 @@ fun SearchResultsScreen(
 
     var query by remember { mutableStateOf(initialQuery) }
     var selectedCategory by remember { mutableStateOf(initialCategory) }  // Estado de categoría
+
+    //Prioriza externalSelectedCategory
     val categoryToFilter = externalSelectedCategory ?: selectedCategory
 
+    //Filtrado de eventos usando `categoryToFilter` y `maxPrice`
     val filteredEvents = events.filter { event ->
         (categoryToFilter == null || event.category == categoryToFilter) &&
                 (maxPrice == null || (event.price ?: 0f) <= maxPrice) &&

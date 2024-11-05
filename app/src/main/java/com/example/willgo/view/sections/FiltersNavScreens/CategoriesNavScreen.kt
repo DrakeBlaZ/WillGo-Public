@@ -19,7 +19,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.willgo.data.Category
+import com.example.willgo.graphs.FiltersScreen
 import com.example.willgo.view.sections.FilterRow
 import com.example.willgo.view.sections.FilterValueRow
 
@@ -28,7 +30,8 @@ import com.example.willgo.view.sections.FilterValueRow
 fun CategoriesNavScreen(
     onBack: () -> Unit,
     modifier: Modifier,
-    onCategorySelected: (Category) -> Unit
+    onCategorySelected: (Category) -> Unit,
+    navController: NavController,
 ){
     Scaffold(
         topBar = {
@@ -39,14 +42,17 @@ fun CategoriesNavScreen(
                         Icon(imageVector = Icons.Default.ArrowBackIosNew, contentDescription = null)}
                 }
             )
-        },
-        bottomBar = {
+        }
+        /*bottomBar = {
             ResultFilterButton(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
+                    .height(56.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()),
+                onClick = {
+                    navController.popBackStack(route = FiltersScreen.Filters.route, inclusive = false)
+                }
             )
-        }
+        }*/
     ) {
         Column(modifier = Modifier.padding(it)) {
             Text("Categoria")
@@ -55,7 +61,11 @@ fun CategoriesNavScreen(
                 FilterValueRow(
                     modifier = modifier,
                     value = category.name,
-                    onClick = { onCategorySelected(category) }
+                    onClick = {
+                        //onCategorySelected(category)
+                        navController.previousBackStackEntry?.savedStateHandle?.set("selectedCategory", category)
+                        navController.popBackStack()
+                    }
                 )
             }
         }
