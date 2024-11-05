@@ -55,7 +55,28 @@ fun AllFilters(navController: NavController){
                         else -> selectedPrice.removeSuffix(" euros")
                     }
                     val typeParam = selectedType.takeIf { it != "Todos" } ?: ""
-                    navController.navigate("searchResults?maxPrice=$maxPriceParam&category=$categoryParam&type=$typeParam")
+
+                    //navController.navigate("searchResults?maxPrice=${if (maxPriceParam != "10000") maxPriceParam else ""}&category=${categoryParam.ifEmpty { "" }}&type=${if (typeParam != "Todos") typeParam else ""}")
+
+                    val route = when {
+                        categoryParam.isNotEmpty() && maxPriceParam != "10000" && typeParam.isNotEmpty() ->
+                            "searchResults?category=$categoryParam&maxPrice=$maxPriceParam&type=$typeParam"
+                        categoryParam.isNotEmpty() && maxPriceParam != "10000" ->
+                            "searchResults?category=$categoryParam&maxPrice=$maxPriceParam"
+                        categoryParam.isNotEmpty() && typeParam.isNotEmpty() ->
+                            "searchResults?category=$categoryParam&type=$typeParam"
+                        maxPriceParam != "10000" && typeParam.isNotEmpty() ->
+                            "searchResults?maxPrice=$maxPriceParam&type=$typeParam"
+                        categoryParam.isNotEmpty() ->
+                            "searchResults?category=$categoryParam"
+                        maxPriceParam != "10000" ->
+                            "searchResults?maxPrice=$maxPriceParam"
+                        typeParam.isNotEmpty() ->
+                            "searchResults?type=$typeParam"
+                        else ->
+                            "searchResults"
+                    }
+                    navController.navigate(route)
                 }
             )
         }

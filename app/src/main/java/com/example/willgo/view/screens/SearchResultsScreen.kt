@@ -61,11 +61,17 @@ fun SearchResultsScreen(
     //Prioriza externalSelectedCategory
     val categoryToFilter = externalSelectedCategory ?: selectedCategory
 
-    //Filtrado de eventos usando `categoryToFilter` y `maxPrice`
-    val filteredEvents = events.filter { event ->
+    /*val filteredEvents = events.filter { event ->
         (categoryToFilter == null || event.category == categoryToFilter) &&
                 (maxPrice == null || (event.price ?: 0f) <= maxPrice) &&
                 (typeFilter == null || typeFilter == "Todos" || event.type.equals(typeFilter, ignoreCase = true)) &&
+                event.name_event.contains(query, ignoreCase = true)
+    }*/
+
+    val filteredEvents = events.filter { event ->
+        (categoryToFilter == null || event.category == categoryToFilter) &&
+                (maxPrice == null || (event.price ?: 0f) <= maxPrice) &&
+                (typeFilter == null || event.type.equals(typeFilter, ignoreCase = true)) &&
                 event.name_event.contains(query, ignoreCase = true)
     }
 
@@ -123,12 +129,6 @@ fun SearchResultsScreen(
                 modifier = Modifier.padding(bottom = 14.dp, start = 8.dp),
                 fontSize = 16.sp
             )
-
-            /*val filteredEvents = events.filter { event ->
-                val categoryToFilter = externalSelectedCategory ?: selectedCategory  // Prioriza externalSelectedCategory
-                (categoryToFilter == null || event.category == categoryToFilter) &&
-                        normalizeText(event.name_event).contains(normalizeText(query))
-            }*/
 
             if (filteredEvents.isEmpty()) {
                 Text("No se encontraron eventos.")
