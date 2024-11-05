@@ -49,6 +49,7 @@ fun SearchResultsScreen(
     initialCategory: Category? = null,
     maxPrice: Float? = null,
     externalSelectedCategory: Category? = null,
+    typeFilter: String? = null,
     onQueryChange: (String) -> Unit,
     onSearch: (String) -> Unit,
     navController: NavController
@@ -64,6 +65,7 @@ fun SearchResultsScreen(
     val filteredEvents = events.filter { event ->
         (categoryToFilter == null || event.category == categoryToFilter) &&
                 (maxPrice == null || (event.price ?: 0f) <= maxPrice) &&
+                (typeFilter == null || typeFilter == "Todos" || event.type.equals(typeFilter, ignoreCase = true)) &&
                 event.name_event.contains(query, ignoreCase = true)
     }
 

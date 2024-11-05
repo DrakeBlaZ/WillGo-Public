@@ -33,6 +33,7 @@ fun AllFilters(navController: NavController){
     // Estado para almacenar las selecciones
     var selectedCategory by remember { mutableStateOf<Category?>(null) }
     var selectedPrice by remember { mutableStateOf("Todos") }
+    var selectedType by remember { mutableStateOf("Todos") }
 
     Scaffold(
         topBar = {
@@ -53,14 +54,15 @@ fun AllFilters(navController: NavController){
                         "Gratis" -> "0"
                         else -> selectedPrice.removeSuffix(" euros")
                     }
-                    navController.navigate("searchResults?maxPrice=$maxPriceParam&category=$categoryParam")
+                    val typeParam = selectedType.takeIf { it != "Todos" } ?: ""
+                    navController.navigate("searchResults?maxPrice=$maxPriceParam&category=$categoryParam&type=$typeParam")
                 }
             )
         }
     ) {
 
         Column(modifier = Modifier.padding(it)) {
-            //FilterRow(modifier = Modifier.fillMaxWidth().weight(1f).clickable {  navController.navigate(FiltersScreen.Categories.route) }, filterName = "Categoria", value = "Todos")
+            //Filtro de categoria
             FilterRow(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -73,7 +75,7 @@ fun AllFilters(navController: NavController){
                 filterName = "Categoria",
                 value = selectedCategory?.name ?: "Todos"
             )
-            //FilterRow(modifier = Modifier.fillMaxWidth().weight(1f).clickable{ navController.navigate(FiltersScreen.Price.route) }, filterName = "Precio", value = "Todos")
+            //Filtro de precio
             FilterRow(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -86,7 +88,19 @@ fun AllFilters(navController: NavController){
                 filterName = "Precio",
                 value = selectedPrice
             )
-            FilterRow(modifier = Modifier.fillMaxWidth().weight(1f).clickable{ navController.navigate(FiltersScreen.Type.route) }, filterName = "Tipo de lugar", value = "Todos")
+            //Filtro de tipo de lugar
+            FilterRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .clickable {
+                        navController.currentBackStackEntry?.savedStateHandle?.set("selectedType", selectedType)
+                        navController.navigate(FiltersScreen.Type.route)
+                    },
+                filterName = "Tipo de lugar",
+                value = selectedType
+            )
+            //Filtro de fecha
             FilterRow(modifier = Modifier.fillMaxWidth().weight(1f).clickable{ navController.navigate(FiltersScreen.Date.route) }, filterName = "Fecha", value = "10/10/2023")
         }
     }
@@ -97,6 +111,9 @@ fun AllFilters(navController: NavController){
 
     navController.currentBackStackEntry?.savedStateHandle?.getLiveData<String>("selectedPrice")
         ?.observe(navController.currentBackStackEntry!!) { selectedPrice = it }
+
+    navController.currentBackStackEntry?.savedStateHandle?.getLiveData<String>("selectedType")
+        ?.observe(navController.currentBackStackEntry!!) { selectedType = it }
 }
 
 @Composable

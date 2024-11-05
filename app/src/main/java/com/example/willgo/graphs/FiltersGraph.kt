@@ -43,9 +43,9 @@ fun FiltersNavGraph(navController: NavHostController, events: List<Event>, paddi
     val onBack: () -> Unit = { navController.popBackStack() }
     val modifier = Modifier.fillMaxWidth().height(56.dp)
 
-    // Variable para almacenar la categoría seleccionada externamente
     val externalSelectedCategory = remember { mutableStateOf<Category?>(null) }
-    val maxPriceFilter = remember { mutableStateOf<Float?>(null) } // Añadimos estado para el precio
+    val maxPriceFilter = remember { mutableStateOf<Float?>(null) }
+    val selectedTypeFilter = remember { mutableStateOf<String?>(null) }
 
     NavHost(navController = navController, startDestination = FiltersScreen.Filters.route, route = Graph.MAIN) {
         composable(route = FiltersScreen.Filters.route) {
@@ -72,34 +72,24 @@ fun FiltersNavGraph(navController: NavHostController, events: List<Event>, paddi
         composable(route = FiltersScreen.Price.route) {
             PriceNavScreen(
                 onBack = onBack,
-                modifier, navController,
+                modifier,
+                navController,
                 onPriceSelected = { maxPrice ->
                     maxPriceFilter.value = maxPrice
                 }
             )
         }
 
-        /*composable(
-            route = "searchResults?maxPrice={maxPrice}",
-            arguments = listOf(
-                navArgument("maxPrice") { defaultValue = "10000" }
+        composable(route = FiltersScreen.Type.route) {
+            TypeNavScreen(
+                onBack = onBack,
+                modifier,
+                navController,
+                onTypeSelected = { selectedType ->
+                    selectedTypeFilter.value = selectedType
+                }
             )
-        ) { backStackEntry ->
-            val maxPrice = backStackEntry.arguments?.getString("maxPrice")?.toFloatOrNull() ?: 10000f
-            SearchResultsScreen(
-                paddingValues = paddingValues,
-                events = events,
-                initialQuery = "",
-                maxPrice = maxPrice, // Pasa el precio máximo aquí
-                onQueryChange = { newQuery ->
-                    navController.navigate("searchResults?query=$newQuery&maxPrice=$maxPrice")
-                },
-                onSearch = { searchQuery ->
-                    navController.navigate("searchResults?query=$searchQuery&maxPrice=$maxPrice")
-                },
-                navController = navController
-            )
-        }*/
+        }
 
         composable(
             route = "searchResults?maxPrice={maxPrice}&category={category}",
@@ -129,8 +119,35 @@ fun FiltersNavGraph(navController: NavHostController, events: List<Event>, paddi
             )
         }
 
-        composable(route = FiltersScreen.Type.route) {
-            TypeNavScreen(onBack = onBack, modifier)
+        composable(
+            route = "searchResults?maxPrice={maxPrice}&category={category}&type={type}", // Modificado: Añadido parámetro type
+            arguments = listOf(
+                navArgument("maxPrice") { defaultValue = "10000" },
+                navArgument("category") { defaultValue = "" },
+                navArgument("type") { defaultValue = "Todos" } // Añadido: Argumento para el tipo de lugar
+            )
+        ) { backStackEntry ->
+            val maxPrice = backStackEntry.arguments?.getString("maxPrice")?.toFloatOrNull() ?: 10000f
+            val categoryName = backStackEntry.arguments?.getString("category")
+            val typeFilter = backStackEntry.arguments?.getString("type") ?: "Todos"
+            val externalCategory = categoryName?.takeIf { it.isNotBlank() }?.let { Category.valueOf(it) }
+
+            // Llama a SearchResultsScreen con maxPrice, categoría y tipo de lugar
+            SearchResultsScreen(
+                paddingValues = paddingValues,
+                events = events,
+                initialQuery = "",
+                maxPrice = maxPrice,
+                externalSelectedCategory = externalCategory,
+                typeFilter = typeFilter, // Añadido: Pasa el filtro de tipo
+                onQueryChange = { newQuery ->
+                    navController.navigate("searchResults?query=$newQuery&maxPrice=$maxPrice&category=${externalCategory?.name ?: ""}&type=$typeFilter")
+                },
+                onSearch = { searchQuery ->
+                    navController.navigate("searchResults?query=$searchQuery&maxPrice=$maxPrice&category=${externalCategory?.name ?: ""}&type=$typeFilter")
+                },
+                navController = navController
+            )
         }
 
         // Define el destino de SearchResultsScreen para recibir la categoría seleccionada
@@ -158,6 +175,8 @@ fun FiltersNavGraph(navController: NavHostController, events: List<Event>, paddi
                 navController = navController
             )
         }
+
+
 
         composable(route = "home") {
             HomeScreen(paddingValues = paddingValues, events, navController)

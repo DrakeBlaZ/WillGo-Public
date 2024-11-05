@@ -43,16 +43,6 @@ fun CategoriesNavScreen(
                 }
             )
         }
-        /*bottomBar = {
-            ResultFilterButton(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()),
-                onClick = {
-                    navController.popBackStack(route = FiltersScreen.Filters.route, inclusive = false)
-                }
-            )
-        }*/
     ) {
         Column(modifier = Modifier.padding(it)) {
             Text("Categoria")

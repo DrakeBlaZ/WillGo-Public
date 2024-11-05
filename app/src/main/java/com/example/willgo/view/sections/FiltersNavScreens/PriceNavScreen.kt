@@ -41,58 +41,10 @@ fun PriceNavScreen(
                 navigationIcon = { IconButton(onClick = onBack){ Icon(imageVector = Icons.Default.ArrowBackIosNew, contentDescription = null) } }
             )
         }
-        /*bottomBar = {
-            ResultFilterButton(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()),
-                onClick = {
-                    navController.popBackStack(route = FiltersScreen.Filters.route, inclusive = false)
-                }
-            )
-        }*/
     ) {
         Column(modifier = Modifier.padding(it)) {
             Text("Precio")
             Spacer(modifier = Modifier.height(8.dp))
-
-            /*val categoryParam = selectedCategory?.name ?: ""
-            FilterValueRow(modifier = Modifier, value = "Todos", onClick = {
-                navController.navigate("searchResults?maxPrice=10000&category=$categoryParam")
-            })
-            FilterValueRow(modifier = Modifier, value = "Gratis", onClick = {
-                navController.navigate("searchResults?maxPrice=0&category=$categoryParam")
-            })
-            FilterValueRow(modifier = Modifier, value = "5 euros", onClick = {
-                navController.navigate("searchResults?maxPrice=5&category=$categoryParam")
-            })
-            FilterValueRow(modifier = Modifier, value = "10 euros", onClick = {
-                navController.navigate("searchResults?maxPrice=10&category=$categoryParam")
-            })
-            FilterValueRow(modifier = Modifier, value = "20 euros", onClick = {
-                navController.navigate("searchResults?maxPrice=20&category=$categoryParam")
-            })
-            FilterValueRow(modifier = Modifier, value = "50 euros", onClick = {
-                navController.navigate("searchResults?maxPrice=50&category=$categoryParam")
-            })
-            FilterValueRow(modifier = Modifier, value = "100 euros", onClick = {
-                navController.navigate("searchResults?maxPrice=100&category=$categoryParam")
-            })
-            FilterValueRow(modifier = Modifier, value = "200 euros", onClick = {
-                navController.navigate("searchResults?maxPrice=200&category=$categoryParam")
-            })*/
-
-            /*val prices = listOf("Todos", "Gratis", "5 euros", "10 euros", "20 euros", "50 euros", "100 euros", "200 euros")
-            prices.forEach { price ->
-                FilterValueRow(
-                    modifier = Modifier,
-                    value = price,
-                    onClick = {
-                        navController.previousBackStackEntry?.savedStateHandle?.set("selectedPrice", price)
-                        navController.popBackStack() // Vuelve a `AllFiltersScreen`
-                    }
-                )
-            }*/
 
             FilterValueRow(modifier = Modifier, value = "Todos", onClick = {
                 navController.previousBackStackEntry?.savedStateHandle?.set("selectedPrice", "Todos")
