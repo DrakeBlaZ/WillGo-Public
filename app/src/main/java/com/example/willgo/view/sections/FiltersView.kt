@@ -42,6 +42,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.willgo.data.Category
 import com.example.willgo.data.Event
 import com.example.willgo.graphs.FiltersNavGraph
 import com.example.willgo.graphs.FiltersScreen
@@ -52,7 +53,15 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FiltersTagView(sheetState: SheetState, coroutineScope: CoroutineScope, events: List<Event>){
+fun FiltersTagView(
+    sheetState: SheetState,
+    coroutineScope: CoroutineScope,
+    events: List<Event>,
+    selectedCategory: Category?,
+    selectedPrice: String,
+    selectedType: String,
+    selectedDate: String
+){
     val keyboard = LocalSoftwareKeyboardController.current
     if (sheetState.isVisible) {
         MyModalBottomSheet(
@@ -65,13 +74,42 @@ fun FiltersTagView(sheetState: SheetState, coroutineScope: CoroutineScope, event
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        item(){
+        /*item(){
             FilterButton(onClick = {
                 keyboard?.hide()
                 coroutineScope.launch { sheetState.expand() }}, modifier = Modifier.padding(start = 8.dp))
         }
         items(5){
             FilterAddedCard("Concierto")
+        }*/
+
+        item {
+            FilterButton(onClick = {
+                keyboard?.hide()
+                coroutineScope.launch { sheetState.expand() }
+            }, modifier = Modifier.padding(start = 8.dp))
+        }
+
+        // Muestra el valor de cada filtro en un botón separado
+        if (selectedCategory != null) {
+            item {
+                FilterAddedCard(selectedCategory.name)
+            }
+        }
+        if (selectedPrice.isNotEmpty() && selectedPrice != "Todos") {
+            item {
+                FilterAddedCard(selectedPrice)
+            }
+        }
+        if (selectedType.isNotEmpty() && selectedType != "Todos") {
+            item {
+                FilterAddedCard(selectedType)
+            }
+        }
+        if (selectedDate.isNotEmpty() && selectedDate != "Todos") {
+            item {
+                FilterAddedCard(selectedDate)
+            }
         }
     }
 }
@@ -106,7 +144,7 @@ fun FilterAddedCard(filter: String){
         onClick = {},
         colors = ButtonDefaults.elevatedButtonColors(containerColor = Color.Gray)
     ) {
-        Text("Elevated con Icono")
+        Text(filter)
         Spacer(modifier = Modifier.width(8.dp))
         Icon(imageVector = Icons.Default.Close, contentDescription = null)
     }

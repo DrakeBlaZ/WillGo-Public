@@ -50,7 +50,7 @@ fun FiltersNavGraph(navController: NavHostController, events: List<Event>, paddi
 
     NavHost(navController = navController, startDestination = FiltersScreen.Filters.route, route = Graph.MAIN) {
         composable(route = FiltersScreen.Filters.route) {
-            AllFilters(navController)
+            AllFilters(navController, events)
         }
 
         composable(route = FiltersScreen.Categories.route) {

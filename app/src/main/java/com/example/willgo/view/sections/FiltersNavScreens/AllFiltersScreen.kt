@@ -3,6 +3,7 @@ package com.example.willgo.view.sections.FiltersNavScreens
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,27 +15,35 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.willgo.data.Category
+import com.example.willgo.data.Event
 import com.example.willgo.graphs.FiltersScreen
 import com.example.willgo.view.sections.FilterRow
+import com.example.willgo.view.sections.FiltersTagView
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AllFilters(navController: NavController){
+fun AllFilters(navController: NavController, events: List<Event>) {
     // Estado para almacenar las selecciones
     var selectedCategory by remember { mutableStateOf<Category?>(null) }
     var selectedPrice by remember { mutableStateOf("Todos") }
     var selectedType by remember { mutableStateOf("Todos") }
     var selectedDate by remember { mutableStateOf("Todos") }
+
+    // Crear el estado del BottomSheet y el CoroutineScope para la hoja de filtros
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
@@ -101,6 +110,19 @@ fun AllFilters(navController: NavController){
     ) {
 
         Column(modifier = Modifier.padding(it)) {
+
+            // Llamada a FiltersTagView para mostrar los filtros seleccionados
+            FiltersTagView(
+                sheetState = sheetState,
+                coroutineScope = coroutineScope,
+                events = events,
+                selectedCategory = selectedCategory,
+                selectedPrice = selectedPrice,
+                selectedType = selectedType,
+                selectedDate = selectedDate
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
 
             //Filtro de categoria
             FilterRow(

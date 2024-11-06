@@ -136,7 +136,15 @@ fun SearchResultsScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            FiltersTagView(bottomSheetState, coroutineScope, events)
+            FiltersTagView(
+                bottomSheetState,
+                coroutineScope,
+                events,
+                selectedCategory = categoryToFilter,
+                selectedPrice = maxPrice?.toString() ?: "Todos",
+                selectedType = typeFilter ?: "Todos",
+                selectedDate = dateFilter ?: "Todos"
+            )
 
             Text(
                 text = "Resultados de la búsqueda:",
