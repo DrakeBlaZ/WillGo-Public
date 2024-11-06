@@ -119,7 +119,11 @@ fun AllFilters(navController: NavController, events: List<Event>) {
                 selectedCategory = selectedCategory,
                 selectedPrice = selectedPrice,
                 selectedType = selectedType,
-                selectedDate = selectedDate
+                selectedDate = selectedDate,
+                onRemoveCategory = { selectedCategory = null },
+                onRemovePrice = { selectedPrice = "Todos" },
+                onRemoveType = { selectedType = "Todos" },
+                onRemoveDate = { selectedDate = "Todos" }
             )
 
             Spacer(modifier = Modifier.height(8.dp))

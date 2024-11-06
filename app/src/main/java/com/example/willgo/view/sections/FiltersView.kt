@@ -60,7 +60,11 @@ fun FiltersTagView(
     selectedCategory: Category?,
     selectedPrice: String,
     selectedType: String,
-    selectedDate: String
+    selectedDate: String,
+    onRemoveCategory: () -> Unit,
+    onRemovePrice: () -> Unit,
+    onRemoveType: () -> Unit,
+    onRemoveDate: () -> Unit
 ){
     val keyboard = LocalSoftwareKeyboardController.current
     if (sheetState.isVisible) {
@@ -74,15 +78,6 @@ fun FiltersTagView(
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        /*item(){
-            FilterButton(onClick = {
-                keyboard?.hide()
-                coroutineScope.launch { sheetState.expand() }}, modifier = Modifier.padding(start = 8.dp))
-        }
-        items(5){
-            FilterAddedCard("Concierto")
-        }*/
-
         item {
             FilterButton(onClick = {
                 keyboard?.hide()
@@ -90,25 +85,25 @@ fun FiltersTagView(
             }, modifier = Modifier.padding(start = 8.dp))
         }
 
-        // Muestra el valor de cada filtro en un botón separado
+        // Muestra el valor de cada filtro en un botón separado con opción de eliminación
         if (selectedCategory != null) {
             item {
-                FilterAddedCard(selectedCategory.name)
+                FilterAddedCard(filter = selectedCategory.name, onRemove = onRemoveCategory)
             }
         }
         if (selectedPrice.isNotEmpty() && selectedPrice != "Todos") {
             item {
-                FilterAddedCard(selectedPrice)
+                FilterAddedCard(filter = selectedPrice, onRemove = onRemovePrice)
             }
         }
         if (selectedType.isNotEmpty() && selectedType != "Todos") {
             item {
-                FilterAddedCard(selectedType)
+                FilterAddedCard(filter = selectedType, onRemove = onRemoveType)
             }
         }
         if (selectedDate.isNotEmpty() && selectedDate != "Todos") {
             item {
-                FilterAddedCard(selectedDate)
+                FilterAddedCard(filter = selectedDate, onRemove = onRemoveDate)
             }
         }
     }
@@ -139,14 +134,18 @@ fun MyModalBottomSheet(
 }
 
 @Composable
-fun FilterAddedCard(filter: String){
+fun FilterAddedCard(filter: String, onRemove: () -> Unit){
     ElevatedButton(
-        onClick = {},
+        onClick = onRemove,
         colors = ButtonDefaults.elevatedButtonColors(containerColor = Color.Gray)
     ) {
         Text(filter)
         Spacer(modifier = Modifier.width(8.dp))
-        Icon(imageVector = Icons.Default.Close, contentDescription = null)
+        Icon(
+            imageVector = Icons.Default.Close,
+            contentDescription = null,
+            modifier = Modifier.clickable { onRemove() }
+        )
     }
 }
 

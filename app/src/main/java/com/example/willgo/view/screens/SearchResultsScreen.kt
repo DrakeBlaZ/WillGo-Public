@@ -21,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -62,6 +63,10 @@ fun SearchResultsScreen(
 
     var query by remember { mutableStateOf(initialQuery) }
     var selectedCategory by remember { mutableStateOf(initialCategory) }
+    var selectedPrice by remember { mutableStateOf(maxPrice?.toString() ?: "Todos") }
+    var selectedType by remember { mutableStateOf(typeFilter ?: "Todos") }
+    var selectedDate by remember { mutableStateOf(dateFilter ?: "Todos") }
+
     val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
     // Obtenemos las fechas de hoy, de la semana y del mes siguiente
@@ -69,10 +74,12 @@ fun SearchResultsScreen(
     val nextWeek = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 7) }.time
     val nextMonth = Calendar.getInstance().apply { add(Calendar.MONTH, 1) }.time
 
-    val categoryToFilter = externalSelectedCategory ?: selectedCategory
+    //val categoryToFilter = externalSelectedCategory ?: selectedCategory
+
+    var categoryToFilter by remember { mutableStateOf(externalSelectedCategory ?: selectedCategory) }
 
     // Filtrado de eventos basado en categoría, precio, tipo y fecha
-    val filteredEvents = events.filter { event ->
+    /*val filteredEvents = events.filter { event ->
         val eventDate = try {
             dateFormatter.parse(event.date ?: "")
         } catch (e: Exception) {
@@ -90,7 +97,32 @@ fun SearchResultsScreen(
                         (dateFilter != "Hoy" && dateFilter != "Esta semana" && dateFilter != "Este mes" && event.date == dateFilter)
                         ) &&
                 event.name_event.contains(query, ignoreCase = true)
+    }*/
+
+    val filteredEvents by remember {
+        derivedStateOf {
+            events.filter { event ->
+                val eventDate = try {
+                    dateFormatter.parse(event.date ?: "")
+                } catch (e: Exception) {
+                    null
+                }
+
+                eventDate != null &&
+                        (categoryToFilter == null || event.category == categoryToFilter) &&
+                        (selectedPrice == "Todos" || (event.price ?: 0f) <= (selectedPrice.toFloatOrNull() ?: 0f)) &&
+                        (selectedType == "Todos" || event.type.equals(selectedType, ignoreCase = true)) &&
+                        (selectedDate == "Todos" ||
+                                (selectedDate == "Hoy" && eventDate.compareTo(today) == 0) ||
+                                (selectedDate == "Esta semana" && eventDate in today..nextWeek) ||
+                                (selectedDate == "Este mes" && eventDate in today..nextMonth) ||
+                                (selectedDate != "Hoy" && selectedDate != "Esta semana" && selectedDate != "Este mes" && event.date == selectedDate)
+                                ) &&
+                        event.name_event.contains(query, ignoreCase = true)
+            }
+        }
     }
+
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val coroutineScope = rememberCoroutineScope()
 
@@ -136,14 +168,32 @@ fun SearchResultsScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            FiltersTagView(
+            /*FiltersTagView(
                 bottomSheetState,
                 coroutineScope,
                 events,
                 selectedCategory = categoryToFilter,
                 selectedPrice = maxPrice?.toString() ?: "Todos",
                 selectedType = typeFilter ?: "Todos",
-                selectedDate = dateFilter ?: "Todos"
+                selectedDate = dateFilter ?: "Todos",
+                onRemoveCategory = { selectedCategory = null },
+                onRemovePrice = { selectedPrice = "Todos"},
+                onRemoveType = { selectedType = "Todos"},
+                onRemoveDate = { selectedDate = "Todos"}
+            )*/
+
+            FiltersTagView(
+                bottomSheetState,
+                coroutineScope,
+                events,
+                selectedCategory = categoryToFilter,
+                selectedPrice = selectedPrice,
+                selectedType = selectedType,
+                selectedDate = selectedDate,
+                onRemoveCategory = { categoryToFilter = null },
+                onRemovePrice = { selectedPrice = "Todos" },
+                onRemoveType = { selectedType = "Todos" },
+                onRemoveDate = { selectedDate = "Todos" }
             )
 
             Text(
@@ -176,5 +226,3 @@ fun normalizeText(text: String): String {
         .replace("[^\\p{ASCII}]".toRegex(), "") // Elimina caracteres no ASCII
         .lowercase()  // Convierte el texto a minúsculas
 }
-
-
