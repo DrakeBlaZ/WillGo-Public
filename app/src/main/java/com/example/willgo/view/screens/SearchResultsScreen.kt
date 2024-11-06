@@ -65,18 +65,12 @@ fun SearchResultsScreen(
     val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
     // Obtenemos las fechas de hoy, de la semana y del mes siguiente
-    val today = Calendar.getInstance().time
+    val today = dateFormatter.parse(dateFormatter.format(Calendar.getInstance().time)) ?: Calendar.getInstance().time
     val nextWeek = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 7) }.time
     val nextMonth = Calendar.getInstance().apply { add(Calendar.MONTH, 1) }.time
 
     val categoryToFilter = externalSelectedCategory ?: selectedCategory
 
-    /*val filteredEvents = events.filter { event ->
-        (categoryToFilter == null || event.category == categoryToFilter) &&
-                (maxPrice == null || (event.price ?: 0f) <= maxPrice) &&
-                (typeFilter == null || event.type.equals(typeFilter, ignoreCase = true)) &&
-                event.name_event.contains(query, ignoreCase = true)
-    }*/
     // Filtrado de eventos basado en categoría, precio, tipo y fecha
     val filteredEvents = events.filter { event ->
         val eventDate = try {
