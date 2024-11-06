@@ -62,6 +62,7 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
                 maxPrice = null,
                 externalSelectedCategory = externalSelectedCategory.value,
                 typeFilter = null,
+                dateFilter = null,
                 onQueryChange = { newQuery ->
                     navController.navigate("searchResults/$newQuery")
                 },
@@ -96,6 +97,7 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
                 maxPrice = null,
                 externalSelectedCategory = externalSelectedCategory.value,
                 typeFilter = null,
+                dateFilter = null,
                 onQueryChange = { newQuery ->
                     navController.navigate("searchResults?query=$newQuery&category=${category?.name ?: ""}")
                 },

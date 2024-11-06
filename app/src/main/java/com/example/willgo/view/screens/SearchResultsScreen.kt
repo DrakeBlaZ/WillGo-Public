@@ -38,7 +38,11 @@ import com.example.willgo.graphs.BottomBarScreen
 import com.example.willgo.view.sections.CommonEventCard
 import com.example.willgo.view.sections.FiltersPreview
 import com.example.willgo.view.sections.FiltersTagView
+import kotlinx.datetime.LocalDate
 import java.text.Normalizer
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,31 +54,49 @@ fun SearchResultsScreen(
     maxPrice: Float? = null,
     externalSelectedCategory: Category? = null,
     typeFilter: String? = null,
+    dateFilter: String? = null,
     onQueryChange: (String) -> Unit,
     onSearch: (String) -> Unit,
     navController: NavController
 ) {
 
     var query by remember { mutableStateOf(initialQuery) }
-    var selectedCategory by remember { mutableStateOf(initialCategory) }  // Estado de categoría
+    var selectedCategory by remember { mutableStateOf(initialCategory) }
+    val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
-    //Prioriza externalSelectedCategory
+    // Obtenemos las fechas de hoy, de la semana y del mes siguiente
+    val today = Calendar.getInstance().time
+    val nextWeek = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 7) }.time
+    val nextMonth = Calendar.getInstance().apply { add(Calendar.MONTH, 1) }.time
+
     val categoryToFilter = externalSelectedCategory ?: selectedCategory
 
     /*val filteredEvents = events.filter { event ->
         (categoryToFilter == null || event.category == categoryToFilter) &&
                 (maxPrice == null || (event.price ?: 0f) <= maxPrice) &&
-                (typeFilter == null || typeFilter == "Todos" || event.type.equals(typeFilter, ignoreCase = true)) &&
-                event.name_event.contains(query, ignoreCase = true)
-    }*/
-
-    val filteredEvents = events.filter { event ->
-        (categoryToFilter == null || event.category == categoryToFilter) &&
-                (maxPrice == null || (event.price ?: 0f) <= maxPrice) &&
                 (typeFilter == null || event.type.equals(typeFilter, ignoreCase = true)) &&
                 event.name_event.contains(query, ignoreCase = true)
-    }
+    }*/
+    // Filtrado de eventos basado en categoría, precio, tipo y fecha
+    val filteredEvents = events.filter { event ->
+        val eventDate = try {
+            dateFormatter.parse(event.date ?: "")
+        } catch (e: Exception) {
+            null
+        }
 
+        eventDate != null &&
+                (categoryToFilter == null || event.category == categoryToFilter) &&
+                (maxPrice == null || (event.price ?: 0f) <= maxPrice) &&
+                (typeFilter == null || event.type.equals(typeFilter, ignoreCase = true)) &&
+                (dateFilter == null ||
+                        (dateFilter == "Hoy" && eventDate.compareTo(today) == 0) ||
+                        (dateFilter == "Esta semana" && eventDate in today..nextWeek) ||
+                        (dateFilter == "Este mes" && eventDate in today..nextMonth) ||
+                        (dateFilter != "Hoy" && dateFilter != "Esta semana" && dateFilter != "Este mes" && event.date == dateFilter)
+                        ) &&
+                event.name_event.contains(query, ignoreCase = true)
+    }
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val coroutineScope = rememberCoroutineScope()
 

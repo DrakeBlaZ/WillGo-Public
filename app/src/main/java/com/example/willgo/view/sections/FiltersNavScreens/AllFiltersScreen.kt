@@ -34,6 +34,7 @@ fun AllFilters(navController: NavController){
     var selectedCategory by remember { mutableStateOf<Category?>(null) }
     var selectedPrice by remember { mutableStateOf("Todos") }
     var selectedType by remember { mutableStateOf("Todos") }
+    var selectedDate by remember { mutableStateOf("Todos") }
 
     Scaffold(
         topBar = {
@@ -55,26 +56,43 @@ fun AllFilters(navController: NavController){
                         else -> selectedPrice.removeSuffix(" euros")
                     }
                     val typeParam = selectedType.takeIf { it != "Todos" } ?: ""
+                    val dateParam = selectedDate.takeIf { it != "Todos" } ?: ""
+
 
                     //navController.navigate("searchResults?maxPrice=${if (maxPriceParam != "10000") maxPriceParam else ""}&category=${categoryParam.ifEmpty { "" }}&type=${if (typeParam != "Todos") typeParam else ""}")
 
                     val route = when {
+                        categoryParam.isNotEmpty() && maxPriceParam != "10000" && typeParam.isNotEmpty() && dateParam.isNotEmpty() ->
+                            "searchResults?category=$categoryParam&maxPrice=$maxPriceParam&type=$typeParam&date=$dateParam"
                         categoryParam.isNotEmpty() && maxPriceParam != "10000" && typeParam.isNotEmpty() ->
                             "searchResults?category=$categoryParam&maxPrice=$maxPriceParam&type=$typeParam"
+                        categoryParam.isNotEmpty() && maxPriceParam != "10000" && dateParam.isNotEmpty() ->
+                            "searchResults?category=$categoryParam&maxPrice=$maxPriceParam&date=$dateParam"
+                        categoryParam.isNotEmpty() && typeParam.isNotEmpty() && dateParam.isNotEmpty() ->
+                            "searchResults?category=$categoryParam&type=$typeParam&date=$dateParam"
+                        maxPriceParam != "10000" && typeParam.isNotEmpty() && dateParam.isNotEmpty() ->
+                            "searchResults?maxPrice=$maxPriceParam&type=$typeParam&date=$dateParam"
                         categoryParam.isNotEmpty() && maxPriceParam != "10000" ->
                             "searchResults?category=$categoryParam&maxPrice=$maxPriceParam"
                         categoryParam.isNotEmpty() && typeParam.isNotEmpty() ->
                             "searchResults?category=$categoryParam&type=$typeParam"
+                        categoryParam.isNotEmpty() && dateParam.isNotEmpty() ->
+                            "searchResults?category=$categoryParam&date=$dateParam"
                         maxPriceParam != "10000" && typeParam.isNotEmpty() ->
                             "searchResults?maxPrice=$maxPriceParam&type=$typeParam"
+                        maxPriceParam != "10000" && dateParam.isNotEmpty() ->
+                            "searchResults?maxPrice=$maxPriceParam&date=$dateParam"
+                        typeParam.isNotEmpty() && dateParam.isNotEmpty() ->
+                            "searchResults?type=$typeParam&date=$dateParam"
                         categoryParam.isNotEmpty() ->
                             "searchResults?category=$categoryParam"
                         maxPriceParam != "10000" ->
                             "searchResults?maxPrice=$maxPriceParam"
                         typeParam.isNotEmpty() ->
                             "searchResults?type=$typeParam"
-                        else ->
-                            "searchResults"
+                        dateParam.isNotEmpty() ->
+                            "searchResults?date=$dateParam"
+                        else -> "searchResults"
                     }
                     navController.navigate(route)
                 }
@@ -83,6 +101,7 @@ fun AllFilters(navController: NavController){
     ) {
 
         Column(modifier = Modifier.padding(it)) {
+
             //Filtro de categoria
             FilterRow(
                 modifier = Modifier
@@ -96,6 +115,7 @@ fun AllFilters(navController: NavController){
                 filterName = "Categoria",
                 value = selectedCategory?.name ?: "Todos"
             )
+
             //Filtro de precio
             FilterRow(
                 modifier = Modifier
@@ -109,6 +129,7 @@ fun AllFilters(navController: NavController){
                 filterName = "Precio",
                 value = selectedPrice
             )
+
             //Filtro de tipo de lugar
             FilterRow(
                 modifier = Modifier
@@ -121,8 +142,18 @@ fun AllFilters(navController: NavController){
                 filterName = "Tipo de lugar",
                 value = selectedType
             )
+
             //Filtro de fecha
-            FilterRow(modifier = Modifier.fillMaxWidth().weight(1f).clickable{ navController.navigate(FiltersScreen.Date.route) }, filterName = "Fecha", value = "10/10/2023")
+            FilterRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .clickable {
+                        navController.navigate(FiltersScreen.Date.route)
+                },
+                filterName = "Fecha",
+                value = selectedDate
+            )
         }
     }
 
@@ -135,6 +166,9 @@ fun AllFilters(navController: NavController){
 
     navController.currentBackStackEntry?.savedStateHandle?.getLiveData<String>("selectedType")
         ?.observe(navController.currentBackStackEntry!!) { selectedType = it }
+
+    navController.currentBackStackEntry?.savedStateHandle?.getLiveData<String>("selectedDate")
+        ?.observe(navController.currentBackStackEntry!!) { selectedDate = it }
 }
 
 @Composable

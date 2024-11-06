@@ -46,6 +46,7 @@ fun FiltersNavGraph(navController: NavHostController, events: List<Event>, paddi
     val externalSelectedCategory = remember { mutableStateOf<Category?>(null) }
     val maxPriceFilter = remember { mutableStateOf<Float?>(null) }
     val selectedTypeFilter = remember { mutableStateOf<String?>(null) }
+    val selectedDateFilter = remember { mutableStateOf<String?>(null) }
 
     NavHost(navController = navController, startDestination = FiltersScreen.Filters.route, route = Graph.MAIN) {
         composable(route = FiltersScreen.Filters.route) {
@@ -66,7 +67,14 @@ fun FiltersNavGraph(navController: NavHostController, events: List<Event>, paddi
         }
 
         composable(route = FiltersScreen.Date.route){
-            DateNavScreen(onBack = onBack, modifier)
+            DateNavScreen(
+                onBack = onBack,
+                modifier,
+                navController = navController,
+                onDateSelected = { selectedDate ->
+                    selectedDateFilter.value = selectedDate
+                }
+            )
         }
 
         composable(route = FiltersScreen.Price.route) {
@@ -91,35 +99,44 @@ fun FiltersNavGraph(navController: NavHostController, events: List<Event>, paddi
             )
         }
 
-        /*
+        // Ruta para categoría, precio, tipo y fecha
         composable(
-            route = "searchResults?maxPrice={maxPrice}&category={category}",
+            route = "searchResults?maxPrice={maxPrice}&category={category}&type={type}&date={date}",
             arguments = listOf(
                 navArgument("maxPrice") { defaultValue = "10000" },
-                navArgument("category") { defaultValue = "" }
+                navArgument("category") { defaultValue = "" },
+                navArgument("type") { defaultValue = "Todos" },
+                navArgument("date") { defaultValue = "Todos" }
             )
         ) { backStackEntry ->
             val maxPrice = backStackEntry.arguments?.getString("maxPrice")?.toFloatOrNull() ?: 10000f
             val categoryName = backStackEntry.arguments?.getString("category")
+            val typeFilter = backStackEntry.arguments?.getString("type") ?: "Todos"
+            val dateFilter = backStackEntry.arguments?.getString("date") ?: "Todos"
+
             val externalCategory = categoryName?.takeIf { it.isNotBlank() }?.let { Category.valueOf(it) }
 
-            // Llama a SearchResultsScreen con maxPrice y categoría
             SearchResultsScreen(
                 paddingValues = paddingValues,
                 events = events,
                 initialQuery = "",
-                maxPrice = maxPrice,
+                maxPrice = if (maxPrice == 10000f) null else maxPrice,
                 externalSelectedCategory = externalCategory,
+                typeFilter = if (typeFilter == "Todos") null else typeFilter,
+                dateFilter = if (dateFilter == "Todos") null else dateFilter, // Añadido filtro de fecha
                 onQueryChange = { newQuery ->
-                    navController.navigate("searchResults?query=$newQuery&maxPrice=$maxPrice&category=${externalCategory?.name ?: ""}")
+                    navController.navigate(
+                        "searchResults?query=$newQuery&maxPrice=${maxPrice ?: ""}&category=${externalCategory?.name ?: ""}&type=${typeFilter ?: ""}&date=${dateFilter ?: ""}"
+                    )
                 },
                 onSearch = { searchQuery ->
-                    navController.navigate("searchResults?query=$searchQuery&maxPrice=$maxPrice&category=${externalCategory?.name ?: ""}")
+                    navController.navigate(
+                        "searchResults?query=$searchQuery&maxPrice=${maxPrice ?: ""}&category=${externalCategory?.name ?: ""}&type=${typeFilter ?: ""}&date=${dateFilter ?: ""}"
+                    )
                 },
                 navController = navController
             )
         }
-        */
 
         //Ruta para categoria, precio y tipo
         composable(
@@ -142,6 +159,7 @@ fun FiltersNavGraph(navController: NavHostController, events: List<Event>, paddi
                 maxPrice = if (maxPrice == null || maxPrice == 10000f) null else maxPrice,
                 externalSelectedCategory = externalCategory,
                 typeFilter = if (typeFilter == "Todos") null else typeFilter,
+                dateFilter = null,
                 onQueryChange = { newQuery ->
                     //navController.navigate("searchResults?query=$newQuery&maxPrice=${if (maxPrice != 10000f) maxPrice else ""}&category=${externalCategory?.name ?: ""}&type=${if (typeFilter != "Todos") typeFilter else ""}")
                     navController.navigate(
@@ -179,6 +197,7 @@ fun FiltersNavGraph(navController: NavHostController, events: List<Event>, paddi
                 externalSelectedCategory = externalCategory,
                 maxPrice = null,
                 typeFilter = null,
+                dateFilter = null,
                 onQueryChange = { newQuery ->
                     navController.navigate("searchResults?query=$newQuery&category=${externalCategory?.name ?: ""}")
                 },
@@ -203,6 +222,7 @@ fun FiltersNavGraph(navController: NavHostController, events: List<Event>, paddi
                 maxPrice = if (maxPrice == 10000f) null else maxPrice,
                 externalSelectedCategory = null,
                 typeFilter = null,
+                dateFilter = null,
                 onQueryChange = { newQuery ->
                     navController.navigate("searchResults?query=$newQuery&maxPrice=${maxPrice ?: ""}")
                 },
@@ -227,11 +247,46 @@ fun FiltersNavGraph(navController: NavHostController, events: List<Event>, paddi
                 maxPrice = null,
                 externalSelectedCategory = null,
                 typeFilter = if (typeFilter == "Todos") null else typeFilter,
+                dateFilter = null,
                 onQueryChange = { newQuery ->
                     navController.navigate("searchResults?query=$newQuery&type=${typeFilter ?: ""}")
                 },
                 onSearch = { searchQuery ->
                     navController.navigate("searchResults?query=$searchQuery&type=${typeFilter ?: ""}")
+                },
+                navController = navController
+            )
+        }
+
+        //Ruta para categoria y fecha
+        composable(
+            route = "searchResults?category={category}&date={date}",
+            arguments = listOf(
+                navArgument("category") { defaultValue = "" },
+                navArgument("date") { defaultValue = "Todos" }
+            )
+        ) { backStackEntry ->
+            val categoryName = backStackEntry.arguments?.getString("category")
+            val dateFilter = backStackEntry.arguments?.getString("date") ?: "Todos"
+            val externalCategory = categoryName?.takeIf { it.isNotBlank() }?.let { Category.valueOf(it) }
+
+            SearchResultsScreen(
+                paddingValues = paddingValues,
+                events = events,
+                initialQuery = "",
+                externalSelectedCategory = externalCategory,
+                maxPrice = null,
+                typeFilter = null,
+                dateFilter = if (dateFilter == "Todos") null else dateFilter,
+                onQueryChange = { newQuery ->
+                    navController.navigate(
+                        "searchResults?query=$newQuery&category=${externalCategory?.name ?: ""}&date=${dateFilter ?: ""}"
+                    )
+                },
+                onSearch = { searchQuery ->
+                    navController.navigate(
+                        "searchResults?query=$searchQuery&category=${externalCategory?.name ?: ""}&date=${dateFilter ?: ""}"
+                    )
                 },
                 navController = navController
             )
@@ -256,6 +311,7 @@ fun FiltersNavGraph(navController: NavHostController, events: List<Event>, paddi
                 maxPrice = if (maxPrice == 10000f) null else maxPrice,
                 externalSelectedCategory = externalCategory,
                 typeFilter = null,
+                dateFilter = null,
                 onQueryChange = { newQuery ->
                     navController.navigate(
                         "searchResults?query=$newQuery&maxPrice=${maxPrice ?: ""}&category=${externalCategory?.name ?: ""}"
@@ -289,6 +345,7 @@ fun FiltersNavGraph(navController: NavHostController, events: List<Event>, paddi
                 maxPrice = null,
                 externalSelectedCategory = externalCategory,
                 typeFilter = if (typeFilter == "Todos") null else typeFilter,
+                dateFilter = null,
                 onQueryChange = { newQuery ->
                     navController.navigate(
                         "searchResults?query=$newQuery&category=${externalCategory?.name ?: ""}&type=${typeFilter ?: ""}"
@@ -303,33 +360,178 @@ fun FiltersNavGraph(navController: NavHostController, events: List<Event>, paddi
             )
         }
 
-        /*
+        //Ruta para precio y fecha
         composable(
-            route = "searchResults?externalSelectedCategory={externalSelectedCategory}",
-            arguments = listOf(navArgument("externalSelectedCategory") { defaultValue = "" })
+            route = "searchResults?maxPrice={maxPrice}&date={date}",
+            arguments = listOf(
+                navArgument("maxPrice") { defaultValue = "10000" },
+                navArgument("date") { defaultValue = "Todos" }
+            )
         ) { backStackEntry ->
-            val categoryName = backStackEntry.arguments?.getString("externalSelectedCategory")
-            val externalCategory = categoryName?.takeIf { it.isNotBlank() }?.let { Category.valueOf(it) }
+            val maxPrice = backStackEntry.arguments?.getString("maxPrice")?.toFloatOrNull()
+            val dateFilter = backStackEntry.arguments?.getString("date") ?: "Todos"
 
-            // Llama a SearchResultsScreen pasando la categoría seleccionada como externalSelectedCategory
             SearchResultsScreen(
-                paddingValues = PaddingValues(),
+                paddingValues = paddingValues,
                 events = events,
                 initialQuery = "",
-                externalSelectedCategory = externalCategory,
+                maxPrice = if (maxPrice == 10000f) null else maxPrice,
+                externalSelectedCategory = null,
+                typeFilter = null,
+                dateFilter = if (dateFilter == "Todos") null else dateFilter,
                 onQueryChange = { newQuery ->
-                    // Actualiza la ruta de búsqueda para que refleje el nuevo término de búsqueda
-                    navController.navigate("searchResults?query=$newQuery&externalSelectedCategory=${externalCategory?.name ?: ""}")
+                    navController.navigate(
+                        "searchResults?query=$newQuery&maxPrice=${maxPrice ?: ""}&date=${dateFilter ?: ""}"
+                    )
                 },
                 onSearch = { searchQuery ->
-                    // Ejecuta una búsqueda nueva y navega con la query y categoría actualizadas
-                    navController.navigate("searchResults?query=$searchQuery&externalSelectedCategory=${externalCategory?.name ?: ""}")
+                    navController.navigate(
+                        "searchResults?query=$searchQuery&maxPrice=${maxPrice ?: ""}&date=${dateFilter ?: ""}"
+                    )
                 },
                 navController = navController
             )
         }
-        */
 
+        //Ruta para tipo y fecha
+        composable(
+            route = "searchResults?type={type}&date={date}",
+            arguments = listOf(
+                navArgument("type") { defaultValue = "Todos" },
+                navArgument("date") { defaultValue = "Todos" }
+            )
+        ) { backStackEntry ->
+            val typeFilter = backStackEntry.arguments?.getString("type") ?: "Todos"
+            val dateFilter = backStackEntry.arguments?.getString("date") ?: "Todos"
+
+            SearchResultsScreen(
+                paddingValues = paddingValues,
+                events = events,
+                initialQuery = "",
+                maxPrice = null,
+                externalSelectedCategory = null,
+                typeFilter = if (typeFilter == "Todos") null else typeFilter,
+                dateFilter = if (dateFilter == "Todos") null else dateFilter,
+                onQueryChange = { newQuery ->
+                    navController.navigate(
+                        "searchResults?query=$newQuery&type=${typeFilter ?: ""}&date=${dateFilter ?: ""}"
+                    )
+                },
+                onSearch = { searchQuery ->
+                    navController.navigate(
+                        "searchResults?query=$searchQuery&type=${typeFilter ?: ""}&date=${dateFilter ?: ""}"
+                    )
+                },
+                navController = navController
+            )
+        }
+
+        //Ruta para categoria, tipo y fecha
+        composable(
+            route = "searchResults?category={category}&type={type}&date={date}",
+            arguments = listOf(
+                navArgument("category") { defaultValue = "" },
+                navArgument("type") { defaultValue = "Todos" },
+                navArgument("date") { defaultValue = "Todos" }
+            )
+        ) { backStackEntry ->
+            val categoryName = backStackEntry.arguments?.getString("category")
+            val typeFilter = backStackEntry.arguments?.getString("type") ?: "Todos"
+            val dateFilter = backStackEntry.arguments?.getString("date") ?: "Todos"
+            val externalCategory = categoryName?.takeIf { it.isNotBlank() }?.let { Category.valueOf(it) }
+
+            SearchResultsScreen(
+                paddingValues = paddingValues,
+                events = events,
+                initialQuery = "",
+                externalSelectedCategory = externalCategory,
+                maxPrice = null,
+                typeFilter = if (typeFilter == "Todos") null else typeFilter,
+                dateFilter = if (dateFilter == "Todos") null else dateFilter,
+                onQueryChange = { newQuery ->
+                    navController.navigate(
+                        "searchResults?query=$newQuery&category=${externalCategory?.name ?: ""}&type=${typeFilter ?: ""}&date=${dateFilter ?: ""}"
+                    )
+                },
+                onSearch = { searchQuery ->
+                    navController.navigate(
+                        "searchResults?query=$searchQuery&category=${externalCategory?.name ?: ""}&type=${typeFilter ?: ""}&date=${dateFilter ?: ""}"
+                    )
+                },
+                navController = navController
+            )
+        }
+
+        //Ruta para precio, tipo y fecha
+        composable(
+            route = "searchResults?maxPrice={maxPrice}&type={type}&date={date}",
+            arguments = listOf(
+                navArgument("maxPrice") { defaultValue = "10000" },
+                navArgument("type") { defaultValue = "Todos" },
+                navArgument("date") { defaultValue = "Todos" }
+            )
+        ) { backStackEntry ->
+            val maxPrice = backStackEntry.arguments?.getString("maxPrice")?.toFloatOrNull()
+            val typeFilter = backStackEntry.arguments?.getString("type") ?: "Todos"
+            val dateFilter = backStackEntry.arguments?.getString("date") ?: "Todos"
+
+            SearchResultsScreen(
+                paddingValues = paddingValues,
+                events = events,
+                initialQuery = "",
+                maxPrice = if (maxPrice == 10000f) null else maxPrice,
+                externalSelectedCategory = null,
+                typeFilter = if (typeFilter == "Todos") null else typeFilter,
+                dateFilter = if (dateFilter == "Todos") null else dateFilter,
+                onQueryChange = { newQuery ->
+                    navController.navigate(
+                        "searchResults?query=$newQuery&maxPrice=${maxPrice ?: ""}&type=${typeFilter ?: ""}&date=${dateFilter ?: ""}"
+                    )
+                },
+                onSearch = { searchQuery ->
+                    navController.navigate(
+                        "searchResults?query=$searchQuery&maxPrice=${maxPrice ?: ""}&type=${typeFilter ?: ""}&date=${dateFilter ?: ""}"
+                    )
+                },
+                navController = navController
+            )
+        }
+
+        //Ruta para categoria, precio y fecha
+        composable(
+            route = "searchResults?category={category}&maxPrice={maxPrice}&date={date}",
+            arguments = listOf(
+                navArgument("category") { defaultValue = "" },
+                navArgument("maxPrice") { defaultValue = "10000" },
+                navArgument("date") { defaultValue = "Todos" }
+            )
+        ) { backStackEntry ->
+            val categoryName = backStackEntry.arguments?.getString("category")
+            val maxPrice = backStackEntry.arguments?.getString("maxPrice")?.toFloatOrNull()
+            val dateFilter = backStackEntry.arguments?.getString("date") ?: "Todos"
+            val externalCategory = categoryName?.takeIf { it.isNotBlank() }?.let { Category.valueOf(it) }
+
+            SearchResultsScreen(
+                paddingValues = paddingValues,
+                events = events,
+                initialQuery = "",
+                maxPrice = if (maxPrice == 10000f) null else maxPrice,
+                externalSelectedCategory = externalCategory,
+                typeFilter = null,
+                dateFilter = if (dateFilter == "Todos") null else dateFilter,
+                onQueryChange = { newQuery ->
+                    navController.navigate(
+                        "searchResults?query=$newQuery&category=${externalCategory?.name ?: ""}&maxPrice=${maxPrice ?: ""}&date=${dateFilter ?: ""}"
+                    )
+                },
+                onSearch = { searchQuery ->
+                    navController.navigate(
+                        "searchResults?query=$searchQuery&category=${externalCategory?.name ?: ""}&maxPrice=${maxPrice ?: ""}&date=${dateFilter ?: ""}"
+                    )
+                },
+                navController = navController
+            )
+        }
 
         composable(route = "home") {
             HomeScreen(paddingValues = paddingValues, events, navController)
