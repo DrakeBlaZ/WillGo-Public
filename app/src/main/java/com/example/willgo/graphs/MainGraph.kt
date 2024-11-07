@@ -49,14 +49,16 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
         }
 
         composable(
-            route = "searchResults?maxPrice={maxPrice}&category={category}&type={type}&date={date}",
+            route = "searchResults?query={query}&maxPrice={maxPrice}&category={category}&type={type}&date={date}",
             arguments = listOf(
+                navArgument("query") { defaultValue = "" },
                 navArgument("maxPrice") { defaultValue = "10000" },
                 navArgument("category") { defaultValue = "" },
                 navArgument("type") { defaultValue = "Todos" },
                 navArgument("date") { defaultValue = "Todos" },
                 )
         ) { backStackEntry ->
+            val query = backStackEntry.arguments?.getString("query") ?: ""
             val maxPrice = backStackEntry.arguments?.getString("maxPrice")?.toFloatOrNull() ?: 10000f
             val category = backStackEntry.arguments?.getString("category")?.let { Category.valueOf(it) }
             val typeFilter = backStackEntry.arguments?.getString("type")
@@ -65,16 +67,30 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
             SearchResultsScreen(
                 paddingValues = paddingValues,
                 events = events.value,
-                initialQuery = "",
+                initialQuery = query,
                 maxPrice = if (maxPrice == 10000f) null else maxPrice,
                 externalSelectedCategory = category,
                 typeFilter = if (typeFilter == "Todos") null else typeFilter,
                 dateFilter = if (dateFilter == "Todos") null else dateFilter,
                 onQueryChange = { newQuery ->
-                    navController.navigate(buildSearchRoute(query = newQuery, maxPrice = maxPrice, category = category, type = typeFilter, date = dateFilter))
+                    navController.navigate(
+                        buildSearchRoute(
+                            query = newQuery,
+                            maxPrice = maxPrice,
+                            category = category,
+                            type = typeFilter,
+                            date = dateFilter)
+                    )
                 },
                 onSearch = { searchQuery ->
-                    navController.navigate(buildSearchRoute(query = searchQuery, maxPrice = maxPrice, category = category, type = typeFilter, date = dateFilter))
+                    navController.navigate(
+                        buildSearchRoute(
+                            query = searchQuery,
+                            maxPrice = maxPrice,
+                            category = category,
+                            type = typeFilter,
+                            date = dateFilter)
+                    )
                 },
                 navController = navController
             )
@@ -97,6 +113,30 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
                 },
                 onSearch = { searchQuery ->
                     navController.navigate("searchResults/$searchQuery")
+                },
+                navController
+            )
+        }
+
+        //ruta para buscar por categoria y por nombre
+        composable(route = "searchResults/{query}/{category}") { backStackEntry ->
+            val query = backStackEntry.arguments?.getString("query") ?: ""
+            val category = backStackEntry.arguments?.getString("category")?.let { Category.valueOf(it) }
+            val filteredEvents = events.value.filter { it.name_event.contains(query, ignoreCase = true) && it.category == category } // Filtrar eventos
+            SearchResultsScreen(
+                paddingValues,
+                events = filteredEvents,
+                initialQuery = query,
+                initialCategory = category,
+                maxPrice = null,
+                externalSelectedCategory = externalSelectedCategory.value,
+                typeFilter = null,
+                dateFilter = null,
+                onQueryChange = { newQuery ->
+                    navController.navigate("searchResults/$newQuery/${category}")
+                },
+                onSearch = { searchQuery ->
+                    navController.navigate("searchResults/$searchQuery/${category}")
                 },
                 navController
             )

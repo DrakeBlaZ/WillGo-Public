@@ -41,6 +41,7 @@ fun AllFilters(navController: NavController, navControllerMain: NavController, e
     var selectedPrice by remember { mutableStateOf("Todos") }
     var selectedType by remember { mutableStateOf("Todos") }
     var selectedDate by remember { mutableStateOf("Todos") }
+    var queryParam by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
@@ -60,6 +61,7 @@ fun AllFilters(navController: NavController, navControllerMain: NavController, e
                         else -> selectedPrice.removeSuffix(" euros").toFloatOrNull() ?: 10000f
                     }
                     val route = buildSearchRoute(
+                        query = queryParam.takeIf { it.isNotEmpty() },
                         maxPrice = maxPriceParam.takeIf { it != 10000f },
                         category = selectedCategory,
                         type = selectedType.takeIf { it != "Todos" },
