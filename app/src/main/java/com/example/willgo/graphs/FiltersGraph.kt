@@ -99,8 +99,6 @@ fun FiltersNavGraph(navController: NavHostController, events: List<Event>, paddi
             )
         }
 
-
-
         composable(route = "home") {
             HomeScreen(paddingValues = paddingValues, events, navController)
         }

@@ -64,30 +64,25 @@ fun DateNavScreen(
             Text("Fecha")
             Spacer(modifier = Modifier.height(8.dp))
 
-            Button(onClick = {
+            FilterValueRow(modifier = modifier, value = "Hoy", onClick = {
                 navController.previousBackStackEntry?.savedStateHandle?.set("selectedDate", "Hoy")
-                navController.popBackStack() // Volver a AllFiltersScreen
-            }) {
-                Text("Hoy")
-            }
-
-            Button(onClick = {
+                navController.popBackStack()
+            })
+            FilterValueRow(modifier = modifier, value = "Esta semana", onClick = {
                 navController.previousBackStackEntry?.savedStateHandle?.set("selectedDate", "Esta semana")
-                navController.popBackStack() // Volver a AllFiltersScreen
-            }) {
-                Text("Esta semana")
-            }
-
-            Button(onClick = {
+                navController.popBackStack()
+            })
+            FilterValueRow(modifier = modifier, value = "Este mes", onClick = {
                 navController.previousBackStackEntry?.savedStateHandle?.set("selectedDate", "Este mes")
-                navController.popBackStack() // Volver a AllFiltersScreen
-            }) {
-                Text("Este mes")
-            }
+                navController.popBackStack()
+            })
+            FilterValueRow(modifier = modifier, value = "Personalizado", onClick = {
+                showDialog = true
+            })
 
-            Button(onClick = { showDialog = true }) {
+            /*Button(onClick = { showDialog = true }) {
                 Text("Selecciona día")
-            }
+            }*/
 
             // DatePickerDialog para seleccionar una fecha específica
             if (showDialog) {
