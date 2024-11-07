@@ -29,6 +29,7 @@ import androidx.navigation.NavHostController
 import com.example.willgo.data.Category
 import com.example.willgo.data.Event
 import com.example.willgo.graphs.FiltersScreen
+import com.example.willgo.graphs.buildSearchRoute
 import com.example.willgo.view.sections.FilterRow
 import com.example.willgo.view.sections.FiltersTagView
 
@@ -53,54 +54,20 @@ fun AllFilters(navController: NavController, navControllerMain: NavController, e
                     .fillMaxWidth()
                     .height(56.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()),
                 onClick = {
-                    // Navegar a `SearchResultsScreen` con los filtros seleccionados
-                    val categoryParam = selectedCategory?.name ?: ""
                     val maxPriceParam = when (selectedPrice) {
-                        "Todos" -> "10000"
-                        "Gratis" -> "0"
-                        else -> selectedPrice.removeSuffix(" euros")
+                        "Todos" -> 10000f
+                        "Gratis" -> 0f
+                        else -> selectedPrice.removeSuffix(" euros").toFloatOrNull() ?: 10000f
                     }
-                    val typeParam = selectedType.takeIf { it != "Todos" } ?: ""
-                    val dateParam = selectedDate.takeIf { it != "Todos" } ?: ""
-
-
-                    //navController.navigate("searchResults?maxPrice=${if (maxPriceParam != "10000") maxPriceParam else ""}&category=${categoryParam.ifEmpty { "" }}&type=${if (typeParam != "Todos") typeParam else ""}")
-
-                    val route = when {
-                        categoryParam.isNotEmpty() && maxPriceParam != "10000" && typeParam.isNotEmpty() && dateParam.isNotEmpty() ->
-                            "searchResults?category=$categoryParam&maxPrice=$maxPriceParam&type=$typeParam&date=$dateParam"
-                        categoryParam.isNotEmpty() && maxPriceParam != "10000" && typeParam.isNotEmpty() ->
-                            "searchResults?category=$categoryParam&maxPrice=$maxPriceParam&type=$typeParam"
-                        categoryParam.isNotEmpty() && maxPriceParam != "10000" && dateParam.isNotEmpty() ->
-                            "searchResults?category=$categoryParam&maxPrice=$maxPriceParam&date=$dateParam"
-                        categoryParam.isNotEmpty() && typeParam.isNotEmpty() && dateParam.isNotEmpty() ->
-                            "searchResults?category=$categoryParam&type=$typeParam&date=$dateParam"
-                        maxPriceParam != "10000" && typeParam.isNotEmpty() && dateParam.isNotEmpty() ->
-                            "searchResults?maxPrice=$maxPriceParam&type=$typeParam&date=$dateParam"
-                        categoryParam.isNotEmpty() && maxPriceParam != "10000" ->
-                            "searchResults?category=$categoryParam&maxPrice=$maxPriceParam"
-                        categoryParam.isNotEmpty() && typeParam.isNotEmpty() ->
-                            "searchResults?category=$categoryParam&type=$typeParam"
-                        categoryParam.isNotEmpty() && dateParam.isNotEmpty() ->
-                            "searchResults?category=$categoryParam&date=$dateParam"
-                        maxPriceParam != "10000" && typeParam.isNotEmpty() ->
-                            "searchResults?maxPrice=$maxPriceParam&type=$typeParam"
-                        maxPriceParam != "10000" && dateParam.isNotEmpty() ->
-                            "searchResults?maxPrice=$maxPriceParam&date=$dateParam"
-                        typeParam.isNotEmpty() && dateParam.isNotEmpty() ->
-                            "searchResults?type=$typeParam&date=$dateParam"
-                        categoryParam.isNotEmpty() ->
-                            "searchResults?category=$categoryParam"
-                        maxPriceParam != "10000" ->
-                            "searchResults?maxPrice=$maxPriceParam"
-                        typeParam.isNotEmpty() ->
-                            "searchResults?type=$typeParam"
-                        dateParam.isNotEmpty() ->
-                            "searchResults?date=$dateParam"
-                        else -> "searchResults"
-                    }
+                    val route = buildSearchRoute(
+                        maxPrice = maxPriceParam.takeIf { it != 10000f },
+                        category = selectedCategory,
+                        type = selectedType.takeIf { it != "Todos" },
+                        date = selectedDate.takeIf { it != "Todos" }
+                    )
                     navControllerMain.navigate(route)
                 }
+
             )
         }
     ) {
