@@ -60,7 +60,8 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
         ) { backStackEntry ->
             val query = backStackEntry.arguments?.getString("query") ?: ""
             val maxPrice = backStackEntry.arguments?.getString("maxPrice")?.toFloatOrNull() ?: 10000f
-            val category = backStackEntry.arguments?.getString("category")?.let { Category.valueOf(it) }
+            //val category = backStackEntry.arguments?.getString("category")?.let { Category.valueOf(it) }
+            val category = backStackEntry.arguments?.getString("category")?.takeIf { it.isNotEmpty() }?.let { Category.valueOf(it) }
             val typeFilter = backStackEntry.arguments?.getString("type")
             val dateFilter = backStackEntry.arguments?.getString("date")
 
