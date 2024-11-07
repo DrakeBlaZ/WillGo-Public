@@ -39,6 +39,7 @@ import com.example.willgo.graphs.BottomBarScreen
 import com.example.willgo.view.sections.CommonEventCard
 import com.example.willgo.view.sections.FiltersPreview
 import com.example.willgo.view.sections.FiltersTagView
+import com.example.willgo.view.sections.FiltersTagViewSearchScreen
 import kotlinx.datetime.LocalDate
 import java.text.Normalizer
 import java.text.SimpleDateFormat
@@ -74,30 +75,8 @@ fun SearchResultsScreen(
     val nextWeek = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 7) }.time
     val nextMonth = Calendar.getInstance().apply { add(Calendar.MONTH, 1) }.time
 
-    //val categoryToFilter = externalSelectedCategory ?: selectedCategory
-
     var categoryToFilter by remember { mutableStateOf(externalSelectedCategory ?: selectedCategory) }
 
-    // Filtrado de eventos basado en categoría, precio, tipo y fecha
-    /*val filteredEvents = events.filter { event ->
-        val eventDate = try {
-            dateFormatter.parse(event.date ?: "")
-        } catch (e: Exception) {
-            null
-        }
-
-        eventDate != null &&
-                (categoryToFilter == null || event.category == categoryToFilter) &&
-                (maxPrice == null || (event.price ?: 0f) <= maxPrice) &&
-                (typeFilter == null || event.type.equals(typeFilter, ignoreCase = true)) &&
-                (dateFilter == null ||
-                        (dateFilter == "Hoy" && eventDate.compareTo(today) == 0) ||
-                        (dateFilter == "Esta semana" && eventDate in today..nextWeek) ||
-                        (dateFilter == "Este mes" && eventDate in today..nextMonth) ||
-                        (dateFilter != "Hoy" && dateFilter != "Esta semana" && dateFilter != "Este mes" && event.date == dateFilter)
-                        ) &&
-                event.name_event.contains(query, ignoreCase = true)
-    }*/
 
     val filteredEvents by remember {
         derivedStateOf {
@@ -168,24 +147,12 @@ fun SearchResultsScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            /*FiltersTagView(
-                bottomSheetState,
-                coroutineScope,
-                events,
-                selectedCategory = categoryToFilter,
-                selectedPrice = maxPrice?.toString() ?: "Todos",
-                selectedType = typeFilter ?: "Todos",
-                selectedDate = dateFilter ?: "Todos",
-                onRemoveCategory = { selectedCategory = null },
-                onRemovePrice = { selectedPrice = "Todos"},
-                onRemoveType = { selectedType = "Todos"},
-                onRemoveDate = { selectedDate = "Todos"}
-            )*/
 
-            FiltersTagView(
-                bottomSheetState,
-                coroutineScope,
-                events,
+            FiltersTagViewSearchScreen(
+                sheetState = bottomSheetState,
+                coroutineScope = coroutineScope,
+                events = events,
+                navControllerMain = navController,
                 selectedCategory = categoryToFilter,
                 selectedPrice = selectedPrice,
                 selectedType = selectedType,
@@ -208,12 +175,13 @@ fun SearchResultsScreen(
                 Text("No se encontraron eventos.")
             } else {
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.padding(bottom = paddingValues.calculateBottomPadding()).fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally) {
                     items(filteredEvents) { event ->
                         CommonEventCard(event = event)  // Mostrar tarjeta de evento
                     }
+                    item{}
                 }
             }
         }

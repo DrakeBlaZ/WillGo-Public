@@ -46,7 +46,8 @@ fun FiltersPreview(navController: NavController, selectedCategory: Category?, ev
         MyModalBottomSheet(
             onDismiss = { coroutineScope.launch { bottomSheetState.hide() } },
             sheetState = bottomSheetState,
-            events = events
+            events = events,
+            navControllerMain = navController
         )
     }
 

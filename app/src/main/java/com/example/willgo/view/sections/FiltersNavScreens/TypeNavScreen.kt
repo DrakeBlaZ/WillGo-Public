@@ -43,19 +43,19 @@ fun TypeNavScreen(
             Text("Tipo de lugar")
             Spacer(modifier = Modifier.height(8.dp))
 
-            FilterValueRow(modifier = Modifier, value = "Todos", onClick = {
+            FilterValueRow(modifier = modifier, value = "Todos", onClick = {
                 navController.previousBackStackEntry?.savedStateHandle?.set("selectedType", "Todos")
                 navController.popBackStack()
             })
-            FilterValueRow(modifier = Modifier, value = "Interior", onClick = {
+            FilterValueRow(modifier = modifier, value = "Interior", onClick = {
                 navController.previousBackStackEntry?.savedStateHandle?.set("selectedType", "Interior")
                 navController.popBackStack()
             })
-            FilterValueRow(modifier = Modifier, value = "Exterior", onClick = {
+            FilterValueRow(modifier = modifier, value = "Exterior", onClick = {
                 navController.previousBackStackEntry?.savedStateHandle?.set("selectedType", "Exterior")
                 navController.popBackStack()
             })
-            FilterValueRow(modifier = Modifier, value = "Online", onClick = {
+            FilterValueRow(modifier = modifier, value = "Online", onClick = {
                 navController.previousBackStackEntry?.savedStateHandle?.set("selectedType", "Online")
                 navController.popBackStack()
             })

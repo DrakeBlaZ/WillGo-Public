@@ -34,16 +34,12 @@ import com.example.willgo.view.sections.FiltersTagView
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AllFilters(navController: NavController, events: List<Event>) {
+fun AllFilters(navController: NavController, navControllerMain: NavController, events: List<Event>) {
     // Estado para almacenar las selecciones
     var selectedCategory by remember { mutableStateOf<Category?>(null) }
     var selectedPrice by remember { mutableStateOf("Todos") }
     var selectedType by remember { mutableStateOf("Todos") }
     var selectedDate by remember { mutableStateOf("Todos") }
-
-    // Crear el estado del BottomSheet y el CoroutineScope para la hoja de filtros
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
@@ -103,7 +99,7 @@ fun AllFilters(navController: NavController, events: List<Event>) {
                             "searchResults?date=$dateParam"
                         else -> "searchResults"
                     }
-                    navController.navigate(route)
+                    navControllerMain.navigate(route)
                 }
             )
         }
@@ -113,9 +109,6 @@ fun AllFilters(navController: NavController, events: List<Event>) {
 
             // Llamada a FiltersTagView para mostrar los filtros seleccionados
             FiltersTagView(
-                sheetState = sheetState,
-                coroutineScope = coroutineScope,
-                events = events,
                 selectedCategory = selectedCategory,
                 selectedPrice = selectedPrice,
                 selectedType = selectedType,
@@ -123,7 +116,7 @@ fun AllFilters(navController: NavController, events: List<Event>) {
                 onRemoveCategory = { selectedCategory = null },
                 onRemovePrice = { selectedPrice = "Todos" },
                 onRemoveType = { selectedType = "Todos" },
-                onRemoveDate = { selectedDate = "Todos" }
+                onRemoveDate = { selectedDate = "Todos" },
             )
 
             Spacer(modifier = Modifier.height(8.dp))

@@ -45,36 +45,35 @@ fun PriceNavScreen(
         Column(modifier = Modifier.padding(it)) {
             Text("Precio")
             Spacer(modifier = Modifier.height(8.dp))
-
-            FilterValueRow(modifier = Modifier, value = "Todos", onClick = {
+            FilterValueRow(modifier = modifier, value = "Todos", onClick = {
                 navController.previousBackStackEntry?.savedStateHandle?.set("selectedPrice", "Todos")
                 navController.popBackStack() // Regresar a AllFiltersScreen
             })
-            FilterValueRow(modifier = Modifier, value = "Gratis", onClick = {
+            FilterValueRow(modifier = modifier, value = "Gratis", onClick = {
                 navController.previousBackStackEntry?.savedStateHandle?.set("selectedPrice", "Gratis")
                 navController.popBackStack()
             })
-            FilterValueRow(modifier = Modifier, value = "5 euros", onClick = {
+            FilterValueRow(modifier = modifier, value = "5 euros", onClick = {
                 navController.previousBackStackEntry?.savedStateHandle?.set("selectedPrice", "5 euros")
                 navController.popBackStack()
             })
-            FilterValueRow(modifier = Modifier, value = "10 euros", onClick = {
+            FilterValueRow(modifier = modifier, value = "10 euros", onClick = {
                 navController.previousBackStackEntry?.savedStateHandle?.set("selectedPrice", "10 euros")
                 navController.popBackStack()
             })
-            FilterValueRow(modifier = Modifier, value = "20 euros", onClick = {
+            FilterValueRow(modifier = modifier, value = "20 euros", onClick = {
                 navController.previousBackStackEntry?.savedStateHandle?.set("selectedPrice", "20 euros")
                 navController.popBackStack()
             })
-            FilterValueRow(modifier = Modifier, value = "50 euros", onClick = {
+            FilterValueRow(modifier = modifier, value = "50 euros", onClick = {
                 navController.previousBackStackEntry?.savedStateHandle?.set("selectedPrice", "50 euros")
                 navController.popBackStack()
             })
-            FilterValueRow(modifier = Modifier, value = "100 euros", onClick = {
+            FilterValueRow(modifier = modifier, value = "100 euros", onClick = {
                 navController.previousBackStackEntry?.savedStateHandle?.set("selectedPrice", "100 euros")
                 navController.popBackStack()
             })
-            FilterValueRow(modifier = Modifier, value = "200 euros", onClick = {
+            FilterValueRow(modifier = modifier, value = "200 euros", onClick = {
                 navController.previousBackStackEntry?.savedStateHandle?.set("selectedPrice", "200 euros")
                 navController.popBackStack()
             })
