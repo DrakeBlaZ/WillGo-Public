@@ -16,8 +16,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.willgo.data.Category
@@ -56,6 +54,7 @@ fun CategorySection(events: List<Event>, paddingValues: PaddingValues, navContro
     }
 }
 
+/*
 @Preview
 @Composable
 fun EventSectionPreview(){
@@ -75,3 +74,4 @@ fun EventSectionPreview(){
     val events = listOf(event, event, event, event, event)
     CategoryScreen(category = Category.Actuacion_musical, onBack = {}, events = events, navController = navController)
 }
+ */

@@ -28,11 +28,12 @@ import com.example.willgo.data.Event
 import coil.compose.AsyncImage
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.willgo.graphs.HomeScreenRoutes
 
 @Composable
-fun CommonEventCard(event: Event, navigationController: NavHostController){
+fun CommonEventCard(event: Event, navigationController: NavController){
     Card(
         modifier = Modifier
             .background(Color.Transparent)
@@ -121,5 +122,5 @@ fun CommonEventCard(event: Event, navigationController: NavHostController){
 @Composable
 fun EventCard(){
     val navigationController = NavHostController(context = LocalContext.current)
-    CommonEventCard(event = Event(3, "Concierto AC/DC 2025 Valencia", "Concierto AC/DC 2025 Valencia", "gmail", 111111111, Category.Actuacion_musical, "Valencia", "06/05/2025", 20.0f, "https://trpgyhwsghxnaakpoftt.supabase.co/storage/v1/object/public/EventImage/ac_dc.jpg"), navigationController)
+    CommonEventCard(event = Event(3, "Concierto AC/DC 2025 Valencia", "Concierto AC/DC 2025 Valencia", "gmail", 111111111, Category.Actuacion_musical, "Valencia", "06/05/2025", 20.0f, "https://trpgyhwsghxnaakpoftt.supabase.co/storage/v1/object/public/EventImage/ac_dc.jpg",5.0f, 100,"Interior"), navigationController)
 }
