@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -36,7 +35,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.willgo.data.Category
 import com.example.willgo.data.Event
-import com.example.willgo.graphs.BottomBarScreen
 import com.example.willgo.view.screens.navScreens.SearchBar
 import com.example.willgo.view.screens.navScreens.TopBar
 import com.example.willgo.view.sections.CommonEventCard
@@ -48,7 +46,6 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchResultsScreen(paddingValues: PaddingValues, events: List<Event>, initialQuery: String, initialCategory: Category? = null, onQueryChange: (String) -> Unit, onSearch: (String) -> Unit, navController: NavController) {
 fun SearchResultsScreen(
     paddingValues: PaddingValues,
     events: List<Event>,
@@ -64,8 +61,8 @@ fun SearchResultsScreen(
 ) {
 
     var query by remember { mutableStateOf(initialQuery) }
-    var selectedCategory by remember { mutableStateOf(initialCategory) }  // Estado de categoría
     var selectedCategory by remember { mutableStateOf(initialCategory) }
+    var selectedPrice by remember { mutableStateOf(maxPrice?.toString() ?: "Todos") }
     var selectedType by remember { mutableStateOf(typeFilter ?: "Todos") }
     var selectedDate by remember { mutableStateOf(dateFilter ?: "Todos") }
 
@@ -117,7 +114,6 @@ fun SearchResultsScreen(
         ) {
             TopBar(navigationIcon = {
                 IconButton(
-                    onClick = {navController.navigate(BottomBarScreen.Home.route)})
                     onClick = {
                         //navController.navigate(BottomBarScreen.Home.route)
                         navController.navigate("home") {
@@ -149,7 +145,6 @@ fun SearchResultsScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            FiltersTagView(bottomSheetState, coroutineScope)
 
             FiltersTagViewSearchScreen(
                 sheetState = bottomSheetState,
