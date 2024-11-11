@@ -52,6 +52,38 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    fun getWillGo(event: Event){
+        lifecycleScope.launch{
+            val client = getClient()
+            val supabaseResponse = client.postgrest["WillGo"].select(){
+                filter{
+                    eq("event_id", event.id)
+                }
+            }
+            val data = supabaseResponse.decodeList<User>()
+            Log.e("supabase", data.toString())
+        }
+    }
+
+    fun addWillGo(event: Event){
+        lifecycleScope.launch {
+            val user = getUser()
+            val client = getClient()
+            val supabaseResponse = client.postgrest["WillGo"].insert(user)
+            val data = supabaseResponse.decodeList<User>()
+            Log.e("supabase", data.toString())
+        }
+    }
+
+    private suspend fun getUser(): User{
+        val client = getClient()
+        val supabaseResponse = client.postgrest["Usuario"].select()
+        val data = supabaseResponse.decodeList<User>()
+        Log.e("supabase", data.toString())
+        return data[0]
+
+    }
+
     private fun getData(){
         lifecycleScope.launch{
             val client = getClient()

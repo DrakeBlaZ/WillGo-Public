@@ -1,6 +1,5 @@
 package com.example.willgo.graphs
 
-import android.app.appsearch.SearchResults
 import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
@@ -15,6 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.willgo.data.Category
 import com.example.willgo.data.Event
+import com.example.willgo.view.screens.EventDataScreen
 import com.example.willgo.view.screens.SearchResultsScreen
 import com.example.willgo.view.screens.navScreens.HomeScreen
 import com.example.willgo.view.screens.navScreens.MapScreen
@@ -58,11 +58,6 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
             CategoryScreen(onBack = { navController.popBackStack() }, category = category, events.value, navController)
         }
 
-        composable(
-            route = HomeScreenRoutes.DetailEvent.route,
-        ) {
-            DetailEventScreen(onBack = { navController.popBackStack() }, events.value[0])
-        }
 
         composable(
             route = "searchResults?query={query}&maxPrice={maxPrice}&category={category}&type={type}&date={date}",
@@ -159,6 +154,16 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
             )
         }
 
+        composable(
+            route = "eventDetail/{eventId}",
+            arguments = listOf(navArgument("eventId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val event = backStackEntry.arguments?.getInt("eventId") ?: -1
+            val filteredEvents = events.value.filter { it.id.toInt() == event }
+            EventDataScreen(filteredEvents[0], paddingValues, onBack = { navController.popBackStack() })
+        }
+
+
     }
 }
 
@@ -174,6 +179,8 @@ fun getCategory(categoryName: String): Category{
         else ->  Category.Actuacion_musical
 
     }
+
+
 }
 
 suspend fun loadEventsFromSupabase(eventsState: MutableState<List<Event>>){

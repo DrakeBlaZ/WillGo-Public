@@ -1,6 +1,7 @@
 package com.example.willgo.view.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -176,7 +177,7 @@ fun SearchResultsScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally) {
                     items(filteredEvents) { event ->
-                        CommonEventCard(event = event, navController)  // Mostrar tarjeta de evento
+                        CommonEventCard(event = event, modifier = Modifier.clickable {navController.navigate("eventDetail/${event.id}")})  // Mostrar tarjeta de evento
                     }
                     item{}
                 }

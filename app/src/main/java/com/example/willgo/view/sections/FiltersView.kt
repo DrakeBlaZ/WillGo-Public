@@ -70,7 +70,7 @@ fun FiltersTagView(
         // Muestra el valor de cada filtro en un botón separado con opción de eliminación
         if (selectedCategory != null) {
             item {
-                FilterAddedCard(filter = selectedCategory.name, onRemove = onRemoveCategory)
+                FilterAddedCard(filter = selectedCategory.name.replace("_"," "), onRemove = onRemoveCategory)
             }
         }
         if (selectedPrice.isNotEmpty() && selectedPrice != "Todos") {

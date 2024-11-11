@@ -50,7 +50,7 @@ fun CategoriesNavScreen(
             for (category: Category in Category.entries) {
                 FilterValueRow(
                     modifier = modifier,
-                    value = category.name,
+                    value = category.name.replace("_"," "),
                     onClick = {
                         //onCategorySelected(category)
                         navController.previousBackStackEntry?.savedStateHandle?.set("selectedCategory", category)
