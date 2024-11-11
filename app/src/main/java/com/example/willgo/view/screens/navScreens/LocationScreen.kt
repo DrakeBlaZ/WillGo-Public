@@ -1,4 +1,4 @@
-package com.example.willgo.view.screens
+package com.example.willgo.view.screens.navScreens
 
 import androidx.compose.runtime.Composable
 

@@ -15,6 +15,7 @@ interface SupabaseApi {
         @Query("select") select: String = "*"
     ): Call<List<Event>>
 
+
     @POST("Evento")
     fun addEvent(
         @Header("apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRycGd5aHdzZ2h4bmFha3BvZnR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjgwMjgwNDcsImV4cCI6MjA0MzYwNDA0N30.IJthecg-DH9rwOob2XE6ANunb6IskxCbMAacducBVPE") apiKey: String,

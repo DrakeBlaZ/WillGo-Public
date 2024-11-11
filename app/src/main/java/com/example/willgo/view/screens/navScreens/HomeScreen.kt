@@ -1,7 +1,6 @@
-package com.example.willgo.view.screens
+package com.example.willgo.view.screens.navScreens
 
 import android.util.Log
-import android.widget.ImageButton
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -31,13 +30,8 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SearchBar
-import androidx.compose.material3.SearchBarColors
-import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldColors
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,15 +44,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.example.willgo.data.Category
 import com.example.willgo.data.Event
+import com.example.willgo.view.screens.normalizeText
 import com.example.willgo.view.sections.EventCard
 import com.example.willgo.view.sections.CommonEventCard
-import com.example.willgo.view.sections.FilterGrid
 import com.example.willgo.view.sections.FiltersPreview
 
 @Composable
-fun HomeScreen(paddingValues: PaddingValues, events: List<Event>, navController: NavController){
+fun HomeScreen(paddingValues: PaddingValues, events: List<Event>, navController: NavHostController){
     //var filteredEvents by remember { mutableStateOf(events) }
     var query by remember { mutableStateOf("") }
 
@@ -91,12 +86,12 @@ fun HomeScreen(paddingValues: PaddingValues, events: List<Event>, navController:
             )
             {
                 items(1) {
-                    CategorySection(title = "Actuación musical", events = getEventsByCategory(events, Category.Actuacion_musical))
-                    CategorySection(title = "Comedia", events = getEventsByCategory(events, Category.Comedia))
-                    CategorySection(title = "Cultura", events = getEventsByCategory(events, Category.Cultura))
-                    CategorySection(title = "Deporte", events = getEventsByCategory(events, Category.Deporte))
-                    CategorySection(title = "Discoteca", events = getEventsByCategory(events, Category.Discoteca))
-                    CategorySection(title = "Teatro", events = getEventsByCategory(events, Category.Teatro))
+                    CategorySection(title = "Actuación musical", events = getEventsByCategory(events, Category.Actuacion_musical), navController)
+                    CategorySection(title = "Comedia", events = getEventsByCategory(events, Category.Comedia), navController)
+                    CategorySection(title = "Cultura", events = getEventsByCategory(events, Category.Cultura), navController)
+                    CategorySection(title = "Deporte", events = getEventsByCategory(events, Category.Deporte), navController)
+                    CategorySection(title = "Discoteca", events = getEventsByCategory(events, Category.Discoteca), navController)
+                    CategorySection(title = "Teatro", events = getEventsByCategory(events, Category.Teatro), navController)
                 }
             }
         }
@@ -136,14 +131,14 @@ fun TopBar(navigationIcon: @Composable () -> Unit = {}) {
 }
 
 @Composable
-fun CategorySection(title: String, events: List<Event>) {
+fun CategorySection(title: String, events: List<Event>, navController: NavHostController) {
     SectionTitle(title = title)
     Spacer(modifier = Modifier.height(16.dp))
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(events) { event ->
-            CommonEventCard(event = event)  // Muestra cada evento en su tarjeta
+            CommonEventCard(event = event, navController)  // Muestra cada evento en su tarjeta
         }
     }
     Spacer(modifier = Modifier.height(16.dp))
@@ -189,7 +184,7 @@ fun SearchBar(text:String, events: List<Event>, onQueryChange: (String) -> Unit,
                         onQueryChange("")
                     }
                 )
-            } else null
+            }
         },
         modifier = Modifier.padding(horizontal = searchBarPadding),
         windowInsets = WindowInsets(top = 0.dp, bottom = 0.dp),
@@ -226,14 +221,14 @@ fun SectionTitle(title: String) {
 }
 
 @Composable
-fun EventList(events: List<Event>){
+fun EventList(events: List<Event>, navController: NavHostController){
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Log.d("EventList", "Mostrando ${events.size} eventos en la lista")
         items(events.size){
                 index ->
-            CommonEventCard(event = events[index])
+            CommonEventCard(event = events[index], navController)
             Log.d("EventList", "Evento mostrado: ${events[index].name_event}")
         }
     }

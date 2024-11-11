@@ -15,11 +15,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.willgo.data.Category
 import com.example.willgo.data.Event
-import com.example.willgo.view.screens.HomeScreen
-import com.example.willgo.view.screens.MapScreen
-import com.example.willgo.view.screens.ProfileScreen
 import com.example.willgo.view.screens.SearchResultsScreen
-import com.example.willgo.view.sections.FiltersNavScreens.AllFilters
+import com.example.willgo.view.screens.navScreens.HomeScreen
+import com.example.willgo.view.screens.navScreens.MapScreen
+import com.example.willgo.view.screens.navScreens.ProfileScreen
+import com.example.willgo.view.screens.other.CategoryScreen
+import com.example.willgo.view.screens.other.DetailEventScreen
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
@@ -49,6 +50,21 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
         }
 
         composable(
+            route = HomeScreenRoutes.Category.route,
+            arguments = listOf(navArgument("categoryName") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val categoryName = backStackEntry.arguments?.getString("categoryName") ?: "DEFAULT"
+            val category = getCategory(categoryName)
+            CategoryScreen(onBack = { navController.popBackStack() }, category = category, events.value, navController)
+        }
+
+        composable(
+            route = HomeScreenRoutes.DetailEvent.route,
+        ) {
+            DetailEventScreen(onBack = { navController.popBackStack() }, events.value[0])
+        }
+
+        composable(
             route = "searchResults?query={query}&maxPrice={maxPrice}&category={category}&type={type}&date={date}",
             arguments = listOf(
                 navArgument("query") { defaultValue = "" },
@@ -56,7 +72,7 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
                 navArgument("category") { defaultValue = "" },
                 navArgument("type") { defaultValue = "Todos" },
                 navArgument("date") { defaultValue = "Todos" },
-                )
+            )
         ) { backStackEntry ->
             val query = backStackEntry.arguments?.getString("query") ?: ""
             val maxPrice = backStackEntry.arguments?.getString("maxPrice")?.toFloatOrNull() ?: 10000f
@@ -142,6 +158,21 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
                 navController
             )
         }
+
+    }
+}
+
+
+fun getCategory(categoryName: String): Category{
+     return when(categoryName){
+        "Actuacion musical" ->  Category.Actuacion_musical
+        "Comedia" ->  Category.Comedia
+        "Cultura" ->  Category.Cultura
+        "Deporte" ->  Category.Deporte
+        "Discoteca" ->  Category.Discoteca
+        "Teatro" ->  Category.Teatro
+        else ->  Category.Actuacion_musical
+
     }
 }
 
@@ -165,6 +196,11 @@ private fun getClient(): SupabaseClient {
     ){
         install(Postgrest)
     }
+}
+
+sealed class HomeScreenRoutes(val route: String){
+    object Category: HomeScreenRoutes("Category_Section/{categoryName}")
+    object DetailEvent: HomeScreenRoutes("Detail_Event")
 }
 
 fun buildSearchRoute(
