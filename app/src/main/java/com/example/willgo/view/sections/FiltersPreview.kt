@@ -32,10 +32,11 @@ import androidx.navigation.NavHostController
 import com.example.willgo.data.Category
 import kotlinx.coroutines.launch
 import androidx.navigation.NavController
+import com.example.willgo.data.Event
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FiltersPreview(navController: NavController, selectedCategory: Category?){
+fun FiltersPreview(navController: NavController, selectedCategory: Category?, events: List<Event>){
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val coroutineScope = rememberCoroutineScope()
     val keyboard = LocalSoftwareKeyboardController.current
@@ -44,7 +45,9 @@ fun FiltersPreview(navController: NavController, selectedCategory: Category?){
     if (bottomSheetState.isVisible) {
         MyModalBottomSheet(
             onDismiss = { coroutineScope.launch { bottomSheetState.hide() } },
-            sheetState = bottomSheetState
+            sheetState = bottomSheetState,
+            events = events,
+            navControllerMain = navController
         )
     }
 

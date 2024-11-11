@@ -19,25 +19,28 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.willgo.data.Category
+import com.example.willgo.graphs.FiltersScreen
 import com.example.willgo.view.sections.FilterRow
 import com.example.willgo.view.sections.FilterValueRow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CategoriesNavScreen(onBack: () -> Unit, modifier: Modifier){
+fun CategoriesNavScreen(
+    onBack: () -> Unit,
+    modifier: Modifier,
+    onCategorySelected: (Category) -> Unit,
+    navController: NavController,
+){
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Filtros") },
-                navigationIcon = { IconButton(onClick = onBack){ Icon(imageVector = Icons.Default.ArrowBackIosNew, contentDescription = null)}}
-            )
-        },
-        bottomBar = {
-            ResultFilterButton(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
+                navigationIcon = {
+                    IconButton(onClick = onBack){
+                        Icon(imageVector = Icons.Default.ArrowBackIosNew, contentDescription = null)}
+                }
             )
         }
     ) {
@@ -47,7 +50,12 @@ fun CategoriesNavScreen(onBack: () -> Unit, modifier: Modifier){
             for (category: Category in Category.entries) {
                 FilterValueRow(
                     modifier = modifier,
-                    value = category.name
+                    value = category.name,
+                    onClick = {
+                        //onCategorySelected(category)
+                        navController.previousBackStackEntry?.savedStateHandle?.set("selectedCategory", category)
+                        navController.popBackStack()
+                    }
                 )
             }
         }

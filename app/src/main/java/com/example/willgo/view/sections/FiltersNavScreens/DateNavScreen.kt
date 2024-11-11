@@ -27,48 +27,77 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.willgo.data.Category
 import com.example.willgo.view.sections.FilterRow
 import com.example.willgo.view.sections.FilterValueRow
+import kotlinx.datetime.LocalDate
+import java.text.SimpleDateFormat
+import java.time.format.DateTimeFormatter
+import java.util.Date
+import java.util.Locale
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DateNavScreen(
-    onBack: () -> Unit, modifier: Modifier
+    onBack: () -> Unit,
+    modifier: Modifier,
+    navController: NavController,
+    onDateSelected: (String) -> Unit
 ){
+    val context = LocalContext.current
     val state = rememberDatePickerState()
     var showDialog by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Filtros") },
                 navigationIcon = { IconButton(onClick = onBack){ Icon(imageVector = Icons.Default.ArrowBackIosNew, contentDescription = null) } }
             )
-        },
-        bottomBar = {
-            ResultFilterButton(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
-            )
         }
     ) {
         Column(modifier = Modifier.padding(it)) {
             Text("Fecha")
             Spacer(modifier = Modifier.height(8.dp))
-            FilterValueRow(modifier = Modifier, value = "Todos")
-            FilterValueRow(modifier = Modifier, value = "Hoy")
-            FilterValueRow(modifier = Modifier, value = "Esta semana")
-            FilterValueRow(modifier = Modifier, value = "Este mes")
-            FilterValueRow(modifier = Modifier.clickable { showDialog = true }, value = "Selecciona dia")
-            if(showDialog){
+
+            FilterValueRow(modifier = modifier, value = "Hoy", onClick = {
+                navController.previousBackStackEntry?.savedStateHandle?.set("selectedDate", "Hoy")
+                navController.popBackStack()
+            })
+            FilterValueRow(modifier = modifier, value = "Esta semana", onClick = {
+                navController.previousBackStackEntry?.savedStateHandle?.set("selectedDate", "Esta semana")
+                navController.popBackStack()
+            })
+            FilterValueRow(modifier = modifier, value = "Este mes", onClick = {
+                navController.previousBackStackEntry?.savedStateHandle?.set("selectedDate", "Este mes")
+                navController.popBackStack()
+            })
+            FilterValueRow(modifier = modifier, value = "Personalizado", onClick = {
+                showDialog = true
+            })
+
+            /*Button(onClick = { showDialog = true }) {
+                Text("Selecciona día")
+            }*/
+
+            // DatePickerDialog para seleccionar una fecha específica
+            if (showDialog) {
                 DatePickerDialog(
                     onDismissRequest = { showDialog = false },
                     confirmButton = {
-                        Button (onClick = { showDialog = false }) { Text("Confirmar") }
-                                    },
-                ){
+                        Button(onClick = {
+                            val selectedDate = Date(state.selectedDateMillis ?: System.currentTimeMillis())
+                            val formattedDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(selectedDate)
+                            navController.previousBackStackEntry?.savedStateHandle?.set("selectedDate", formattedDate)
+                            showDialog = false
+                            navController.popBackStack()
+                        }) { Text("Confirmar") }
+                    }
+                ) {
                     DatePicker(state = state)
                 }
             }

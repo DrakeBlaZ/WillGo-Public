@@ -19,34 +19,46 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.willgo.view.sections.FilterValueRow
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TypeNavScreen(onBack: () -> Unit, modifier: Modifier){
+fun TypeNavScreen(
+    onBack: () -> Unit,
+    modifier: Modifier,
+    navController: NavController,
+    onTypeSelected: (String) -> Unit
+){
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Filtros") },
                 navigationIcon = { IconButton(onClick = onBack){ Icon(imageVector = Icons.Default.ArrowBackIosNew, contentDescription = null) } }
             )
-        },
-        bottomBar = {
-            ResultFilterButton(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
-            )
         }
     ) {
         Column(modifier = Modifier.padding(it)) {
             Text("Tipo de lugar")
             Spacer(modifier = Modifier.height(8.dp))
-            FilterValueRow(modifier = Modifier, value = "Todos")
-            FilterValueRow(modifier = Modifier, value = "En linea")
-            FilterValueRow(modifier = Modifier, value = "En interior")
-            FilterValueRow(modifier = Modifier, value = "Al aire libre")
+
+            FilterValueRow(modifier = modifier, value = "Todos", onClick = {
+                navController.previousBackStackEntry?.savedStateHandle?.set("selectedType", "Todos")
+                navController.popBackStack()
+            })
+            FilterValueRow(modifier = modifier, value = "Interior", onClick = {
+                navController.previousBackStackEntry?.savedStateHandle?.set("selectedType", "Interior")
+                navController.popBackStack()
+            })
+            FilterValueRow(modifier = modifier, value = "Exterior", onClick = {
+                navController.previousBackStackEntry?.savedStateHandle?.set("selectedType", "Exterior")
+                navController.popBackStack()
+            })
+            FilterValueRow(modifier = modifier, value = "Online", onClick = {
+                navController.previousBackStackEntry?.savedStateHandle?.set("selectedType", "Online")
+                navController.popBackStack()
+            })
         }
     }
 }

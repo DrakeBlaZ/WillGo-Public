@@ -4,6 +4,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -41,6 +43,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.willgo.data.Category
+import com.example.willgo.data.Event
 import com.example.willgo.graphs.FiltersNavGraph
 import com.example.willgo.graphs.FiltersScreen
 import com.example.willgo.graphs.Graph
@@ -48,28 +52,91 @@ import com.example.willgo.view.sections.FiltersNavScreens.AllFilters
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
+@Composable
+fun FiltersTagView(
+    selectedCategory: Category?,
+    selectedPrice: String,
+    selectedType: String,
+    selectedDate: String,
+    onRemoveCategory: () -> Unit,
+    onRemovePrice: () -> Unit,
+    onRemoveType: () -> Unit,
+    onRemoveDate: () -> Unit,
+){
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        // Muestra el valor de cada filtro en un botón separado con opción de eliminación
+        if (selectedCategory != null) {
+            item {
+                FilterAddedCard(filter = selectedCategory.name, onRemove = onRemoveCategory)
+            }
+        }
+        if (selectedPrice.isNotEmpty() && selectedPrice != "Todos") {
+            item {
+                FilterAddedCard(filter = selectedPrice, onRemove = onRemovePrice)
+            }
+        }
+        if (selectedType.isNotEmpty() && selectedType != "Todos") {
+            item {
+                FilterAddedCard(filter = selectedType, onRemove = onRemoveType)
+            }
+        }
+        if (selectedDate.isNotEmpty() && selectedDate != "Todos") {
+            item {
+                FilterAddedCard(filter = selectedDate, onRemove = onRemoveDate)
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FiltersTagView(sheetState: SheetState, coroutineScope: CoroutineScope){
+fun FiltersTagViewSearchScreen(
+    sheetState: SheetState,
+    coroutineScope: CoroutineScope,
+    events: List<Event>,
+    navControllerMain: NavController,
+    selectedCategory: Category?,
+    selectedPrice: String,
+    selectedType: String,
+    selectedDate: String,
+    onRemoveCategory: () -> Unit,
+    onRemovePrice: () -> Unit,
+    onRemoveType: () -> Unit,
+    onRemoveDate: () -> Unit
+){
     val keyboard = LocalSoftwareKeyboardController.current
     if (sheetState.isVisible) {
         MyModalBottomSheet(
             onDismiss = { coroutineScope.launch { sheetState.hide() } },
-            sheetState = sheetState
+            sheetState = sheetState,
+            events = events,
+            navControllerMain = navControllerMain
         )
     }
-
-    LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    Row(
+        modifier = Modifier.fillMaxWidth()
     ) {
-        item(){
-            FilterButton(onClick = {
+        FilterButton(
+            onClick = {
                 keyboard?.hide()
-                coroutineScope.launch { sheetState.expand() }}, modifier = Modifier.padding(start = 8.dp))
-        }
-        items(5){
-            FilterAddedCard("Concierto")
-        }
+                coroutineScope.launch { sheetState.expand() }
+            },
+            modifier = Modifier.padding(start = 8.dp, end = 8.dp)
+        )
+
+        FiltersTagView(
+            selectedCategory = selectedCategory,
+            selectedPrice = selectedPrice,
+            selectedType = selectedType,
+            selectedDate = selectedDate,
+            onRemoveCategory = onRemoveCategory,
+            onRemovePrice = onRemovePrice,
+            onRemoveType = onRemoveType,
+            onRemoveDate = onRemoveDate
+        )
     }
 }
 
@@ -82,33 +149,42 @@ fun FilterButton(onClick: () -> Unit, modifier: Modifier){
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyModalBottomSheet(onDismiss: () -> Unit, sheetState: SheetState) {
+fun MyModalBottomSheet(
+    onDismiss: () -> Unit,
+    sheetState: SheetState,
+    events: List<Event>,
+    navControllerMain: NavController
+) {
     val navHostController = rememberNavController()
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         windowInsets = WindowInsets(bottom = 0.dp),
     ) {
-        FilterPanel(navHostController = navHostController)
+        FilterPanel(navHostController = navHostController, events = events, paddingValues = PaddingValues(0.dp), navControllerMain)
     }
 }
 
 @Composable
-fun FilterAddedCard(filter: String){
+fun FilterAddedCard(filter: String, onRemove: () -> Unit){
     ElevatedButton(
-        onClick = {},
+        onClick = onRemove,
         colors = ButtonDefaults.elevatedButtonColors(containerColor = Color.Gray)
     ) {
-        Text("Elevated con Icono")
+        Text(filter)
         Spacer(modifier = Modifier.width(8.dp))
-        Icon(imageVector = Icons.Default.Close, contentDescription = null)
+        Icon(
+            imageVector = Icons.Default.Close,
+            contentDescription = null,
+            modifier = Modifier.clickable { onRemove() }
+        )
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FilterPanel(navHostController: NavHostController ){
-        FiltersNavGraph(navHostController)
+fun FilterPanel(navHostController: NavHostController, events: List<Event>,paddingValues: PaddingValues, navControllerMain: NavController){
+        FiltersNavGraph(navHostController, events,paddingValues, navControllerMain)
 }
 
 @Composable
@@ -129,9 +205,10 @@ fun FilterRow(modifier: Modifier, filterName: String, value: String){
 }
 
 @Composable
-fun FilterValueRow(modifier: Modifier, value: String){
+fun FilterValueRow(modifier: Modifier, value: String, onClick: () -> Unit){
     Box(modifier = modifier
         .fillMaxWidth()
+        .clickable { onClick() }
         .drawBehind {
             drawLine(
                 color = Color.Gray,
@@ -140,6 +217,7 @@ fun FilterValueRow(modifier: Modifier, value: String){
                 strokeWidth = 1.dp.toPx()
             )
         }
+        .padding(8.dp)
     ){
         Text(text = value, modifier = Modifier.align(Alignment.CenterStart).padding(start = 8.dp))
     }

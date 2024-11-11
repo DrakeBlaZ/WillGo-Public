@@ -22,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,17 +37,71 @@ import androidx.navigation.NavController
 import com.example.willgo.data.Category
 import com.example.willgo.data.Event
 import com.example.willgo.graphs.BottomBarScreen
+import com.example.willgo.view.screens.navScreens.SearchBar
+import com.example.willgo.view.screens.navScreens.TopBar
 import com.example.willgo.view.sections.CommonEventCard
-import com.example.willgo.view.sections.FiltersPreview
-import com.example.willgo.view.sections.FiltersTagView
+import com.example.willgo.view.sections.FiltersTagViewSearchScreen
 import java.text.Normalizer
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchResultsScreen(paddingValues: PaddingValues, events: List<Event>, initialQuery: String, initialCategory: Category? = null, onQueryChange: (String) -> Unit, onSearch: (String) -> Unit, navController: NavController) {
+fun SearchResultsScreen(
+    paddingValues: PaddingValues,
+    events: List<Event>,
+    initialQuery: String,
+    initialCategory: Category? = null,
+    maxPrice: Float? = null,
+    externalSelectedCategory: Category? = null,
+    typeFilter: String? = null,
+    dateFilter: String? = null,
+    onQueryChange: (String) -> Unit,
+    onSearch: (String) -> Unit,
+    navController: NavController
+) {
 
     var query by remember { mutableStateOf(initialQuery) }
     var selectedCategory by remember { mutableStateOf(initialCategory) }  // Estado de categoría
+    var selectedCategory by remember { mutableStateOf(initialCategory) }
+    var selectedType by remember { mutableStateOf(typeFilter ?: "Todos") }
+    var selectedDate by remember { mutableStateOf(dateFilter ?: "Todos") }
+
+    val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+
+    // Obtenemos las fechas de hoy, de la semana y del mes siguiente
+    val today = dateFormatter.parse(dateFormatter.format(Calendar.getInstance().time)) ?: Calendar.getInstance().time
+    val nextWeek = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 7) }.time
+    val nextMonth = Calendar.getInstance().apply { add(Calendar.MONTH, 1) }.time
+
+    var categoryToFilter by remember { mutableStateOf(externalSelectedCategory ?: selectedCategory) }
+
+
+    val filteredEvents by remember {
+        derivedStateOf {
+            events.filter { event ->
+                val eventDate = try {
+                    dateFormatter.parse(event.date ?: "")
+                } catch (e: Exception) {
+                    null
+                }
+
+                eventDate != null &&
+                        (categoryToFilter == null || event.category == categoryToFilter) &&
+                        (selectedPrice == "Todos" || (event.price ?: 0f) <= (selectedPrice.toFloatOrNull() ?: 0f)) &&
+                        (selectedType == "Todos" || event.type.equals(selectedType, ignoreCase = true)) &&
+                        (selectedDate == "Todos" ||
+                                (selectedDate == "Hoy" && eventDate.compareTo(today) == 0) ||
+                                (selectedDate == "Esta semana" && eventDate in today..nextWeek) ||
+                                (selectedDate == "Este mes" && eventDate in today..nextMonth) ||
+                                (selectedDate != "Hoy" && selectedDate != "Esta semana" && selectedDate != "Este mes" && event.date == selectedDate)
+                                ) &&
+                        event.name_event.contains(query, ignoreCase = true)
+            }
+        }
+    }
 
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val coroutineScope = rememberCoroutineScope()
@@ -63,6 +118,15 @@ fun SearchResultsScreen(paddingValues: PaddingValues, events: List<Event>, initi
             TopBar(navigationIcon = {
                 IconButton(
                     onClick = {navController.navigate(BottomBarScreen.Home.route)})
+                    onClick = {
+                        //navController.navigate(BottomBarScreen.Home.route)
+                        navController.navigate("home") {
+                            // Establece `launchSingleTop` para evitar duplicados
+                            launchSingleTop = true
+                            // Establece `popUpTo` para limpiar el historial hasta `HomeScreen`
+                            popUpTo("home") { inclusive = true }
+                        }
+                    })
                 {
                     Icon(
                         modifier = Modifier,
@@ -87,6 +151,21 @@ fun SearchResultsScreen(paddingValues: PaddingValues, events: List<Event>, initi
 
             FiltersTagView(bottomSheetState, coroutineScope)
 
+            FiltersTagViewSearchScreen(
+                sheetState = bottomSheetState,
+                coroutineScope = coroutineScope,
+                events = events,
+                navControllerMain = navController,
+                selectedCategory = categoryToFilter,
+                selectedPrice = selectedPrice,
+                selectedType = selectedType,
+                selectedDate = selectedDate,
+                onRemoveCategory = { categoryToFilter = null },
+                onRemovePrice = { selectedPrice = "Todos" },
+                onRemoveType = { selectedType = "Todos" },
+                onRemoveDate = { selectedDate = "Todos" }
+            )
+
             Text(
                 text = "Resultados de la búsqueda:",
                 color = Color.Black,
@@ -95,21 +174,17 @@ fun SearchResultsScreen(paddingValues: PaddingValues, events: List<Event>, initi
                 fontSize = 16.sp
             )
 
-            val filteredEvents = events.filter { event ->
-                (selectedCategory == null || event.category == selectedCategory) &&
-                        normalizeText(event.name_event).contains(normalizeText(query))
-            }
-
             if (filteredEvents.isEmpty()) {
                 Text("No se encontraron eventos.")
             } else {
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.padding(bottom = paddingValues.calculateBottomPadding()).fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally) {
                     items(filteredEvents) { event ->
                         CommonEventCard(event = event, modifier = Modifier.clickable {navController.navigate("eventDetail/${event.id}")})  // Mostrar tarjeta de evento
                     }
+                    item{}
                 }
             }
         }
@@ -122,5 +197,3 @@ fun normalizeText(text: String): String {
         .replace("[^\\p{ASCII}]".toRegex(), "") // Elimina caracteres no ASCII
         .lowercase()  // Convierte el texto a minúsculas
 }
-
-

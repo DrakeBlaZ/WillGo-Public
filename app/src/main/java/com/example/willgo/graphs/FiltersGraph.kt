@@ -12,6 +12,9 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.willgo.data.Category
+import com.example.willgo.data.Event
+import com.example.willgo.view.screens.navScreens.HomeScreen
 import com.example.willgo.view.sections.FiltersNavScreens.AllFilters
 import com.example.willgo.view.sections.FiltersNavScreens.CategoriesNavScreen
 import com.example.willgo.view.sections.FiltersNavScreens.DateNavScreen
@@ -29,28 +32,68 @@ sealed class FiltersScreen(val route: String){
 }
 
 @Composable
-fun FiltersNavGraph(navController: NavHostController){
+fun FiltersNavGraph(navController: NavHostController, events: List<Event>, paddingValues: PaddingValues, navControllerMain: NavController){
     val onBack: () -> Unit = { navController.popBackStack() }
     val modifier = Modifier.fillMaxWidth().height(56.dp)
+
+    val externalSelectedCategory = remember { mutableStateOf<Category?>(null) }
+    val maxPriceFilter = remember { mutableStateOf<Float?>(null) }
+    val selectedTypeFilter = remember { mutableStateOf<String?>(null) }
+    val selectedDateFilter = remember { mutableStateOf<String?>(null) }
+
     NavHost(navController = navController, startDestination = FiltersScreen.Filters.route, route = Graph.MAIN) {
         composable(route = FiltersScreen.Filters.route) {
-            AllFilters(navController)
+            AllFilters(navController, navControllerMain, events)
         }
 
         composable(route = FiltersScreen.Categories.route) {
-            CategoriesNavScreen(onBack = onBack, modifier)
+            CategoriesNavScreen(
+                onBack = onBack,
+                modifier = modifier,
+                onCategorySelected = { selectedCategory ->
+                    externalSelectedCategory.value = selectedCategory
+                    // Navega a SearchResultsScreen pasando la categoría seleccionada
+                    navController.navigate("searchResults?externalSelectedCategory=${selectedCategory.name}")
+                },
+                navController = navController
+            )
         }
 
         composable(route = FiltersScreen.Date.route){
-            DateNavScreen(onBack = onBack, modifier)
+            DateNavScreen(
+                onBack = onBack,
+                modifier,
+                navController = navController,
+                onDateSelected = { selectedDate ->
+                    selectedDateFilter.value = selectedDate
+                }
+            )
         }
 
         composable(route = FiltersScreen.Price.route) {
-            PriceNavScreen(onBack = onBack, modifier)
+            PriceNavScreen(
+                onBack = onBack,
+                modifier,
+                navController,
+                onPriceSelected = { maxPrice ->
+                    maxPriceFilter.value = maxPrice
+                }
+            )
         }
 
         composable(route = FiltersScreen.Type.route) {
-            TypeNavScreen(onBack = onBack, modifier)
+            TypeNavScreen(
+                onBack = onBack,
+                modifier,
+                navController,
+                onTypeSelected = { selectedType ->
+                    selectedTypeFilter.value = selectedType
+                }
+            )
+        }
+
+        composable(route = "home") {
+            HomeScreen(paddingValues = paddingValues, events, navController)
         }
     }
 }

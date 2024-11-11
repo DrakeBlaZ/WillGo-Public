@@ -1,6 +1,5 @@
 package com.example.willgo.graphs
 
-import android.app.appsearch.SearchResults
 import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
@@ -16,10 +15,12 @@ import androidx.navigation.navArgument
 import com.example.willgo.data.Category
 import com.example.willgo.data.Event
 import com.example.willgo.view.screens.EventDataScreen
-import com.example.willgo.view.screens.HomeScreen
-import com.example.willgo.view.screens.MapScreen
-import com.example.willgo.view.screens.ProfileScreen
 import com.example.willgo.view.screens.SearchResultsScreen
+import com.example.willgo.view.screens.navScreens.HomeScreen
+import com.example.willgo.view.screens.navScreens.MapScreen
+import com.example.willgo.view.screens.navScreens.ProfileScreen
+import com.example.willgo.view.screens.other.CategoryScreen
+import com.example.willgo.view.screens.other.DetailEventScreen
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
@@ -31,6 +32,10 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
     LaunchedEffect(Unit) {
         loadEventsFromSupabase(events)
     }
+
+    // Estado para almacenar la categoría seleccionada externamente
+    val externalSelectedCategory = remember { mutableStateOf<Category?>(null) }
+
     NavHost(navController = navController, startDestination = BottomBarScreen.Home.route, route = Graph.MAIN) {
         composable(route = BottomBarScreen.Home.route) {
             HomeScreen(paddingValues = paddingValues, events.value, navController)
@@ -44,19 +49,77 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
             ProfileScreen()
         }
 
+        composable(
+            route = HomeScreenRoutes.Category.route,
+            arguments = listOf(navArgument("categoryName") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val categoryName = backStackEntry.arguments?.getString("categoryName") ?: "DEFAULT"
+            val category = getCategory(categoryName)
+            CategoryScreen(onBack = { navController.popBackStack() }, category = category, events.value, navController)
+        }
+
+
+        composable(
+            route = "searchResults?query={query}&maxPrice={maxPrice}&category={category}&type={type}&date={date}",
+            arguments = listOf(
+                navArgument("query") { defaultValue = "" },
+                navArgument("maxPrice") { defaultValue = "10000" },
+                navArgument("category") { defaultValue = "" },
+                navArgument("type") { defaultValue = "Todos" },
+                navArgument("date") { defaultValue = "Todos" },
+            )
+        ) { backStackEntry ->
+            val query = backStackEntry.arguments?.getString("query") ?: ""
+            val maxPrice = backStackEntry.arguments?.getString("maxPrice")?.toFloatOrNull() ?: 10000f
+            //val category = backStackEntry.arguments?.getString("category")?.let { Category.valueOf(it) }
+            val category = backStackEntry.arguments?.getString("category")?.takeIf { it.isNotEmpty() }?.let { Category.valueOf(it) }
+            val typeFilter = backStackEntry.arguments?.getString("type")
+            val dateFilter = backStackEntry.arguments?.getString("date")
+
+            SearchResultsScreen(
+                paddingValues = paddingValues,
+                events = events.value,
+                initialQuery = query,
+                maxPrice = if (maxPrice == 10000f) null else maxPrice,
+                externalSelectedCategory = category,
+                typeFilter = if (typeFilter == "Todos") null else typeFilter,
+                dateFilter = if (dateFilter == "Todos") null else dateFilter,
+                onQueryChange = { newQuery ->
+                    navController.navigate(
+                        buildSearchRoute(
+                            query = newQuery,
+                            maxPrice = maxPrice,
+                            category = category,
+                            type = typeFilter,
+                            date = dateFilter)
+                    )
+                },
+                onSearch = { searchQuery ->
+                    navController.navigate(
+                        buildSearchRoute(
+                            query = searchQuery,
+                            maxPrice = maxPrice,
+                            category = category,
+                            type = typeFilter,
+                            date = dateFilter)
+                    )
+                },
+                navController = navController
+            )
+        }
+
         composable(route = "searchResults/{query}") { backStackEntry ->
             val query = backStackEntry.arguments?.getString("query") ?: ""
-            val filteredEvents = events.value.filter {
-                it.name_event.contains(
-                    query,
-                    ignoreCase = true
-                )
-            } // Filtrar eventos
+            val filteredEvents = events.value.filter { it.name_event.contains(query, ignoreCase = true) } // Filtrar eventos
             SearchResultsScreen(
                 paddingValues,
                 events = filteredEvents,
                 initialQuery = query,
                 initialCategory = null,
+                maxPrice = null,
+                externalSelectedCategory = externalSelectedCategory.value,
+                typeFilter = null,
+                dateFilter = null,
                 onQueryChange = { newQuery ->
                     navController.navigate("searchResults/$newQuery")
                 },
@@ -67,60 +130,27 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
             )
         }
 
-        /*composable(
-            route = "searchResults?query={query}&category={category}",
-            arguments = listOf(
-                navArgument("query") { defaultValue = "" },
-                navArgument("category") { defaultValue = "" }
-            )
-        ) { backStackEntry ->
+        //ruta para buscar por categoria y por nombre
+        composable(route = "searchResults/{query}/{category}") { backStackEntry ->
             val query = backStackEntry.arguments?.getString("query") ?: ""
-            val categoryName = backStackEntry.arguments?.getString("category") ?: ""
-            val category = Category.entries.firstOrNull { it.name == categoryName }
-
+            val category = backStackEntry.arguments?.getString("category")?.let { Category.valueOf(it) }
+            val filteredEvents = events.value.filter { it.name_event.contains(query, ignoreCase = true) && it.category == category } // Filtrar eventos
             SearchResultsScreen(
-                paddingValues = paddingValues,
-                events = events.value,
-                initialQuery = query,
-                initialCategory = category,
-                onQueryChange = { newQuery ->
-                    navController.navigate("searchResults?query=$newQuery&category=${category?.name ?: ""}")
-                },
-                onSearch = { searchQuery ->
-                    navController.navigate("searchResults?query=$searchQuery&category=${category?.name ?: ""}")
-                },
-                navController = navController
-            )
-        }*/
-
-        composable(
-            route = "searchResults?query={query}&category={category}",
-            arguments = listOf(
-                navArgument("query") { defaultValue = "" },
-                navArgument("category") { defaultValue = "" }
-            )
-        ) { backStackEntry ->
-            val query = backStackEntry.arguments?.getString("query") ?: ""
-            val categoryName = backStackEntry.arguments?.getString("category")
-            val category = Category.entries.firstOrNull { it.name == categoryName }
-
-            val filteredEvents = events.value.filter { event ->
-                (category == null || event.category == category) &&
-                        event.name_event.contains(query, ignoreCase = true)
-            }
-
-            SearchResultsScreen(
-                paddingValues = paddingValues,
+                paddingValues,
                 events = filteredEvents,
                 initialQuery = query,
-                initialCategory = category,  // Pasa la categoría seleccionada
+                initialCategory = category,
+                maxPrice = null,
+                externalSelectedCategory = externalSelectedCategory.value,
+                typeFilter = null,
+                dateFilter = null,
                 onQueryChange = { newQuery ->
-                    navController.navigate("searchResults?query=$newQuery&category=${category?.name ?: ""}")
+                    navController.navigate("searchResults/$newQuery/${category}")
                 },
                 onSearch = { searchQuery ->
-                    navController.navigate("searchResults?query=$searchQuery&category=${category?.name ?: ""}")
+                    navController.navigate("searchResults/$searchQuery/${category}")
                 },
-                navController = navController
+                navController
             )
         }
 
@@ -129,9 +159,24 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
             arguments = listOf(navArgument("eventId") { type = NavType.IntType })
         ) { backStackEntry ->
             val event = backStackEntry.arguments?.getInt("eventId") ?: -1
-            val filteredEvents = events.value.filter { it.id == event }
+            val filteredEvents = events.value.filter { it.id.toInt() == event }
             EventDataScreen(filteredEvents[0], paddingValues, onBack = { navController.popBackStack() })
         }
+
+
+    }
+}
+
+
+fun getCategory(categoryName: String): Category{
+     return when(categoryName){
+        "Actuacion musical" ->  Category.Actuacion_musical
+        "Comedia" ->  Category.Comedia
+        "Cultura" ->  Category.Cultura
+        "Deporte" ->  Category.Deporte
+        "Discoteca" ->  Category.Discoteca
+        "Teatro" ->  Category.Teatro
+        else ->  Category.Actuacion_musical
 
     }
 
@@ -158,4 +203,26 @@ private fun getClient(): SupabaseClient {
     ){
         install(Postgrest)
     }
+}
+
+sealed class HomeScreenRoutes(val route: String){
+    object Category: HomeScreenRoutes("Category_Section/{categoryName}")
+    object DetailEvent: HomeScreenRoutes("Detail_Event")
+}
+
+fun buildSearchRoute(
+    query: String? = null,
+    maxPrice: Float? = null,
+    category: Category? = null,
+    type: String? = null,
+    date: String? = null
+): String {
+    return buildString {
+        append("searchResults?")
+        query?.takeIf { it.isNotEmpty() }?.let { append("query=$it&") }
+        maxPrice?.takeIf { it != 10000f }?.let { append("maxPrice=$it&") }
+        category?.let { append("category=${it.name}&") }
+        type?.takeIf { it != "Todos" }?.let { append("type=$it&") }
+        date?.takeIf { it != "Todos" }?.let { append("date=$it&") }
+    }.removeSuffix("&")
 }
