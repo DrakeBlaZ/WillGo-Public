@@ -36,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Vertices
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -47,6 +48,7 @@ import coil.compose.AsyncImage
 import com.example.willgo.data.Event
 import com.example.willgo.data.User
 import com.example.willgo.data.WillGo
+import com.example.willgo.view.sections.VerticalSeparator
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
@@ -265,6 +267,7 @@ fun WillGo(willGo: Boolean, event: Event, coroutineScope: CoroutineScope, onWill
     }
 }
 
+
 suspend fun getWillGo(event: Event):Boolean{
     val client = getClient()
     val supabaseResponse = client.postgrest["WillGo"].select(){
@@ -289,7 +292,7 @@ suspend fun getAttendants(event: Event):Int{
 
 suspend fun addWillGo(event: Event){
     val user = getUser()
-    val willGo = user.nickname?.let { WillGo(event.id, it) }
+    val willGo = user.nickname?.let { WillGo(event.id.toInt(), it) }
     val client = getClient()
     willGo?.let {
         client.postgrest["WillGo"].insert(willGo)

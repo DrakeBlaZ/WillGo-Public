@@ -1,5 +1,6 @@
 package com.example.willgo.view.screens.other
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -48,7 +49,7 @@ fun CategorySection(events: List<Event>, paddingValues: PaddingValues, navContro
         .padding(paddingValues.calculateTopPadding())
         ){
         items(count = events.size){
-            event -> CommonEventCard(events[event], navController)
+            event -> CommonEventCard(events[event], Modifier.clickable {navController.navigate("eventDetail/${events[event].id}")})
             Spacer(modifier = Modifier.height(16.dp))
         }
     }

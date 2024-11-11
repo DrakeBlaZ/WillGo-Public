@@ -55,7 +55,7 @@ fun SectionTitle(title: String, navController: NavHostController) {
 }
 
 @Composable
-private fun VerticalSeparator(){
+fun VerticalSeparator(){
     Box(modifier = Modifier
         .height(164.dp)
         .width(4.dp))

@@ -47,8 +47,8 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.willgo.data.Category
 import com.example.willgo.data.Event
+import com.example.willgo.graphs.HomeScreenRoutes
 import com.example.willgo.view.screens.normalizeText
-import com.example.willgo.view.sections.EventCard
 import com.example.willgo.view.sections.CommonEventCard
 import com.example.willgo.view.sections.FiltersPreview
 
@@ -86,12 +86,12 @@ fun HomeScreen(paddingValues: PaddingValues, events: List<Event>, navController:
             )
             {
                 items(1) {
-                    CategorySection(title = "Actuación musical", events = getEventsByCategory(events, Category.Actuacion_musical), navController)
-                    CategorySection(title = "Comedia", events = getEventsByCategory(events, Category.Comedia), navController)
-                    CategorySection(title = "Cultura", events = getEventsByCategory(events, Category.Cultura), navController)
-                    CategorySection(title = "Deporte", events = getEventsByCategory(events, Category.Deporte), navController)
-                    CategorySection(title = "Discoteca", events = getEventsByCategory(events, Category.Discoteca), navController)
-                    CategorySection(title = "Teatro", events = getEventsByCategory(events, Category.Teatro), navController)
+                    CategorySection(title = Category.Actuacion_musical, events = getEventsByCategory(events, Category.Actuacion_musical), navController)
+                    CategorySection(title = Category.Comedia, events = getEventsByCategory(events, Category.Comedia), navController)
+                    CategorySection(title = Category.Cultura, events = getEventsByCategory(events, Category.Cultura), navController)
+                    CategorySection(title = Category.Deporte, events = getEventsByCategory(events, Category.Deporte), navController)
+                    CategorySection(title = Category.Discoteca, events = getEventsByCategory(events, Category.Discoteca), navController)
+                    CategorySection(title = Category.Teatro, events = getEventsByCategory(events, Category.Teatro), navController)
                 }
             }
         }
@@ -131,15 +131,15 @@ fun TopBar(navigationIcon: @Composable () -> Unit = {}) {
 }
 
 @Composable
-fun CategorySection(title: String, events: List<Event>, navController: NavHostController) {
-    SectionTitle(title = title)
+fun CategorySection(title: Category, events: List<Event>, navController: NavHostController) {
+    SectionTitle(title = title, modifier = Modifier.clickable {navController.navigate(HomeScreenRoutes.Category.route)})
     Spacer(modifier = Modifier.height(16.dp))
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         item{}
         items(events) { event ->
-            CommonEventCard(event = event, navController)  // Muestra cada evento en su tarjeta
+            CommonEventCard(event = event, modifier = Modifier.clickable {navController.navigate("eventDetail/${event.id}")})  // Muestra cada evento en su tarjeta
         }
         item {}
     }
@@ -196,16 +196,14 @@ fun SearchBar(text:String, events: List<Event>, onQueryChange: (String) -> Unit,
 }
 
 @Composable
-fun SectionTitle(title: String) {
+fun SectionTitle(title: Category, modifier: Modifier) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(horizontal = 12.dp)
-            .clickable {
+        modifier = modifier.padding(horizontal = 12.dp)
 
-            }
     ) {
         Text(
-            text = title,
+            text = title.name.replace("_", " "),
             color = Color.Black,
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
@@ -222,45 +220,8 @@ fun SectionTitle(title: String) {
     }
 }
 
-@Composable
-fun EventList(events: List<Event>, navController: NavHostController){
-    LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Log.d("EventList", "Mostrando ${events.size} eventos en la lista")
-        items(events.size){
-                index ->
-            CommonEventCard(event = events[index], navController)
-            Log.d("EventList", "Evento mostrado: ${events[index].name_event}")
-        }
-    }
-}
 
-@Composable
-fun EventSection() {
-    LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        item{VerticalSeparator()}
-        item{}
-        items(6){
-            EventCard()
-        }
-        item{VerticalSeparator()}
-
-    }
-}
 
 fun getEventsByCategory(events: List<Event>, category: Category): List<Event> {
     return events.filter { it.category == category }
 }
-
-@Composable
-fun VerticalSeparator(){
-    Box(modifier = Modifier
-        .height(164.dp)
-        .width(4.dp))
-}
-
-
-
