@@ -4,8 +4,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -14,14 +12,9 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.example.willgo.data.Category
 import com.example.willgo.data.Event
-import com.example.willgo.view.screens.HomeScreen
-import com.example.willgo.view.screens.MapScreen
-import com.example.willgo.view.screens.ProfileScreen
-import com.example.willgo.view.screens.SearchResultsScreen
+import com.example.willgo.view.screens.navScreens.HomeScreen
 import com.example.willgo.view.sections.FiltersNavScreens.AllFilters
 import com.example.willgo.view.sections.FiltersNavScreens.CategoriesNavScreen
 import com.example.willgo.view.sections.FiltersNavScreens.DateNavScreen

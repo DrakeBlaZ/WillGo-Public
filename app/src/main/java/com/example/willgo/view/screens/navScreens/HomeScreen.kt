@@ -137,9 +137,11 @@ fun CategorySection(title: String, events: List<Event>, navController: NavHostCo
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        item{}
         items(events) { event ->
             CommonEventCard(event = event, navController)  // Muestra cada evento en su tarjeta
         }
+        item {}
     }
     Spacer(modifier = Modifier.height(16.dp))
 }
@@ -240,6 +242,7 @@ fun EventSection() {
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         item{VerticalSeparator()}
+        item{}
         items(6){
             EventCard()
         }

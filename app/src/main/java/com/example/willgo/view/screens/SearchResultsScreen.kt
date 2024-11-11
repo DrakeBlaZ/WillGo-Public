@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -35,12 +34,10 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.willgo.data.Category
 import com.example.willgo.data.Event
-import com.example.willgo.graphs.BottomBarScreen
+import com.example.willgo.view.screens.navScreens.SearchBar
+import com.example.willgo.view.screens.navScreens.TopBar
 import com.example.willgo.view.sections.CommonEventCard
-import com.example.willgo.view.sections.FiltersPreview
-import com.example.willgo.view.sections.FiltersTagView
 import com.example.willgo.view.sections.FiltersTagViewSearchScreen
-import kotlinx.datetime.LocalDate
 import java.text.Normalizer
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -179,7 +176,7 @@ fun SearchResultsScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally) {
                     items(filteredEvents) { event ->
-                        CommonEventCard(event = event)  // Mostrar tarjeta de evento
+                        CommonEventCard(event = event, navController)  // Mostrar tarjeta de evento
                     }
                     item{}
                 }
