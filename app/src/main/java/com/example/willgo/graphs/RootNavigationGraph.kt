@@ -11,10 +11,10 @@ fun RootNavigationGraph(){
     val navController = rememberNavController()
 
     NavHost(navController = navController,
-        startDestination = Graph.AUTH,
+        startDestination = Graph.MAIN,
         route = Graph.ROOT)
     {
-        authNavGraph(navController)
+        //authNavGraph(navController)
         composable(route = Graph.MAIN){
             MainScreen()
         }

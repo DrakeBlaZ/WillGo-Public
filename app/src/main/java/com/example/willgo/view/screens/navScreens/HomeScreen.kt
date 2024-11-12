@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,11 +17,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -39,15 +43,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import com.example.willgo.data.Category
 import com.example.willgo.data.Event
+import com.example.willgo.graphs.HomeScreenRoutes
+import com.example.willgo.view.screens.normalizeText
 import com.example.willgo.view.sections.CommonEventCard
-import com.example.willgo.view.sections.EventSection
-import com.example.willgo.view.sections.SectionTitle
+import com.example.willgo.view.sections.FiltersPreview
 
 @Composable
 fun HomeScreen(paddingValues: PaddingValues, events: List<Event>, navController: NavHostController){
-    var filteredEvents by remember { mutableStateOf(events) }
+    //var filteredEvents by remember { mutableStateOf(events) }
+    var query by remember { mutableStateOf("") }
+
     Box(modifier = Modifier
         .fillMaxSize()
         .padding(top = paddingValues.calculateTopPadding())
@@ -57,16 +66,18 @@ fun HomeScreen(paddingValues: PaddingValues, events: List<Event>, navController:
                 .fillMaxWidth()
         ) {
             TopBar()
-            Search(events) { query ->
-                filteredEvents = if (query.isEmpty()) {
-                    events
-                } else {
-                    events.filter {
-                        it.name_event.contains(query, ignoreCase = true)
-                    }
-                }
-                Log.d("Search", "Query de búsqueda: $query, eventos filtrados: ${filteredEvents.size}")
-            }
+            SearchBar(
+                text = query,
+                events = events,
+                onQueryChange = { newQuery ->
+                    query = normalizeText(newQuery)
+                },
+                onSearch = {
+                    navController.navigate("searchResults/${normalizeText(query)}")
+                },
+                navController = navController
+            )
+
             Spacer(modifier = Modifier.height(12.dp))
             LazyColumn(modifier = Modifier
                 .padding(bottom = paddingValues.calculateBottomPadding())
@@ -74,34 +85,29 @@ fun HomeScreen(paddingValues: PaddingValues, events: List<Event>, navController:
                 .background(Color.White)
             )
             {
-                items(1)  {
-                    Spacer(Modifier.height(16.dp))
-                    EventSection("Popular", navController)
-                    Spacer(Modifier.height(16.dp))
-                    EventSection("Conciertos", navController)
-                    Spacer(Modifier.height(16.dp))
-                    EventSection("Deportes", navController)
-                    Spacer(Modifier.height(16.dp))
-
-                    SectionTitle(title = "Resultados de la búsqueda", navController = navController)
-                    Spacer(Modifier.height(16.dp))
-                    EventList(filteredEvents, navController)
-                    Spacer(Modifier.height(16.dp))
+                items(1) {
+                    CategorySection(title = Category.Actuacion_musical, events = getEventsByCategory(events, Category.Actuacion_musical), navController)
+                    CategorySection(title = Category.Comedia, events = getEventsByCategory(events, Category.Comedia), navController)
+                    CategorySection(title = Category.Cultura, events = getEventsByCategory(events, Category.Cultura), navController)
+                    CategorySection(title = Category.Deporte, events = getEventsByCategory(events, Category.Deporte), navController)
+                    CategorySection(title = Category.Discoteca, events = getEventsByCategory(events, Category.Discoteca), navController)
+                    CategorySection(title = Category.Teatro, events = getEventsByCategory(events, Category.Teatro), navController)
                 }
-
             }
         }
     }
-
 }
 
 @Composable
- private fun TopBar() {
+fun TopBar(navigationIcon: @Composable () -> Unit = {}) {
     Box(
         modifier = Modifier.padding(top = 12.dp, start = 12.dp, end = 12.dp)
             .fillMaxWidth()
+            .height(48.dp)
     ) {
-
+        Box(modifier = Modifier.align(Alignment.TopStart)){
+            navigationIcon()
+        }
         Text(
             text = "WILLGO",
             color = Color.Black,
@@ -124,10 +130,26 @@ fun HomeScreen(paddingValues: PaddingValues, events: List<Event>, navController:
     }
 }
 
+@Composable
+fun CategorySection(title: Category, events: List<Event>, navController: NavHostController) {
+    SectionTitle(title = title, modifier = Modifier.clickable {navController.navigate(HomeScreenRoutes.Category.route)})
+    Spacer(modifier = Modifier.height(16.dp))
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        item{}
+        items(events) { event ->
+            CommonEventCard(event = event, modifier = Modifier.clickable {navController.navigate("eventDetail/${event.id}")})  // Muestra cada evento en su tarjeta
+        }
+        item {}
+    }
+    Spacer(modifier = Modifier.height(16.dp))
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Search(events: List<Event>, onQueryChange: (String) -> Unit){
-    var text by remember { mutableStateOf("") }
+fun SearchBar(text:String, events: List<Event>, onQueryChange: (String) -> Unit, onSearch: () -> Unit, navController: NavController){
+    var query by remember { mutableStateOf(text) }
     var active by remember { mutableStateOf(false) }
 
     Log.d("Search", "Función de búsqueda inicializada")
@@ -135,14 +157,15 @@ fun Search(events: List<Event>, onQueryChange: (String) -> Unit){
     val searchBarPadding by animateDpAsState(targetValue = if (active) 0.dp else 16.dp, label = "")
 
     SearchBar(
-        query = text,
-        onQueryChange = {query ->
-            text = query
-            onQueryChange(query)
+        query = query,
+        onQueryChange = { newQuery ->
+            query = newQuery
+            onQueryChange(normalizeText(newQuery))
             Log.d("SearchBar", "Texto cambiado: $text")
         },
         onSearch = {
             active = false
+            onSearch() // Navegar a la pantalla de resultados
         },
         active = active,
         onActiveChange = {
@@ -154,33 +177,51 @@ fun Search(events: List<Event>, onQueryChange: (String) -> Unit){
         leadingIcon = {
             Icon(imageVector = Icons.Default.Search, contentDescription = "Search icon")
         },
-        trailingIcon = if(active && text.isNotEmpty()){{
-            Icon(imageVector = Icons.Default.Close, contentDescription = "Close icon",
-                modifier = Modifier.clickable{
-                    text = ""
-                    onQueryChange("")
-                })
-        }}else{@Composable {}},
-        modifier = Modifier.padding( horizontal = searchBarPadding),
-        windowInsets = WindowInsets(top = 0.dp, bottom = 0.dp)
-    ) { }
+        trailingIcon = {
+            if (active && text.isNotEmpty()) {
+                Icon(
+                    imageVector = Icons.Default.Close, contentDescription = "Close icon",
+                    modifier = Modifier.clickable {
+                        query = ""
+                        onQueryChange("")
+                    }
+                )
+            }
+        },
+        modifier = Modifier.padding(horizontal = searchBarPadding),
+        windowInsets = WindowInsets(top = 0.dp, bottom = 0.dp),
+    ) {
+        FiltersPreview(navController, null, events)
+    }
 }
 
 @Composable
-fun EventList(events: List<Event>, navController: NavHostController){
-    LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+fun SectionTitle(title: Category, modifier: Modifier) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier.padding(horizontal = 12.dp)
+
     ) {
-        Log.d("EventList", "Mostrando ${events.size} eventos en la lista")
-        items(events.size){
-                index ->
-            CommonEventCard(event = events[index], navController)
-            Log.d("EventList", "Evento mostrado: ${events[index].name_event}")
+        Text(
+            text = title.name.replace("_", " "),
+            color = Color.Black,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        Box(
+            modifier = Modifier
+                .background(Color.White, shape = RoundedCornerShape(16.dp))
+        ) {
+            Image(
+                imageVector =  Icons.Default.ChevronRight, contentDescription = null
+            )
         }
     }
 }
 
 
 
-
-
+fun getEventsByCategory(events: List<Event>, category: Category): List<Event> {
+    return events.filter { it.category == category }
+}

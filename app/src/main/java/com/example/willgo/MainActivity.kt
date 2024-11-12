@@ -52,19 +52,36 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    //Función para cargar eventos desde Supabase
-    private fun loadEventsFromSupabase(eventsState: MutableState<List<Event>>){
-        lifecycleScope.launch {
-            try{
-                val client = getClient()
-                val supabaseResponse = client.postgrest["Evento"].select()
-                val events = supabaseResponse.decodeList<Event>()
-                Log.d("Supabase", "Eventos obtenidos: ${events.size}")
-                eventsState.value = events
-            } catch (e: Exception) {
-                Log.e("Supabase", "Error al obtener eventos: ${e.message}")
+    fun getWillGo(event: Event){
+        lifecycleScope.launch{
+            val client = getClient()
+            val supabaseResponse = client.postgrest["WillGo"].select(){
+                filter{
+                    eq("event_id", event.id)
+                }
             }
+            val data = supabaseResponse.decodeList<User>()
+            Log.e("supabase", data.toString())
         }
+    }
+
+    fun addWillGo(event: Event){
+        lifecycleScope.launch {
+            val user = getUser()
+            val client = getClient()
+            val supabaseResponse = client.postgrest["WillGo"].insert(user)
+            val data = supabaseResponse.decodeList<User>()
+            Log.e("supabase", data.toString())
+        }
+    }
+
+    private suspend fun getUser(): User{
+        val client = getClient()
+        val supabaseResponse = client.postgrest["Usuario"].select()
+        val data = supabaseResponse.decodeList<User>()
+        Log.e("supabase", data.toString())
+        return data[0]
+
     }
 
     private fun getData(){

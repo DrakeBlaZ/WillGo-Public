@@ -1,5 +1,6 @@
 package com.example.willgo.view.screens.other
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,8 +17,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.willgo.data.Category
@@ -50,12 +49,13 @@ fun CategorySection(events: List<Event>, paddingValues: PaddingValues, navContro
         .padding(paddingValues.calculateTopPadding())
         ){
         items(count = events.size){
-            event -> CommonEventCard(events[event], navController)
+            event -> CommonEventCard(events[event], Modifier.clickable {navController.navigate("eventDetail/${events[event].id}")})
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
 
+/*
 @Preview
 @Composable
 fun EventSectionPreview(){
@@ -75,3 +75,4 @@ fun EventSectionPreview(){
     val events = listOf(event, event, event, event, event)
     CategoryScreen(category = Category.Actuacion_musical, onBack = {}, events = events, navController = navController)
 }
+ */

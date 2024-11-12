@@ -25,21 +25,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.willgo.graphs.HomeScreenRoutes
 
-@Composable
-fun EventSection(title: String, navController: NavHostController) {
-    SectionTitle(title = title, navController = navController)
-    Spacer(modifier = Modifier.height(16.dp))
-    LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        item{ VerticalSeparator() }
-        items(6){
-            EventCard()
-        }
-        item{ VerticalSeparator() }
 
-    }
-}
 
 @Composable
 fun SectionTitle(title: String, navController: NavHostController) {
@@ -69,7 +55,7 @@ fun SectionTitle(title: String, navController: NavHostController) {
 }
 
 @Composable
-private fun VerticalSeparator(){
+fun VerticalSeparator(){
     Box(modifier = Modifier
         .height(164.dp)
         .width(4.dp))
