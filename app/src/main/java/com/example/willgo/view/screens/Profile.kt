@@ -1,9 +1,15 @@
 package com.example.willgo.view.screens
 
+
+import android.app.Dialog
 import android.provider.ContactsContract.Profile
 import android.text.style.BackgroundColorSpan
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +22,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -29,6 +36,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Label
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,42 +50,76 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import android.app.Dialog
-import android.os.Bundle
-import android.view.Gravity
-import android.view.ViewGroup
-import android.widget.ImageButton
-import android.widget.LinearLayout
-import android.widget.TextView
-//import androidx.appcompat.app.AppCompatActivity
-import android.widget.Button
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import com.example.willgo.data.Event
+import com.example.willgo.view.sections.CommonEventCard
 
-@Preview
+//@Preview
 @Composable
-fun Profile(/*paddingValues: PaddingValues, User: user*/){
+fun Profile(navController: NavHostController = rememberNavController()/* , User: user*/){
+
+
+    var comentariosDialog by remember { mutableStateOf(false) }
     Column(modifier = Modifier
-      //  .padding(paddingValues)
         .fillMaxSize()
         .background(Color.White)
+
     )
     {
         TopBar2()
-        ProfilePic2()
-        DataSection(name = "Nombre Apellido" /*user.name*/)
-        Spacer(Modifier.height(16.dp))
-        ButtonsSection(onSeguirClick = { }, onComentariosClick = {})
-        Spacer(modifier = Modifier.height(16.dp))
-        FollowsSection(12,12)
-        Spacer(Modifier.height(16.dp))
-        SectionTitle2(title = "Asistirá próximamente")
-        Spacer(Modifier.height(16.dp))
-        ConcertsSection2()
-        Spacer(Modifier.height(16.dp))
-        SectionTitle2(title = "Eventos asistidos")
-        Spacer(Modifier.height(16.dp))
-        PopularSection2()
-        Spacer(Modifier.height(16.dp))
 
+        if(comentariosDialog){
+            AlertDialog(
+                onDismissRequest = {comentariosDialog=false},
+                title = {
+                    Text(text = "Comentarios")
+                },
+                text = {
+                    Column {
+                        Text(text = "Holaa")
+                        Text(text = "Adioos")
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = {comentariosDialog = false}
+                    ) {
+                        Text("Cerrar")
+                    }
+                }
+            )
+        }
+
+        LazyColumn(
+            modifier = Modifier
+               
+                .fillMaxSize()
+                .background(Color.White)
+        )
+        {
+            items(1){
+
+                ProfilePic2()
+                DataSection(name = "Nombre Apellido" /*user.name*/)
+                Spacer(Modifier.height(16.dp))
+                ButtonsSection(
+                    onSeguirClick = { },
+                    onComentariosClick = {navController.navigate("comments")}
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                FollowsSection(12, 12)
+                Spacer(Modifier.height(16.dp))
+                SectionTitle2(title = "Asistirá próximamente")
+                Spacer(Modifier.height(16.dp))
+                ConcertsSection2()
+                Spacer(Modifier.height(16.dp))
+                SectionTitle2(title = "Eventos asistidos")
+                Spacer(Modifier.height(16.dp))
+                PopularSection2()
+                Spacer(Modifier.height(16.dp))
+            }
+        }
     }
 }
 
@@ -85,7 +127,7 @@ fun Profile(/*paddingValues: PaddingValues, User: user*/){
 private fun DataSection(name: String) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-      //  modifier = Modifier.padding(horizontal = 12.dp)
+        //  modifier = Modifier.padding(horizontal = 12.dp)
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center
     ) {
@@ -96,7 +138,7 @@ private fun DataSection(name: String) {
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
-       //     modifier = Modifier.align(Alignment.Center)
+            //     modifier = Modifier.align(Alignment.Center)
         )
 
 
@@ -114,64 +156,9 @@ private fun ButtonsSection(onSeguirClick: () -> Unit, onComentariosClick: () -> 
         }
         Button(onClick = onComentariosClick) {
             Text(text = "Comentarios")
-
         }
     }
 }
-
-@Composable
-private fun onComentariosClick(){
-    val dialog = Dialog(this)
-
-    val dialogLayout = LinearLayout(this).apply {
-        orientation = LinearLayout.VERTICAL
-        setPadding(50, 50, 50, 50)
-        layoutParams = ViewGroup.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        )
-    }
-
-    val closeButton = ImageButton(this).apply {
-        setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
-        layoutParams = LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.WRAP_CONTENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        ).apply {
-            gravity = Gravity.END
-        }
-        setOnClickListener {
-            dialog.dismiss()
-        }
-    }
-
-    val titleText = TextView(this).apply {
-        text = "Comentarios"
-        textSize = 18f
-        setPadding(0, 0, 0, 20)
-    }
-
-    // Comentarios de ejemplo
-    val comment1 = TextView(this).apply {
-        text = "Comentario de ejemplo 1"
-    }
-
-    val comment2 = TextView(this).apply {
-        text = "Comentario de ejemplo 2"
-    }
-
-    dialogLayout.addView(closeButton)
-    dialogLayout.addView(titleText)
-    dialogLayout.addView(comment1)
-    dialogLayout.addView(comment2)
-
-    dialog.setContentView(dialogLayout)
-    dialog.show()
-
-
-
-}
-
 
 @Composable
 private fun FollowsSection(number1: Int, number2: Int) {
@@ -180,7 +167,14 @@ private fun FollowsSection(number1: Int, number2: Int) {
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
 
-
+/*
+        Column(modifier = Modifier
+            //  .padding(paddingValues)
+            .background(Color.White)
+        )
+        {
+        }
+*/
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -188,7 +182,6 @@ private fun FollowsSection(number1: Int, number2: Int) {
             Text(text = "Seguidores")
         }
 
-        // Segunda columna
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -196,7 +189,7 @@ private fun FollowsSection(number1: Int, number2: Int) {
             Text(text = "Seguidos")
         }
 
-      }
+    }
 }
 
 
@@ -240,16 +233,7 @@ fun TopBar2() {
             textAlign = TextAlign.Center,
             modifier = Modifier.align(Alignment.Center)
         )
-        Box(
-            modifier = Modifier
-                .background(Color.White, shape = RoundedCornerShape(16.dp))
-                .align(Alignment.TopEnd)
 
-        ) {
-            Image(
-                imageVector =  Icons.Default.AccountCircle, contentDescription = null
-            )
-        }
     }
 }
 
@@ -290,6 +274,21 @@ fun PopularSection2() {
     ) {
         item{VerticalSeparator2()}
         items(6){
+            CommonEventCard(event = Event(
+                id = 1,
+                description = "Descripción del evento",
+                name_event = "Nombre del evento",
+                date = "2024-11-12",
+                image = "url_de_imagen_evento",  // Este URL puede ser dinámico
+                duration = 2.0f,
+                price = 10.0f,
+                category = null,
+                location = null,
+                asistance = 1000,
+                type = "Concierto"
+            ), modifier = Modifier
+                .height(164.dp)
+                .width(4.dp))
         }
         item{VerticalSeparator2()}
 
@@ -303,6 +302,21 @@ fun ConcertsSection2() {
     ) {
         item{VerticalSeparator2()}
         items(6){
+            CommonEventCard(event = Event(
+                id = 1,
+                description = "Descripción del evento",
+                name_event = "Nombre del evento",
+                date = "2024-11-12",
+                image = "url_de_imagen_evento",  // Este URL puede ser dinámico
+                duration = 2.0f,
+                price = 10.0f,
+                category = null,
+                location = null,
+                asistance = 1000,
+                type = "Concierto"
+            ), modifier = Modifier
+                .height(164.dp)
+                .width(4.dp))
         }
         item{VerticalSeparator2()}
 
