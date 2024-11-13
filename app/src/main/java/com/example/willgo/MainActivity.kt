@@ -19,6 +19,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -27,6 +28,10 @@ import com.example.willgo.data.Event
 import com.example.willgo.data.User
 import com.example.willgo.graphs.RootNavigationGraph
 import com.example.willgo.ui.theme.WillGoTheme
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapUiSettings
+import com.google.maps.android.compose.Marker
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
@@ -47,6 +52,7 @@ class MainActivity : ComponentActivity() {
                    color = MaterialTheme.colorScheme.background
                ) {
                    RootNavigationGraph()
+                   MyGoogleMaps()
                }
             }
         }
@@ -102,6 +108,18 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+}
+
+@Composable
+fun MyGoogleMaps(){
+    val marker = LatLng(39.482298, -0.346236)
+    val uiSettings by remember {mutableStateOf(MapUiSettings(zoomControlsEnabled = true))}
+
+    GoogleMap(modifier = Modifier.fillMaxSize(),
+              uiSettings = uiSettings
+        ){
+        Marker(position = marker)
+    }
 }
 
 //@Preview(showBackground = true)
