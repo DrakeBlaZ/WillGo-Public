@@ -49,14 +49,14 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
             ProfileScreen()
         }
 
-        composable(
+        /*composable(
             route = HomeScreenRoutes.Category.route,
             arguments = listOf(navArgument("categoryName") { type = NavType.StringType })
         ) { backStackEntry ->
             val categoryName = backStackEntry.arguments?.getString("categoryName") ?: "DEFAULT"
             val category = getCategory(categoryName)
             CategoryScreen(onBack = { navController.popBackStack() }, category = category, events.value, navController)
-        }
+        }*/
 
 
         composable(
@@ -163,7 +163,14 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
             EventDataScreen(filteredEvents[0], paddingValues, onBack = { navController.popBackStack() })
         }
 
-
+        composable(
+            route = "Category_Section/{categoryName}", // Cambiado para aceptar un parámetro de ruta
+            arguments = listOf(navArgument("categoryName") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val categoryName = backStackEntry.arguments?.getString("categoryName") ?: "DEFAULT"
+            val category = getCategory(categoryName) // Usa el nombre para obtener la categoría correcta
+            CategoryScreen(onBack = { navController.popBackStack() }, category = category, events.value, navController)
+        }
     }
 }
 
