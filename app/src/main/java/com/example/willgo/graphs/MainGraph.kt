@@ -58,7 +58,6 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
             CategoryScreen(onBack = { navController.popBackStack() }, category = category, events.value, navController)
         }*/
 
-
         composable(
             route = "searchResults?query={query}&maxPrice={maxPrice}&category={category}&type={type}&date={date}",
             arguments = listOf(

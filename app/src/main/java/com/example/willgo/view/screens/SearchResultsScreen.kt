@@ -68,10 +68,23 @@ fun SearchResultsScreen(
 
     val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
-    // Obtenemos las fechas de hoy, de la semana y del mes siguiente
+    // Obtiene la fecha actual
     val today = dateFormatter.parse(dateFormatter.format(Calendar.getInstance().time)) ?: Calendar.getInstance().time
-    val nextWeek = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 7) }.time
-    val nextMonth = Calendar.getInstance().apply { add(Calendar.MONTH, 1) }.time
+
+    // Calcula los límites de la semana y el mes actuales
+    val calendar = Calendar.getInstance()
+
+    // Calcular los límites de la semana actual (desde el primer día de la semana hasta el último)
+    calendar.set(Calendar.DAY_OF_WEEK, calendar.firstDayOfWeek)
+    val startOfWeek = dateFormatter.parse(dateFormatter.format(calendar.time)) ?: today
+    calendar.add(Calendar.DAY_OF_WEEK, 6)
+    val endOfWeek = dateFormatter.parse(dateFormatter.format(calendar.time)) ?: today
+
+    // Calcular los límites del mes actual (desde el primer día hasta el último)
+    calendar.set(Calendar.DAY_OF_MONTH, 1)
+    val startOfMonth = dateFormatter.parse(dateFormatter.format(calendar.time)) ?: today
+    calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+    val endOfMonth = dateFormatter.parse(dateFormatter.format(calendar.time)) ?: today
 
     var categoryToFilter by remember { mutableStateOf(externalSelectedCategory ?: selectedCategory) }
 
@@ -91,8 +104,8 @@ fun SearchResultsScreen(
                         (selectedType == "Todos" || event.type.equals(selectedType, ignoreCase = true)) &&
                         (selectedDate == "Todos" ||
                                 (selectedDate == "Hoy" && eventDate.compareTo(today) == 0) ||
-                                (selectedDate == "Esta semana" && eventDate in today..nextWeek) ||
-                                (selectedDate == "Este mes" && eventDate in today..nextMonth) ||
+                                (selectedDate == "Esta semana" && eventDate in startOfWeek..endOfWeek) ||
+                                (selectedDate == "Este mes" && eventDate in startOfMonth..endOfMonth) ||
                                 (selectedDate != "Hoy" && selectedDate != "Esta semana" && selectedDate != "Este mes" && event.date == selectedDate)
                                 ) &&
                         event.name_event.contains(query, ignoreCase = true)
