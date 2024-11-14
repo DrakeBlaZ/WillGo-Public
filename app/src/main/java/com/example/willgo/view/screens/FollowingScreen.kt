@@ -68,8 +68,10 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
-fun FollowingScreen(paddingValues: PaddingValues, nickname: String, navController: NavHostController, onBack: () -> Unit){
+fun FollowingScreen(navController: NavHostController, nickname: String, paddingValues: PaddingValues, onBack: () -> Unit){
     val following = remember { mutableStateOf(listOf<User>()) }
+
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         following.value = getFollowingForUser(nickname)
@@ -110,5 +112,23 @@ suspend fun getFollowingForUser(nickname: String): List<User> {
     val supabaseResponse = client.postgrest["seguidores"].select{
         filter { eq("follower", nickname)}
     }
-    return supabaseResponse.decodeList<User>()
+    val followingUsers = supabaseResponse.decodeList<SeguidoresResponse>()
+
+    val result:MutableList<User> = mutableListOf()
+
+    for (user in followingUsers) {
+        val usersupabaseResponse = client.postgrest["Usuario"].select{
+            filter { eq("nickname", user.following)}
+        }
+        val followingUser = usersupabaseResponse.decodeList<User>()
+        result += followingUser
+    }
+
+    return result
 }
+
+@kotlinx.serialization.Serializable
+data class SeguidoresResponse(
+    val following: String,
+    val follower: String
+)
