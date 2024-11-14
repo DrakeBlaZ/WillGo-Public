@@ -24,10 +24,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
+import com.example.willgo.data.Category
 import com.example.willgo.data.Event
 import com.example.willgo.data.User
 import com.example.willgo.graphs.RootNavigationGraph
 import com.example.willgo.ui.theme.WillGoTheme
+import com.example.willgo.view.screens.navScreens.MapScreen
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapUiSettings
@@ -52,7 +54,9 @@ class MainActivity : ComponentActivity() {
                    color = MaterialTheme.colorScheme.background
                ) {
                    RootNavigationGraph()
-                   MyGoogleMaps()
+//                   MapScreen(events)
+//                   MyGoogleMaps()
+//                   EventMapWithEvents()
                }
             }
         }
@@ -110,17 +114,32 @@ class MainActivity : ComponentActivity() {
 
 }
 
-@Composable
-fun MyGoogleMaps(){
-    val marker = LatLng(39.482298, -0.346236)
-    val uiSettings by remember {mutableStateOf(MapUiSettings(zoomControlsEnabled = true))}
+//@Composable
+//fun EventMapWithEvents() {
+//    val events = listOf(
+////        Event(id = 1, name_event = "Music Concert", latitude = 39.482298, longitude = -0.346236, date = "2024-10-15", category = Category("Music")),
+//        Event(id = 2, description = "ddd", name_event = "Art Exhibit", location = null,
+//            latitude = 45.482298, longitude = -5.346236, date = "2024-11-20", price = 2f,
+//            image = "iii", duration = 20f, asistance = 22L, category = Category.Teatro)
+//        // Add more events as needed
+//    )
+//
+//    MapScreen(events = events)
+//}
 
-    GoogleMap(modifier = Modifier.fillMaxSize(),
-              uiSettings = uiSettings
-        ){
-        Marker(position = marker)
-    }
-}
+//@Composable
+//fun MyGoogleMaps(){
+//    val marker = LatLng(39.482298, -0.346236)
+//    val marker1 = LatLng(45.482298, -5.346236)
+//    val uiSettings by remember {mutableStateOf(MapUiSettings(zoomControlsEnabled = true))}
+//
+//    GoogleMap(modifier = Modifier.fillMaxSize(),
+//              uiSettings = uiSettings
+//        ){
+//        Marker(position = marker)
+//        Marker(position = marker1)
+//    }
+//}
 
 //@Preview(showBackground = true)
 //@Composable

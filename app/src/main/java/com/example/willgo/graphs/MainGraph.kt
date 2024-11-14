@@ -42,7 +42,7 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
         }
 
         composable(route = BottomBarScreen.Location.route) {
-            MapScreen()
+            MapScreen(eventsState = events)
         }
 
         composable(route = BottomBarScreen.Profile.route) {

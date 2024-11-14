@@ -1,5 +1,6 @@
 package com.example.willgo.data
 
+import com.google.android.gms.maps.model.LatLng
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -11,6 +12,8 @@ data class Event(
     val phone: Long? = 0,
     val category: Category?,
     val location: String?,
+    val latitude: Double?,
+    val longitude: Double?,
     val date: String? = "",
     val price: Float?,
     val image: String?,
