@@ -22,6 +22,7 @@ import com.example.willgo.view.screens.navScreens.MapScreen
 import com.example.willgo.view.screens.navScreens.ProfileScreen
 import com.example.willgo.view.screens.other.CategoryScreen
 import com.example.willgo.view.screens.CommentsOnEvents
+import com.example.willgo.view.screens.FollowingScreen
 import com.example.willgo.view.screens.other.DetailEventScreen
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
@@ -172,6 +173,19 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues,
         ) { backStackEntry ->
             val nickname = backStackEntry.arguments?.getString("nickname") ?: ""
             CommentsOnEvents(
+                navController = navController,
+                nickname = nickname,
+                paddingValues = paddingValues,
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = "following/{nickname}",
+            arguments = listOf(navArgument("nickname") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val nickname = backStackEntry.arguments?.getString("nickname") ?: ""
+            FollowingScreen(
                 navController = navController,
                 nickname = nickname,
                 paddingValues = paddingValues,

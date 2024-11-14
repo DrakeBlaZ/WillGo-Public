@@ -56,6 +56,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.willgo.data.Event
 import com.example.willgo.data.User
 import com.example.willgo.view.screens.getCommentsForUser
+import com.example.willgo.view.screens.getFollowingForUser
 import com.example.willgo.view.sections.CommonEventCard
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -86,7 +87,12 @@ fun ProfileScreen(navController: NavHostController = rememberNavController(), pa
                 DataSection(name = user.name)
                 Spacer(Modifier.height(16.dp))
                 ButtonsSection(
-                    onSeguirClick = { },
+                    onSeguirClick = {
+                        coroutineScope.launch {
+                            val userFollowing = getFollowingForUser(user.nickname)
+                            navController.navigate("following/${user.nickname}")
+                        }
+                    },
                     onComentariosClick = {
                         coroutineScope.launch {
                             val userComments = getCommentsForUser(user.nickname)
@@ -139,7 +145,7 @@ private fun ButtonsSection(onSeguirClick: () -> Unit, onComentariosClick: () -> 
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         Button(onClick = onSeguirClick) {
-            Text(text = "Seguir")
+            Text(text = "Seguidos")
         }
         Button(onClick = onComentariosClick) {
             Text(text = "Comentarios")
@@ -275,7 +281,7 @@ fun PopularSection2() {
                 type = "Concierto"
             ), modifier = Modifier
                 .height(164.dp)
-                .width(4.dp))
+                .width(164.dp))
         }
         item{VerticalSeparator2()}
 
@@ -303,7 +309,7 @@ fun ConcertsSection2() {
                 type = "Concierto"
             ), modifier = Modifier
                 .height(164.dp)
-                .width(4.dp))
+                .width(164.dp))
         }
         item{VerticalSeparator2()}
 
