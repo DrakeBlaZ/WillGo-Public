@@ -16,14 +16,24 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.willgo.graphs.BottomBarScreen
 import com.example.willgo.graphs.MainNavGraph
+import com.example.willgo.data.User
 
 @Composable
 fun MainScreen(navController: NavHostController = rememberNavController()){
+
+    val user = User(
+        nickname = "rafagimeno",
+        name = "Rafa",
+        password = "123456",
+        email = "rafagimeno6@gmail.com",
+        followers = 0,
+        followed = 0
+    )
     Scaffold(
         bottomBar = { NavBar(navController ) }
     )
     {
-        MainNavGraph(navController = navController, paddingValues = it)
+        MainNavGraph(navController = navController, paddingValues = it, user)
     }
 }
 
