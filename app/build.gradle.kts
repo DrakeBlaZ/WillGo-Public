@@ -90,6 +90,7 @@ dependencies {
     //NAVIGATION
     implementation(libs.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
+    implementation("androidx.navigation:navigation-compose:2.7.1")
 
     //COIL IMAGES
     implementation ("io.coil-kt:coil-compose:2.1.0")

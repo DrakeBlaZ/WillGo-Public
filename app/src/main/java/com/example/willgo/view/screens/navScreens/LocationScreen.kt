@@ -14,12 +14,16 @@ import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 
 @Composable
-fun MapScreen(eventsState: MutableState<List<Event>>){
+fun MapScreen(
+    eventsState: MutableState<List<Event>>,
+    onEventClick: (Event) -> Unit
+){
 //    val marker = LatLng(39.482298, -0.346236)
 //    val marker1 = LatLng(45.482298, -5.346236)
     val uiSettings by remember { mutableStateOf(MapUiSettings(zoomControlsEnabled = true)) }
     val events by eventsState
-    GoogleMap(modifier = Modifier.fillMaxSize(),
+    GoogleMap(
+        modifier = Modifier.fillMaxSize(),
         uiSettings = uiSettings
     ){
 //        Marker(position = marker)
@@ -35,6 +39,7 @@ fun MapScreen(eventsState: MutableState<List<Event>>){
                     onClick = {
                         // pongo accion con el click
                         // por ejemplo, navegar a la pantalla con detalles e evento
+                        onEventClick(event)
                         true
                     }
                 )
