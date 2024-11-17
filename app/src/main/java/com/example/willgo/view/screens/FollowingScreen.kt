@@ -67,26 +67,34 @@ import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
+var nick =""
+
 @Composable
 fun FollowingScreen(navController: NavHostController, nickname: String, paddingValues: PaddingValues, onBack: () -> Unit){
     val following = remember { mutableStateOf(listOf<User>()) }
-
     val coroutineScope = rememberCoroutineScope()
+
+    nick = nickname
 
     LaunchedEffect(Unit) {
         following.value = getFollowingForUser(nickname)
     }
 
     LazyColumn(modifier = Modifier.padding(paddingValues)) {
-        items(following.value) { following ->
-                FollowingItem(following, navController)
+        items(following.value) { follow ->
+                FollowingItem(
+                    follow, navController,
+                    onDelete = {
+                        following.value -= follow
+                    }
+                )
         }
     }
 
 }
 
 @Composable
-fun FollowingItem(user: User, navController: NavController){
+fun FollowingItem(user: User, navController: NavController,onDelete: () -> Unit){
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -99,13 +107,32 @@ fun FollowingItem(user: User, navController: NavController){
             Text(
                 text = "\"${user.nickname}\"",
                 fontWeight = FontWeight.Bold,
-                fontSize = 16.sp
+                fontSize = 20.sp
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.width(40.dp))
+
+
+            val coroutineScope = rememberCoroutineScope()
+            ButtonsSection(
+                stopFollowing = {
+                    coroutineScope.launch {
+                        stopFollowing(user.nickname)
+                    }
+                onDelete()
+                }
+            )
         }
     }
 }
+
+@Composable
+private fun ButtonsSection(stopFollowing:()->Unit) {
+        Button(onClick = stopFollowing) {
+            Text(text = "dejar de seguir")
+        }
+    }
+
 
 suspend fun getFollowingForUser(nickname: String): List<User> {
     val client = getClient()
@@ -132,3 +159,11 @@ data class SeguidoresResponse(
     val following: String,
     val follower: String
 )
+
+suspend fun stopFollowing(nickname: String){
+    val client = getClient()
+    val supabaseResponse = client.postgrest["seguidores"].delete{
+        filter { eq("follower", nick)}
+        filter { eq("following", nickname)}
+    }
+}
