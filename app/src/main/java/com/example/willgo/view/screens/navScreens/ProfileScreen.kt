@@ -56,6 +56,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.willgo.data.Event
 import com.example.willgo.data.User
 import com.example.willgo.view.screens.getCommentsForUser
+import com.example.willgo.view.screens.getFollowersForUser
 import com.example.willgo.view.screens.getFollowingForUser
 import com.example.willgo.view.sections.CommonEventCard
 import kotlinx.coroutines.coroutineScope
@@ -91,6 +92,12 @@ fun ProfileScreen(navController: NavHostController = rememberNavController(), pa
                         coroutineScope.launch {
                             val userFollowing = getFollowingForUser(user.nickname)
                             navController.navigate("following/${user.nickname}")
+                        }
+                    },
+                    onSeguidoresClik = {
+                        coroutineScope.launch {
+                            val userFollowing = getFollowersForUser(user.nickname)
+                            navController.navigate("follower/${user.nickname}")
                         }
                     },
                     onComentariosClick = {
@@ -139,13 +146,16 @@ private fun DataSection(name: String) {
 }
 
 @Composable
-private fun ButtonsSection(onSeguirClick: () -> Unit, onComentariosClick: () -> Unit) {
+private fun ButtonsSection(onSeguirClick: () -> Unit, onComentariosClick: () -> Unit, onSeguidoresClik:()->Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         Button(onClick = onSeguirClick) {
             Text(text = "Seguidos")
+        }
+        Button (onClick = onSeguidoresClik) {
+            Text(text = "Seguidores")
         }
         Button(onClick = onComentariosClick) {
             Text(text = "Comentarios")

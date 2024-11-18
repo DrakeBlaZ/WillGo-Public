@@ -70,31 +70,28 @@ import kotlinx.coroutines.launch
 private var nick =""
 
 @Composable
-fun FollowingScreen(navController: NavHostController, nickname: String, paddingValues: PaddingValues, onBack: () -> Unit){
+fun FollowerScrenn(navController: NavHostController, nickname: String, paddingValues: PaddingValues, onBack: () -> Unit){
     val following = remember { mutableStateOf(listOf<User>()) }
     val coroutineScope = rememberCoroutineScope()
 
     nick = nickname
 
     LaunchedEffect(Unit) {
-        following.value = getFollowingForUser(nickname)
+        following.value = getFollowersForUser(nickname)
     }
 
     LazyColumn(modifier = Modifier.padding(paddingValues)) {
         items(following.value) { follow ->
-                FollowingItem(
-                    follow, navController,
-                    onDelete = {
-                        following.value -= follow
-                    }
-                )
+            FollowingItem(
+                follow, navController
+            )
         }
     }
 
 }
 
 @Composable
-fun FollowingItem(user: User, navController: NavController,onDelete: () -> Unit){
+fun FollowingItem(user: User, navController: NavController,){
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -112,34 +109,16 @@ fun FollowingItem(user: User, navController: NavController,onDelete: () -> Unit)
 
             Spacer(modifier = Modifier.width(40.dp))
 
-
-            val coroutineScope = rememberCoroutineScope()
-            ButtonsSection(
-                stopFollowing = {
-                    coroutineScope.launch {
-                        stopFollowing(user.nickname)
-                    }
-                onDelete()
-                }
-            )
         }
     }
 }
 
-@Composable
-private fun ButtonsSection(stopFollowing:()->Unit) {
-        Button(onClick = stopFollowing) {
-            Text(text = "dejar de seguir")
-        }
-    }
-
-
-suspend fun getFollowingForUser(nickname: String): List<User> {
+suspend fun getFollowersForUser(nickname: String): List<User> {
     val client = getClient()
     val supabaseResponse = client.postgrest["seguidores"].select{
-        filter { eq("follower", nickname)}
+        filter { eq("following", nickname)}
     }
-    val followingUsers = supabaseResponse.decodeList<SeguidoresResponse>()
+    val followingUsers = supabaseResponse.decodeList<SeguidosResponse>()
 
     val result:MutableList<User> = mutableListOf()
 
@@ -155,15 +134,7 @@ suspend fun getFollowingForUser(nickname: String): List<User> {
 }
 
 @kotlinx.serialization.Serializable
-data class SeguidoresResponse(
+data class SeguidosResponse(
     val following: String,
     val follower: String
 )
-
-suspend fun stopFollowing(nickname: String){
-    val client = getClient()
-    val supabaseResponse = client.postgrest["seguidores"].delete{
-        filter { eq("follower", nick)}
-        filter { eq("following", nickname)}
-    }
-}
