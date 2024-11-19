@@ -46,22 +46,25 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues,
         }
 
         composable(route = BottomBarScreen.Location.route) {
-            MapScreen()
+            MapScreen(
+                eventsState = events,
+                onEventClick = { event ->
+                    navController.navigate("eventDetail/${event.id}")
+                })
         }
 
         composable(route = BottomBarScreen.Profile.route) {
             ProfileScreen(navController = navController, paddingValues = paddingValues, user = user)
         }
 
-        composable(
+        /*composable(
             route = HomeScreenRoutes.Category.route,
             arguments = listOf(navArgument("categoryName") { type = NavType.StringType })
         ) { backStackEntry ->
             val categoryName = backStackEntry.arguments?.getString("categoryName") ?: "DEFAULT"
             val category = getCategory(categoryName)
             CategoryScreen(onBack = { navController.popBackStack() }, category = category, events.value, navController)
-        }
-
+        }*/
 
         composable(
             route = "searchResults?query={query}&maxPrice={maxPrice}&category={category}&type={type}&date={date}",
@@ -167,7 +170,6 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues,
             EventDataScreen(filteredEvents[0], paddingValues, onBack = { navController.popBackStack() })
         }
 
-
         composable(
             route = "comments/{nickname}",
             arguments = listOf(navArgument("nickname") { type = NavType.StringType })
@@ -208,6 +210,14 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues,
         }
 
 
+        composable(
+            route = "Category_Section/{categoryName}", // Cambiado para aceptar un parámetro de ruta
+            arguments = listOf(navArgument("categoryName") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val categoryName = backStackEntry.arguments?.getString("categoryName") ?: "DEFAULT"
+            val category = getCategory(categoryName) // Usa el nombre para obtener la categoría correcta
+            CategoryScreen(onBack = { navController.popBackStack() }, category = category, events.value, navController)
+        }
     }
 }
 

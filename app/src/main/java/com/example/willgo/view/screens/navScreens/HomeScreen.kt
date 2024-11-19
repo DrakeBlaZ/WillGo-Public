@@ -132,7 +132,12 @@ fun TopBar(navigationIcon: @Composable () -> Unit = {}) {
 
 @Composable
 fun CategorySection(title: Category, events: List<Event>, navController: NavHostController) {
-    SectionTitle(title = title, modifier = Modifier.clickable {navController.navigate(HomeScreenRoutes.Category.route)})
+    SectionTitle(
+        title = title,
+        modifier = Modifier.clickable {
+            navController.navigate("Category_Section/${title.name}")
+        }
+    )
     Spacer(modifier = Modifier.height(16.dp))
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)

@@ -80,10 +80,6 @@ fun DateNavScreen(
                 showDialog = true
             })
 
-            /*Button(onClick = { showDialog = true }) {
-                Text("Selecciona día")
-            }*/
-
             // DatePickerDialog para seleccionar una fecha específica
             if (showDialog) {
                 DatePickerDialog(
