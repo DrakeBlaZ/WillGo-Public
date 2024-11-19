@@ -124,7 +124,7 @@ suspend fun getFollowersForUser(nickname: String): List<User> {
 
     for (user in followingUsers) {
         val usersupabaseResponse = client.postgrest["Usuario"].select{
-            filter { eq("nickname", user.following)}
+            filter { eq("nickname", user.follower)}
         }
         val followingUser = usersupabaseResponse.decodeList<User>()
         result += followingUser

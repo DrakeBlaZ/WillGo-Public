@@ -123,11 +123,11 @@ fun ProfileScreen(navController: NavHostController = rememberNavController(), pa
                 Spacer(Modifier.height(16.dp))
                 SectionTitle2(title = "Eventos favoritos")
                 Spacer(Modifier.height(16.dp))
-                ConcertsSection2(favevents)
+                ConcertsSection2(favevents,navController)
                 Spacer(Modifier.height(16.dp))
                 SectionTitle2(title = "Asistirá próximamente")
                 Spacer(Modifier.height(16.dp))
-                PopularSection2(willGoevents)
+                PopularSection2(willGoevents,navController)
                 Spacer(Modifier.height(16.dp))
             }
         }
@@ -282,7 +282,7 @@ fun ProfilePic2(){
 
 
 @Composable
-fun PopularSection2(events:MutableState<List<Event>>) {
+fun PopularSection2(events:MutableState<List<Event>>,navController: NavHostController) {
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -294,6 +294,7 @@ fun PopularSection2(events:MutableState<List<Event>>) {
                 modifier = Modifier
                     .height(164.dp)
                     .width(164.dp)
+                    .clickable { navController.navigate("eventDetail/${event.id}")}
                 )
             }
         }
@@ -303,7 +304,7 @@ fun PopularSection2(events:MutableState<List<Event>>) {
 }
 
 @Composable
-fun ConcertsSection2(events:MutableState<List<Event>>) {
+fun ConcertsSection2(events:MutableState<List<Event>>,navController: NavHostController) {
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -315,6 +316,7 @@ fun ConcertsSection2(events:MutableState<List<Event>>) {
                 modifier = Modifier
                     .height(164.dp)
                     .width(164.dp)
+                    .clickable { navController.navigate("eventDetail/${event.id}")}
             )
             }
         }
