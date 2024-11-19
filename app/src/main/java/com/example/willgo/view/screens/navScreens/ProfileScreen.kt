@@ -56,9 +56,13 @@ import kotlinx.coroutines.launch
 fun ProfileScreen(navController: NavHostController = rememberNavController(), paddingValues: PaddingValues, user: User){
     val willGoevents = remember { mutableStateOf(listOf<Event>()) }
     val favevents = remember { mutableStateOf(listOf<Event>()) }
+    val totalfollowers = remember { mutableStateOf(0)}
+    val totalfollowing = remember  { mutableStateOf(0)}
     LaunchedEffect(Unit) {
         willGoevents.value = getWillgoForUser(user.nickname)
         favevents.value = getFavForUser(user.nickname)
+        totalfollowers.value = getTotalfollowers(user.nickname)
+        totalfollowing.value = getTotalfollowing(user.nickname)
     }
     var coroutineScope = rememberCoroutineScope()
     Column(modifier = Modifier
@@ -102,7 +106,7 @@ fun ProfileScreen(navController: NavHostController = rememberNavController(), pa
                     }
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-                FollowsSection(user.followers, user.followed)
+                FollowsSection(totalfollowers.value, totalfollowing.value)
                 Spacer(Modifier.height(16.dp))
                 SectionTitle2(title = "Eventos favoritos")
                 Spacer(Modifier.height(16.dp))
@@ -351,6 +355,22 @@ suspend fun getFavForUser(nickname:String):List<Event> {
     return result
 }
 
+suspend fun getTotalfollowers(nickname: String) : Int {
+    val client = getClient()
+    val supabaseResponseEvents = client.postgrest["seguidores"].select {
+        filter { eq("following", nickname) }
+    }
+    return supabaseResponseEvents.decodeList<Seg>().size
+}
+
+suspend fun getTotalfollowing(nickname: String) : Int {
+    val client = getClient()
+    val supabaseResponseEvents = client.postgrest["seguidores"].select {
+        filter { eq("follower", nickname) }
+    }
+    return supabaseResponseEvents.decodeList<Seg>().size
+}
+
 @kotlinx.serialization.Serializable
 data class EventosResponse(
     val id_event: Long,
@@ -361,4 +381,10 @@ data class EventosResponse(
 data class EventosfavResponse(
     val event_id: Long,
     val user_nickname: String
+)
+
+@kotlinx.serialization.Serializable
+data class Seg(
+    val following : String,
+    val follower : String
 )
