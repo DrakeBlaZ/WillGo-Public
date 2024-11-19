@@ -1,11 +1,6 @@
 package com.example.willgo.view.screens.navScreens
 
-import android.app.Dialog
-import android.provider.ContactsContract.Profile
-import android.text.style.BackgroundColorSpan
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,15 +22,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Label
-import androidx.compose.material3.SearchBar
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -49,24 +37,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.willgo.data.Event
 import com.example.willgo.data.User
-import com.example.willgo.view.screens.SeguidoresResponse
 import com.example.willgo.view.screens.getClient
 import com.example.willgo.view.screens.getCommentsForUser
 import com.example.willgo.view.screens.getFollowersForUser
 import com.example.willgo.view.screens.getFollowingForUser
 import com.example.willgo.view.sections.CommonEventCard
 import io.github.jan.supabase.postgrest.postgrest
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-
 
 //@Preview
 @Composable
