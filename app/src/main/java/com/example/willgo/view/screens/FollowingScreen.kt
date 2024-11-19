@@ -166,4 +166,14 @@ suspend fun stopFollowing(nickname: String){
         filter { eq("follower", nick)}
         filter { eq("following", nickname)}
     }
+    val supabaseResponse2 = client.postgrest["Usuario"].update(
+        mapOf( "followers" to "followers - 1")
+    ) {
+        filter {eq("nickname", nickname)}
+    }
+    val supabaseResponse3 = client.postgrest["Usuario"].update(
+        mapOf( "followed" to "followed - 1")
+    ) {
+        filter {eq("nickname", nick)}
+    }
 }

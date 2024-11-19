@@ -37,6 +37,8 @@ import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,10 +57,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.willgo.data.Event
 import com.example.willgo.data.User
+import com.example.willgo.view.screens.SeguidoresResponse
+import com.example.willgo.view.screens.getClient
 import com.example.willgo.view.screens.getCommentsForUser
 import com.example.willgo.view.screens.getFollowersForUser
 import com.example.willgo.view.screens.getFollowingForUser
 import com.example.willgo.view.sections.CommonEventCard
+import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
@@ -66,6 +71,10 @@ import kotlinx.coroutines.launch
 //@Preview
 @Composable
 fun ProfileScreen(navController: NavHostController = rememberNavController(), paddingValues: PaddingValues, user: User){
+    val willGoevents = remember { mutableStateOf(listOf<Event>()) }
+    LaunchedEffect(Unit) {
+        willGoevents.value = getWillgoForUser(user.nickname)
+    }
     var coroutineScope = rememberCoroutineScope()
     Column(modifier = Modifier
         .fillMaxSize()
@@ -116,7 +125,7 @@ fun ProfileScreen(navController: NavHostController = rememberNavController(), pa
                 Spacer(Modifier.height(16.dp))
                 SectionTitle2(title = "Eventos asistidos")
                 Spacer(Modifier.height(16.dp))
-                PopularSection2()
+                PopularSection2(willGoevents)
                 Spacer(Modifier.height(16.dp))
             }
         }
@@ -271,28 +280,38 @@ fun ProfilePic2(){
 
 
 @Composable
-fun PopularSection2() {
+fun PopularSection2(events:MutableState<List<Event>>) {
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         item{VerticalSeparator2()}
-        items(6){
-            CommonEventCard(event = Event(
-                id = 1,
-                description = "Descripción del evento",
-                name_event = "Nombre del evento",
-                date = "2024-11-12",
-                image = "url_de_imagen_evento",  // Este URL puede ser dinámico
-                duration = 2.0f,
-                price = 10.0f,
-                category = null,
-                location = null,
-                asistance = 1000,
-                type = "Concierto"
-            ), modifier = Modifier
-                .height(164.dp)
-                .width(164.dp))
+        val willgo = events.value
+        for (event in willgo) {
+            item { CommonEventCard(
+                event = event,
+                modifier = Modifier
+                    .height(164.dp)
+                    .width(164.dp)
+                )
+            }
         }
+        //items(6){
+          //  CommonEventCard(event = Event(
+            //    id = 1,
+              //  description = "Descripción del evento",
+                //name_event = "Nombre del evento",
+                //date = "2024-11-12",
+                //image = "url_de_imagen_evento",  // Este URL puede ser dinámico
+                //duration = 2.0f,
+                //price = 10.0f,
+                //category = null,
+                //location = null,
+                //asistance = 1000,
+                //type = "Concierto"
+            //), modifier = Modifier
+              //  .height(164.dp)
+                //.width(164.dp))
+        //}
         item{VerticalSeparator2()}
 
     }
@@ -332,3 +351,27 @@ fun VerticalSeparator2(){
         .height(164.dp)
         .width(4.dp))
 }
+
+suspend fun getWillgoForUser(nickname:String):List<Event> {
+    val client = getClient()
+    val supabaseResponseEvents = client.postgrest["WillGo"].select {
+        filter { eq("users", nickname) }
+    }
+    val willGoevents = supabaseResponseEvents.decodeList<EventosResponse>()
+    val result:MutableList<Event> = mutableListOf()
+    for (event in willGoevents) {
+        val eventsupabaseResponse = client.postgrest["Evento"].select{
+            filter { eq("id", event.idEvent)}
+        }
+        val goEvent = eventsupabaseResponse.decodeList<Event>()
+        result += goEvent
+    }
+
+    return result
+}
+
+@kotlinx.serialization.Serializable
+data class EventosResponse(
+    val idEvent: Long,
+    val user: String
+)
