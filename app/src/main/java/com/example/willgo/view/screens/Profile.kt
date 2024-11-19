@@ -1,4 +1,5 @@
-package com.example.willgo.view.screens.navScreens
+package com.example.willgo.view.screens
+
 
 import android.app.Dialog
 import android.provider.ContactsContract.Profile
@@ -37,12 +38,9 @@ import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,39 +54,46 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.willgo.data.Event
-import com.example.willgo.data.User
-import com.example.willgo.view.screens.SeguidoresResponse
-import com.example.willgo.view.screens.getClient
-import com.example.willgo.view.screens.getCommentsForUser
-import com.example.willgo.view.screens.getFollowersForUser
-import com.example.willgo.view.screens.getFollowingForUser
 import com.example.willgo.view.sections.CommonEventCard
-import io.github.jan.supabase.postgrest.postgrest
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
-
 
 //@Preview
 @Composable
-fun ProfileScreen(navController: NavHostController = rememberNavController(), paddingValues: PaddingValues, user: User){
-    val willGoevents = remember { mutableStateOf(listOf<Event>()) }
-    val favevents = remember { mutableStateOf(listOf<Event>()) }
-    LaunchedEffect(Unit) {
-        willGoevents.value = getWillgoForUser(user.nickname)
-        favevents.value = getFavForUser(user.nickname)
-    }
-    var coroutineScope = rememberCoroutineScope()
+fun Profile(navController: NavHostController = rememberNavController()/* , User: user*/){
+
+
+    var comentariosDialog by remember { mutableStateOf(false) }
     Column(modifier = Modifier
         .fillMaxSize()
         .background(Color.White)
-        .padding(paddingValues)
+
     )
     {
         TopBar2()
 
+        if(comentariosDialog){
+            AlertDialog(
+                onDismissRequest = {comentariosDialog=false},
+                title = {
+                    Text(text = "Comentarios")
+                },
+                text = {
+                    Column {
+                        Text(text = "Holaa")
+                        Text(text = "Adioos")
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = {comentariosDialog = false}
+                    ) {
+                        Text("Cerrar")
+                    }
+                }
+            )
+        }
+
         LazyColumn(
             modifier = Modifier
-
+               
                 .fillMaxSize()
                 .background(Color.White)
         )
@@ -96,38 +101,22 @@ fun ProfileScreen(navController: NavHostController = rememberNavController(), pa
             items(1){
 
                 ProfilePic2()
-                DataSection(name = user.name)
+                DataSection(name = "Nombre Apellido" /*user.name*/)
                 Spacer(Modifier.height(16.dp))
                 ButtonsSection(
-                    onSeguirClick = {
-                        coroutineScope.launch {
-                            val userFollowing = getFollowingForUser(user.nickname)
-                            navController.navigate("following/${user.nickname}")
-                        }
-                    },
-                    onSeguidoresClik = {
-                        coroutineScope.launch {
-                            val userFollowing = getFollowersForUser(user.nickname)
-                            navController.navigate("follower/${user.nickname}")
-                        }
-                    },
-                    onComentariosClick = {
-                        coroutineScope.launch {
-                            val userComments = getCommentsForUser(user.nickname)
-                            navController.navigate("comments/${user.nickname}")
-                        }
-                    }
+                    onSeguirClick = { },
+                    onComentariosClick = {navController.navigate("comments")}
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-                FollowsSection(user.followers, user.followed)
-                Spacer(Modifier.height(16.dp))
-                SectionTitle2(title = "Eventos favoritos")
-                Spacer(Modifier.height(16.dp))
-                ConcertsSection2(favevents,navController)
+                FollowsSection(12, 12)
                 Spacer(Modifier.height(16.dp))
                 SectionTitle2(title = "Asistirá próximamente")
                 Spacer(Modifier.height(16.dp))
-                PopularSection2(willGoevents,navController)
+                ConcertsSection2()
+                Spacer(Modifier.height(16.dp))
+                SectionTitle2(title = "Eventos asistidos")
+                Spacer(Modifier.height(16.dp))
+                PopularSection2()
                 Spacer(Modifier.height(16.dp))
             }
         }
@@ -157,16 +146,13 @@ private fun DataSection(name: String) {
 }
 
 @Composable
-private fun ButtonsSection(onSeguirClick: () -> Unit, onComentariosClick: () -> Unit, onSeguidoresClik:()->Unit) {
+private fun ButtonsSection(onSeguirClick: () -> Unit, onComentariosClick: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         Button(onClick = onSeguirClick) {
-            Text(text = "Seguidos")
-        }
-        Button (onClick = onSeguidoresClik) {
-            Text(text = "Seguidores")
+            Text(text = "Seguir")
         }
         Button(onClick = onComentariosClick) {
             Text(text = "Comentarios")
@@ -282,21 +268,27 @@ fun ProfilePic2(){
 
 
 @Composable
-fun PopularSection2(events:MutableState<List<Event>>,navController: NavHostController) {
+fun PopularSection2() {
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         item{VerticalSeparator2()}
-        val willgo = events.value
-        for (event in willgo) {
-            item { CommonEventCard(
-                event = event,
-                modifier = Modifier
-                    .height(164.dp)
-                    .width(164.dp)
-                    .clickable { navController.navigate("eventDetail/${event.id}")}
-                )
-            }
+        items(6){
+            CommonEventCard(event = Event(
+                id = 1,
+                description = "Descripción del evento",
+                name_event = "Nombre del evento",
+                date = "2024-11-12",
+                image = "url_de_imagen_evento",  // Este URL puede ser dinámico
+                duration = 2.0f,
+                price = 10.0f,
+                category = null,
+                location = null,
+                asistance = 1000,
+                type = "Concierto"
+            ), modifier = Modifier
+                .height(164.dp)
+                .width(4.dp))
         }
         item{VerticalSeparator2()}
 
@@ -304,21 +296,27 @@ fun PopularSection2(events:MutableState<List<Event>>,navController: NavHostContr
 }
 
 @Composable
-fun ConcertsSection2(events:MutableState<List<Event>>,navController: NavHostController) {
+fun ConcertsSection2() {
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         item{VerticalSeparator2()}
-        val willgo = events.value
-        for (event in willgo) {
-            item { CommonEventCard(
-                event = event,
-                modifier = Modifier
-                    .height(164.dp)
-                    .width(164.dp)
-                    .clickable { navController.navigate("eventDetail/${event.id}")}
-            )
-            }
+        items(6){
+            CommonEventCard(event = Event(
+                id = 1,
+                description = "Descripción del evento",
+                name_event = "Nombre del evento",
+                date = "2024-11-12",
+                image = "url_de_imagen_evento",  // Este URL puede ser dinámico
+                duration = 2.0f,
+                price = 10.0f,
+                category = null,
+                location = null,
+                asistance = 1000,
+                type = "Concierto"
+            ), modifier = Modifier
+                .height(164.dp)
+                .width(4.dp))
         }
         item{VerticalSeparator2()}
 
@@ -331,51 +329,3 @@ fun VerticalSeparator2(){
         .height(164.dp)
         .width(4.dp))
 }
-
-suspend fun getWillgoForUser(nickname:String):List<Event> {
-    val client = getClient()
-    val supabaseResponseEvents = client.postgrest["WillGo"].select {
-        filter { eq("users", nickname) }
-    }
-    val willGoevents = supabaseResponseEvents.decodeList<EventosResponse>()
-    val result:MutableList<Event> = mutableListOf()
-    for (event in willGoevents) {
-        val eventsupabaseResponse = client.postgrest["Evento"].select{
-            filter { eq("id", event.id_event)}
-        }
-        val goEvent = eventsupabaseResponse.decodeList<Event>()
-        result += goEvent
-    }
-
-    return result
-}
-
-suspend fun getFavForUser(nickname:String):List<Event> {
-    val client = getClient()
-    val supabaseResponseEvents = client.postgrest["Eventos_favoritos"].select {
-        filter { eq("user_nickname", nickname) }
-    }
-    val favevents = supabaseResponseEvents.decodeList<EventosfavResponse>()
-    val result:MutableList<Event> = mutableListOf()
-    for (event in favevents) {
-        val eventsupabaseResponse = client.postgrest["Evento"].select{
-            filter { eq("id", event.event_id)}
-        }
-        val goEvent = eventsupabaseResponse.decodeList<Event>()
-        result += goEvent
-    }
-
-    return result
-}
-
-@kotlinx.serialization.Serializable
-data class EventosResponse(
-    val id_event: Long,
-    val users: String
-)
-
-@kotlinx.serialization.Serializable
-data class EventosfavResponse(
-    val event_id: Long,
-    val user_nickname: String
-)

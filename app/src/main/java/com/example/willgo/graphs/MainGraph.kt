@@ -14,12 +14,16 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.willgo.data.Category
 import com.example.willgo.data.Event
+import com.example.willgo.data.User
 import com.example.willgo.view.screens.EventDataScreen
 import com.example.willgo.view.screens.SearchResultsScreen
 import com.example.willgo.view.screens.navScreens.HomeScreen
 import com.example.willgo.view.screens.navScreens.MapScreen
 import com.example.willgo.view.screens.navScreens.ProfileScreen
 import com.example.willgo.view.screens.other.CategoryScreen
+import com.example.willgo.view.screens.CommentsOnEvents
+import com.example.willgo.view.screens.FollowerScrenn
+import com.example.willgo.view.screens.FollowingScreen
 import com.example.willgo.view.screens.other.DetailEventScreen
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
@@ -27,7 +31,7 @@ import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.postgrest.postgrest
 
 @Composable
-fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues) {
+fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues, user: User) {
     val events = remember { mutableStateOf(listOf<Event>()) }
     LaunchedEffect(Unit) {
         loadEventsFromSupabase(events)
@@ -50,7 +54,7 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
         }
 
         composable(route = BottomBarScreen.Profile.route) {
-            ProfileScreen()
+            ProfileScreen(navController = navController, paddingValues = paddingValues, user = user)
         }
 
         /*composable(
@@ -165,6 +169,46 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
             val filteredEvents = events.value.filter { it.id.toInt() == event }
             EventDataScreen(filteredEvents[0], paddingValues, onBack = { navController.popBackStack() })
         }
+
+        composable(
+            route = "comments/{nickname}",
+            arguments = listOf(navArgument("nickname") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val nickname = backStackEntry.arguments?.getString("nickname") ?: ""
+            CommentsOnEvents(
+                navController = navController,
+                nickname = nickname,
+                paddingValues = paddingValues,
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = "following/{nickname}",
+            arguments = listOf(navArgument("nickname") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val nickname = backStackEntry.arguments?.getString("nickname") ?: ""
+            FollowingScreen(
+                navController = navController,
+                nickname = nickname,
+                paddingValues = paddingValues,
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = "follower/{nickname}"
+            //arguments = listOf(navArgument("nickname") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val nickname = backStackEntry.arguments?.getString("nickname") ?: ""
+            FollowerScrenn(
+                navController = navController,
+                nickname = nickname,
+                paddingValues = paddingValues,
+                onBack = { navController.popBackStack() }
+            )
+        }
+
 
         composable(
             route = "Category_Section/{categoryName}", // Cambiado para aceptar un parámetro de ruta
