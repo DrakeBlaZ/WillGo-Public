@@ -42,7 +42,11 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues)
         }
 
         composable(route = BottomBarScreen.Location.route) {
-            MapScreen()
+            MapScreen(
+                eventsState = events,
+                onEventClick = { event ->
+                    navController.navigate("eventDetail/${event.id}")
+                })
         }
 
         composable(route = BottomBarScreen.Profile.route) {
