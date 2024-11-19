@@ -72,8 +72,10 @@ import kotlinx.coroutines.launch
 @Composable
 fun ProfileScreen(navController: NavHostController = rememberNavController(), paddingValues: PaddingValues, user: User){
     val willGoevents = remember { mutableStateOf(listOf<Event>()) }
+    val favevents = remember { mutableStateOf(listOf<Event>()) }
     LaunchedEffect(Unit) {
         willGoevents.value = getWillgoForUser(user.nickname)
+        favevents.value = getFavForUser(user.nickname)
     }
     var coroutineScope = rememberCoroutineScope()
     Column(modifier = Modifier
@@ -119,11 +121,11 @@ fun ProfileScreen(navController: NavHostController = rememberNavController(), pa
                 Spacer(modifier = Modifier.height(16.dp))
                 FollowsSection(user.followers, user.followed)
                 Spacer(Modifier.height(16.dp))
+                SectionTitle2(title = "Eventos favoritos")
+                Spacer(Modifier.height(16.dp))
+                ConcertsSection2(favevents)
+                Spacer(Modifier.height(16.dp))
                 SectionTitle2(title = "Asistirá próximamente")
-                Spacer(Modifier.height(16.dp))
-                ConcertsSection2()
-                Spacer(Modifier.height(16.dp))
-                SectionTitle2(title = "Eventos asistidos")
                 Spacer(Modifier.height(16.dp))
                 PopularSection2(willGoevents)
                 Spacer(Modifier.height(16.dp))
@@ -295,50 +297,26 @@ fun PopularSection2(events:MutableState<List<Event>>) {
                 )
             }
         }
-        //items(6){
-          //  CommonEventCard(event = Event(
-            //    id = 1,
-              //  description = "Descripción del evento",
-                //name_event = "Nombre del evento",
-                //date = "2024-11-12",
-                //image = "url_de_imagen_evento",  // Este URL puede ser dinámico
-                //duration = 2.0f,
-                //price = 10.0f,
-                //category = null,
-                //location = null,
-                //asistance = 1000,
-                //type = "Concierto"
-            //), modifier = Modifier
-              //  .height(164.dp)
-                //.width(164.dp))
-        //}
         item{VerticalSeparator2()}
 
     }
 }
 
 @Composable
-fun ConcertsSection2() {
+fun ConcertsSection2(events:MutableState<List<Event>>) {
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         item{VerticalSeparator2()}
-        items(6){
-            CommonEventCard(event = Event(
-                id = 1,
-                description = "Descripción del evento",
-                name_event = "Nombre del evento",
-                date = "2024-11-12",
-                image = "url_de_imagen_evento",  // Este URL puede ser dinámico
-                duration = 2.0f,
-                price = 10.0f,
-                category = null,
-                location = null,
-                asistance = 1000,
-                type = "Concierto"
-            ), modifier = Modifier
-                .height(164.dp)
-                .width(164.dp))
+        val willgo = events.value
+        for (event in willgo) {
+            item { CommonEventCard(
+                event = event,
+                modifier = Modifier
+                    .height(164.dp)
+                    .width(164.dp)
+            )
+            }
         }
         item{VerticalSeparator2()}
 
@@ -361,7 +339,25 @@ suspend fun getWillgoForUser(nickname:String):List<Event> {
     val result:MutableList<Event> = mutableListOf()
     for (event in willGoevents) {
         val eventsupabaseResponse = client.postgrest["Evento"].select{
-            filter { eq("id", event.idEvent)}
+            filter { eq("id", event.id_event)}
+        }
+        val goEvent = eventsupabaseResponse.decodeList<Event>()
+        result += goEvent
+    }
+
+    return result
+}
+
+suspend fun getFavForUser(nickname:String):List<Event> {
+    val client = getClient()
+    val supabaseResponseEvents = client.postgrest["Eventos_favoritos"].select {
+        filter { eq("user_nickname", nickname) }
+    }
+    val favevents = supabaseResponseEvents.decodeList<EventosfavResponse>()
+    val result:MutableList<Event> = mutableListOf()
+    for (event in favevents) {
+        val eventsupabaseResponse = client.postgrest["Evento"].select{
+            filter { eq("id", event.event_id)}
         }
         val goEvent = eventsupabaseResponse.decodeList<Event>()
         result += goEvent
@@ -372,6 +368,12 @@ suspend fun getWillgoForUser(nickname:String):List<Event> {
 
 @kotlinx.serialization.Serializable
 data class EventosResponse(
-    val idEvent: Long,
-    val user: String
+    val id_event: Long,
+    val users: String
+)
+
+@kotlinx.serialization.Serializable
+data class EventosfavResponse(
+    val event_id: Long,
+    val user_nickname: String
 )
