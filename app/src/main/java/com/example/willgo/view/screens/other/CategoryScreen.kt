@@ -16,6 +16,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -24,11 +25,11 @@ import com.example.willgo.data.Event
 import com.example.willgo.view.sections.CommonEventCard
 
 @Composable
-fun CategoryScreen(onBack: () -> Unit, category: Category, events: List<Event>, navController: NavHostController){
+fun CategoryScreen(onBack: () -> Unit, category: Category, events: List<Event>, navController: NavHostController, paddingValuesNav: PaddingValues){
     Scaffold(
         topBar = {TopBar(category.toString(), onBack)},
     ){
-        CategorySection(events.filter { it.category == category }, it, navController)
+        CategorySection(events.filter { it.category == category }, it, navController, paddingValuesNav)
     }
 }
 
@@ -43,10 +44,11 @@ fun TopBar(categoryName: String, onBack: () -> Unit){
 }
 
 @Composable
-fun CategorySection(events: List<Event>, paddingValues: PaddingValues, navController: NavHostController){
+fun CategorySection(events: List<Event>, paddingValues: PaddingValues, navController: NavHostController, paddingValuesNav: PaddingValues){
     LazyColumn(modifier = Modifier
         .fillMaxSize()
-        .padding(paddingValues.calculateTopPadding())
+        .padding(top = paddingValues.calculateTopPadding(), bottom = paddingValuesNav.calculateBottomPadding()),
+        horizontalAlignment = Alignment.CenterHorizontally
         ){
         items(count = events.size){
             event -> CommonEventCard(events[event], Modifier.clickable {navController.navigate("eventDetail/${events[event].id}")})

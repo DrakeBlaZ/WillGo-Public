@@ -1,76 +1,47 @@
 package com.example.willgo.view.screens
 
-import android.app.Dialog
-import android.provider.ContactsContract.Profile
-import android.text.style.BackgroundColorSpan
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.Text
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Label
-import androidx.compose.material3.SearchBar
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
-import com.example.willgo.data.Comment
-import com.example.willgo.data.Event
 import com.example.willgo.data.User
-import com.example.willgo.graphs.loadEventsFromSupabase
-import com.example.willgo.view.screens.getCommentsForUser
-import com.example.willgo.view.sections.CommonEventCard
+import com.example.willgo.graphs.BottomBarScreen
+import com.example.willgo.view.screens.navScreens.TopBar
 import io.github.jan.supabase.postgrest.postgrest
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 
 private var nick =""
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FollowerScrenn(navController: NavHostController, nickname: String, paddingValues: PaddingValues, onBack: () -> Unit){
+fun FollowerScreen(navController: NavHostController, nickname: String, paddingValues: PaddingValues, onBack: () -> Unit){
     val following = remember { mutableStateOf(listOf<User>()) }
     val coroutineScope = rememberCoroutineScope()
 
@@ -79,12 +50,39 @@ fun FollowerScrenn(navController: NavHostController, nickname: String, paddingVa
     LaunchedEffect(Unit) {
         following.value = getFollowersForUser(nickname)
     }
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .padding(paddingValues)
+    ) {
+        TopAppBar(
+            title = { Text("Seguidores") },
+            navigationIcon = {
+                IconButton(
+                    onClick = {
+                        //navController.navigate(BottomBarScreen.Home.route)
+                        navController.navigate(BottomBarScreen.Profile.route) {
+                            // Establece `launchSingleTop` para evitar duplicados
+                            launchSingleTop = true
+                            // Establece `popUpTo` para limpiar el historial hasta `HomeScreen`
+                            popUpTo(BottomBarScreen.Profile.route) { inclusive = true }
+                        }
+                    })
+                {
+                    Icon(
+                        modifier = Modifier,
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "ArrowBack"
+                    )
+                }
+            }
+        )
 
-    LazyColumn(modifier = Modifier.padding(paddingValues)) {
-        items(following.value) { follow ->
-            FollowingItem(
-                follow, navController
-            )
+        LazyColumn(modifier = Modifier) {
+            items(following.value) { follow ->
+                FollowingItem(
+                    follow, navController
+                )
+            }
         }
     }
 

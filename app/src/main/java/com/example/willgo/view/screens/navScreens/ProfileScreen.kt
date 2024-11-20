@@ -149,11 +149,11 @@ private fun ButtonsSection(onSeguirClick: () -> Unit, onComentariosClick: () -> 
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        Button(onClick = onSeguirClick) {
-            Text(text = "Seguidos")
-        }
         Button (onClick = onSeguidoresClik) {
             Text(text = "Seguidores")
+        }
+        Button(onClick = onSeguirClick) {
+            Text(text = "Seguidos")
         }
         Button(onClick = onComentariosClick) {
             Text(text = "Comentarios")
@@ -279,8 +279,6 @@ fun PopularSection2(events:MutableState<List<Event>>,navController: NavHostContr
             item { CommonEventCard(
                 event = event,
                 modifier = Modifier
-                    .height(164.dp)
-                    .width(164.dp)
                     .clickable { navController.navigate("eventDetail/${event.id}")}
                 )
             }
@@ -301,8 +299,6 @@ fun ConcertsSection2(events:MutableState<List<Event>>,navController: NavHostCont
             item { CommonEventCard(
                 event = event,
                 modifier = Modifier
-                    .height(164.dp)
-                    .width(164.dp)
                     .clickable { navController.navigate("eventDetail/${event.id}")}
             )
             }

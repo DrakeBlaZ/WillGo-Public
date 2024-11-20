@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -16,8 +17,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items  // Asegúrate de usar este items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,12 +37,14 @@ import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.example.willgo.data.Event
 import com.example.willgo.data.Comment
+import com.example.willgo.graphs.BottomBarScreen
 import com.example.willgo.graphs.loadEventsFromSupabase
 import io.github.jan.supabase.postgrest.postgrest
 import java.text.SimpleDateFormat
 import java.util.Locale
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CommentsOnEvents(navController: NavController, nickname: String, paddingValues: PaddingValues, onBack: () -> Unit) {
     val comments = remember {
@@ -55,13 +64,39 @@ fun CommentsOnEvents(navController: NavController, nickname: String, paddingValu
     LaunchedEffect(Unit) {
         loadEventsFromSupabase(events)
     }
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .padding(paddingValues)
+    ) {
+        TopAppBar(
+            title = { Text("Comentarios") },
+            navigationIcon = {
+                IconButton(
+                    onClick = {
+                        //navController.navigate(BottomBarScreen.Home.route)
+                        navController.navigate(BottomBarScreen.Profile.route) {
+                            // Establece `launchSingleTop` para evitar duplicados
+                            launchSingleTop = true
+                            // Establece `popUpTo` para limpiar el historial hasta `HomeScreen`
+                            popUpTo(BottomBarScreen.Profile.route) { inclusive = true }
+                        }
+                    })
+                {
+                    Icon(
+                        modifier = Modifier,
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "ArrowBack"
+                    )
+                }
+            }
+        )
+        LazyColumn(modifier = Modifier) {
+            items(comments.value) { comment ->
+                val event = events.value.firstOrNull { it.id == comment.event_id }
 
-    LazyColumn(modifier = Modifier.padding(paddingValues)) {
-        items(comments.value) { comment ->
-            val event = events.value.firstOrNull { it.id == comment.event_id }
-
-            event?.let {
-                CommentItem(comment, it, navController)
+                event?.let {
+                    CommentItem(comment, it, navController)
+                }
             }
         }
     }

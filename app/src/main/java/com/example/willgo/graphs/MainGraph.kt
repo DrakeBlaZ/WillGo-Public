@@ -22,9 +22,8 @@ import com.example.willgo.view.screens.navScreens.MapScreen
 import com.example.willgo.view.screens.navScreens.ProfileScreen
 import com.example.willgo.view.screens.other.CategoryScreen
 import com.example.willgo.view.screens.CommentsOnEvents
-import com.example.willgo.view.screens.FollowerScrenn
+import com.example.willgo.view.screens.FollowerScreen
 import com.example.willgo.view.screens.FollowingScreen
-import com.example.willgo.view.screens.other.DetailEventScreen
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
@@ -201,7 +200,7 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues,
             //arguments = listOf(navArgument("nickname") { type = NavType.StringType })
         ) { backStackEntry ->
             val nickname = backStackEntry.arguments?.getString("nickname") ?: ""
-            FollowerScrenn(
+            FollowerScreen(
                 navController = navController,
                 nickname = nickname,
                 paddingValues = paddingValues,
@@ -216,7 +215,7 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues,
         ) { backStackEntry ->
             val categoryName = backStackEntry.arguments?.getString("categoryName") ?: "DEFAULT"
             val category = getCategory(categoryName) // Usa el nombre para obtener la categoría correcta
-            CategoryScreen(onBack = { navController.popBackStack() }, category = category, events.value, navController)
+            CategoryScreen(onBack = { navController.popBackStack() }, category = category, events.value, navController, paddingValues)
         }
     }
 }

@@ -26,6 +26,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
@@ -35,10 +36,12 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Label
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -60,6 +63,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.willgo.data.Comment
 import com.example.willgo.data.Event
 import com.example.willgo.data.User
+import com.example.willgo.graphs.BottomBarScreen
 import com.example.willgo.graphs.loadEventsFromSupabase
 import com.example.willgo.view.screens.getCommentsForUser
 import com.example.willgo.view.sections.CommonEventCard
@@ -69,6 +73,7 @@ import kotlinx.coroutines.launch
 
 private var nick =""
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FollowingScreen(navController: NavHostController, nickname: String, paddingValues: PaddingValues, onBack: () -> Unit){
     val following = remember { mutableStateOf(listOf<User>()) }
@@ -79,15 +84,41 @@ fun FollowingScreen(navController: NavHostController, nickname: String, paddingV
     LaunchedEffect(Unit) {
         following.value = getFollowingForUser(nickname)
     }
-
-    LazyColumn(modifier = Modifier.padding(paddingValues)) {
-        items(following.value) { follow ->
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .padding(paddingValues)
+    ) {
+        TopAppBar(
+            title = { Text("Seguidos") },
+            navigationIcon = {
+                IconButton(
+                    onClick = {
+                        //navController.navigate(BottomBarScreen.Home.route)
+                        navController.navigate(BottomBarScreen.Profile.route) {
+                            // Establece `launchSingleTop` para evitar duplicados
+                            launchSingleTop = true
+                            // Establece `popUpTo` para limpiar el historial hasta `HomeScreen`
+                            popUpTo(BottomBarScreen.Profile.route) { inclusive = true }
+                        }
+                    })
+                {
+                    Icon(
+                        modifier = Modifier,
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "ArrowBack"
+                    )
+                }
+            }
+        )
+        LazyColumn(modifier = Modifier) {
+            items(following.value) { follow ->
                 FollowingItem(
                     follow, navController,
                     onDelete = {
                         following.value -= follow
                     }
                 )
+            }
         }
     }
 
