@@ -6,7 +6,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -17,23 +20,27 @@ import androidx.navigation.compose.rememberNavController
 import com.example.willgo.graphs.BottomBarScreen
 import com.example.willgo.graphs.MainNavGraph
 import com.example.willgo.data.User
+import com.example.willgo.view.screens.other.SplashScreen
 
 @Composable
 fun MainScreen(navController: NavHostController = rememberNavController()){
 
-    val user = User(
-        nickname = "rafagimeno",
-        name = "Rafa",
-        password = "123456",
-        email = "rafagimeno6@gmail.com",
-        followers = 0,
-        followed = 0
-    )
-    Scaffold(
-        bottomBar = { NavBar(navController ) }
-    )
-    {
-        MainNavGraph(navController = navController, paddingValues = it, user)
+    val user = remember { mutableStateOf<User?>(null) }
+
+    LaunchedEffect(Unit) {
+        user.value = getUser()
+    }
+
+    if (user.value == null) {
+        SplashScreen(navController)
+    } else {
+
+        Scaffold(
+            bottomBar = { NavBar(navController ) }
+        )
+        {
+            MainNavGraph(navController = navController, paddingValues = it, user = user.value!!)
+        }
     }
 }
 

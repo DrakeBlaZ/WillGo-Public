@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,7 +33,6 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.willgo.data.User
 import com.example.willgo.graphs.BottomBarScreen
-import com.example.willgo.view.screens.navScreens.TopBar
 import io.github.jan.supabase.postgrest.postgrest
 
 private var nick =""

@@ -36,7 +36,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Vertices
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -314,7 +313,7 @@ suspend fun deleteWillGo(event: Event){
 }
 
 
-private suspend fun getUser(): User {
+suspend fun getUser(): User {
     val client = getClient()
     val supabaseResponse = client.postgrest["Usuario"].select()
     val data = supabaseResponse.decodeList<User>()

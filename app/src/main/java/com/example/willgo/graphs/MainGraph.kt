@@ -56,15 +56,6 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues,
             ProfileScreen(navController = navController, paddingValues = paddingValues, user = user)
         }
 
-        /*composable(
-            route = HomeScreenRoutes.Category.route,
-            arguments = listOf(navArgument("categoryName") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val categoryName = backStackEntry.arguments?.getString("categoryName") ?: "DEFAULT"
-            val category = getCategory(categoryName)
-            CategoryScreen(onBack = { navController.popBackStack() }, category = category, events.value, navController)
-        }*/
-
         composable(
             route = "searchResults?query={query}&maxPrice={maxPrice}&category={category}&type={type}&date={date}",
             arguments = listOf(
