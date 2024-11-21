@@ -69,6 +69,7 @@ class MainActivity : ComponentActivity() {
         return data[0]
     }
 
+
     private fun getData(){
         lifecycleScope.launch{
             val client = getClient()

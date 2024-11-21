@@ -29,6 +29,7 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -210,7 +211,7 @@ fun CharacteristicEvent(type: String, text: String, modifier: Modifier){
 
 @Composable
 fun WillGo(willGo: Boolean, event: Event, coroutineScope: CoroutineScope, onWillGoChanged: (Boolean) -> Unit) {
-    var attendants by remember { mutableStateOf(0) }
+    var attendants by remember { mutableIntStateOf(0) }
     LaunchedEffect(event) {attendants = getAttendants(event)}
     Box(
         modifier = Modifier
@@ -267,23 +268,25 @@ fun WillGo(willGo: Boolean, event: Event, coroutineScope: CoroutineScope, onWill
 }
 
 
-suspend fun getWillGo(event: Event):Boolean{
+suspend fun getWillGo(event: Event): Boolean {
     val client = getClient()
-    val supabaseResponse = client.postgrest["WillGo"].select(){
-        filter{
-            eq("id_event", event.id)
+    val userNickname = getUser().nickname
+    val supabaseResponse = client.postgrest["WillGo"].select {
+        filter {
+            and {
+                eq("id_event", event.id) // Filtro por ID de evento
+                eq("users", userNickname) // Filtro por nickname del usuario
+            }
         }
     }
     val data = supabaseResponse.decodeList<WillGo>()
-    return data.isNotEmpty()
+    return data.isNotEmpty() // Devuelve true si hay un registro
 }
 
 suspend fun getAttendants(event: Event):Int{
     val client = getClient()
     val supabaseResponse = client.postgrest["WillGo"].select(){
-        filter{
-            eq("id_event", event.id)
-        }
+        filter{eq("id_event", event.id)}
     }
     val data = supabaseResponse.decodeList<WillGo>()
     return data.size
@@ -295,6 +298,7 @@ suspend fun addWillGo(event: Event){
     val client = getClient()
     willGo?.let {
         client.postgrest["WillGo"].insert(willGo)
+
     }
 }
 
@@ -304,12 +308,12 @@ suspend fun deleteWillGo(event: Event){
     val client = getClient()
     client.postgrest["WillGo"].delete(){
         filter{
-            eq("id_event", event.id)
-            user.nickname?.let { eq("users", it) }
+            and{
+                eq("id_event", event.id)
+                eq("users", user.nickname)
+            }
         }
     }
-
-
 }
 
 

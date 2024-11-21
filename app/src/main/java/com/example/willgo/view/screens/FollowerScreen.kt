@@ -24,7 +24,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -41,7 +40,6 @@ private var nick =""
 @Composable
 fun FollowerScreen(navController: NavHostController, nickname: String, paddingValues: PaddingValues, onBack: () -> Unit){
     val following = remember { mutableStateOf(listOf<User>()) }
-    val coroutineScope = rememberCoroutineScope()
 
     nick = nickname
 
@@ -78,7 +76,7 @@ fun FollowerScreen(navController: NavHostController, nickname: String, paddingVa
         LazyColumn(modifier = Modifier) {
             items(following.value) { follow ->
                 FollowingItem(
-                    follow, navController
+                    follow
                 )
             }
         }
@@ -87,7 +85,7 @@ fun FollowerScreen(navController: NavHostController, nickname: String, paddingVa
 }
 
 @Composable
-fun FollowingItem(user: User, navController: NavController,){
+fun FollowingItem(user: User){
     Card(
         modifier = Modifier
             .fillMaxWidth()
