@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -47,7 +46,6 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.willgo.data.Category
 import com.example.willgo.data.Event
-import com.example.willgo.graphs.HomeScreenRoutes
 import com.example.willgo.view.screens.normalizeText
 import com.example.willgo.view.sections.CommonEventCard
 import com.example.willgo.view.sections.FiltersPreview
