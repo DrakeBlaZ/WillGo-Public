@@ -27,6 +27,7 @@ import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,14 +37,30 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.willgo.data.User
+import com.example.willgo.view.screens.getClient
+import com.example.willgo.view.screens.getUser
 import com.example.willgo.view.screens.normalizeText
 import com.example.willgo.view.sections.FiltersPreview
 import com.example.willgo.view.sections.WillGo.WillGoUserItem
+import io.github.jan.supabase.postgrest.postgrest
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 fun WillGoScreen(){
+    val user = remember { mutableStateOf<User?>(null) }
+    LaunchedEffect(Unit) {
+        user.value = getUser()
+    }
+    var selectedUsers = remember { mutableStateOf(listOf<String>()) }
+    val onSelectedUsersChange: (List<String>) -> Unit
+    val onClick: () -> Unit = {
+        sendWillGoRequests(selectedUsers.value)
+    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -58,10 +75,11 @@ fun WillGoScreen(){
         bottomBar = {
             Box(modifier = Modifier.padding(8.dp)){
                 Button(
-                    onClick = { },
+                    onClick = onClick,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(8.dp),
+                    enabled = selectedUsers.value.isNotEmpty()
                 ) {
                     Text(text = "Enviar solicitud")
                 }
@@ -135,6 +153,26 @@ fun WillGoScreen(){
                 }
             }
 
+        }
+    }
+
+}
+
+
+fun sendWillGoRequests(selectedUsers: List<String>){
+    CoroutineScope(Dispatchers.IO).launch {
+        getClient().postgrest["Solicitudes"].insert(selectedUsers)
+
+    }
+}
+
+fun getPossiblyWillGoRequested(){
+    CoroutineScope(Dispatchers.IO).launch {
+        getClient().postgrest["Solicitudes"].select(){
+            filter{
+                eq("user_requested", getUser().nickname)
+                neq("user_requested", getUser().nickname)
+            }
         }
     }
 

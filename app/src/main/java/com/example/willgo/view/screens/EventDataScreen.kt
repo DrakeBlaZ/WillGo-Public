@@ -296,9 +296,13 @@ suspend fun addWillGo(event: Event){
     val user = getUser()
     val willGo = user.nickname?.let { WillGo(event.id.toInt(), it) }
     val client = getClient()
-    willGo?.let {
-        client.postgrest["WillGo"].insert(willGo)
+    try{
+        willGo?.let {
+            client.postgrest["WillGo"].insert(willGo)
 
+        }
+    }catch(e: Exception){
+        print("Duplicado")
     }
 }
 
