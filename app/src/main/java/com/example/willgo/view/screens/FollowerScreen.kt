@@ -28,9 +28,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import com.example.willgo.data.User
+import com.example.willgo.data.User.User
 import com.example.willgo.graphs.BottomBarScreen
 import io.github.jan.supabase.postgrest.postgrest
 

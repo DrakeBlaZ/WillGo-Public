@@ -42,7 +42,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.willgo.data.Event
-import com.example.willgo.data.User
+import com.example.willgo.data.User.User
 import com.example.willgo.view.screens.getClient
 import com.example.willgo.view.screens.getCommentsForUser
 import com.example.willgo.view.screens.getFollowersForUser
@@ -318,7 +318,7 @@ fun VerticalSeparator2(){
 suspend fun getWillgoForUser(nickname:String):List<Event> {
     val client = getClient()
     val supabaseResponseEvents = client.postgrest["WillGo"].select {
-        filter { eq("users", nickname) }
+        filter { eq("user", nickname) }
     }
     val willGoevents = supabaseResponseEvents.decodeList<EventosResponse>()
     val result:MutableList<Event> = mutableListOf()
@@ -370,7 +370,7 @@ suspend fun getTotalfollowing(nickname: String) : Int {
 @kotlinx.serialization.Serializable
 data class EventosResponse(
     val id_event: Long,
-    val users: String
+    val user: String
 )
 
 @kotlinx.serialization.Serializable

@@ -1,15 +1,10 @@
-package com.example.willgo.data
+package com.example.willgo.data.User
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class User (
+data class UserResponse(
     val nickname: String,
     val name: String,
-    val password: String,
-    val email: String,
     val followers: Int,
-    val followed: Int
-) {
-
-}
+)

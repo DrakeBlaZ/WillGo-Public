@@ -14,7 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.willgo.data.Category
 import com.example.willgo.data.Event
-import com.example.willgo.data.User
+import com.example.willgo.data.User.User
 import com.example.willgo.view.screens.EventDataScreen
 import com.example.willgo.view.screens.SearchResultsScreen
 import com.example.willgo.view.screens.navScreens.HomeScreen
@@ -24,6 +24,7 @@ import com.example.willgo.view.screens.other.CategoryScreen
 import com.example.willgo.view.screens.CommentsOnEvents
 import com.example.willgo.view.screens.FollowerScreen
 import com.example.willgo.view.screens.FollowingScreen
+import com.example.willgo.view.screens.other.WillGoScreen
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
@@ -157,8 +158,23 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues,
         ) { backStackEntry ->
             val event = backStackEntry.arguments?.getInt("eventId") ?: -1
             val filteredEvents = events.value.filter { it.id.toInt() == event }
-            EventDataScreen(filteredEvents[0], paddingValues, onBack = { navController.popBackStack() })
+            EventDataScreen(filteredEvents[0], paddingValues, onBack = { navController.popBackStack() },
+                goAlone ={navController.navigate("goAlone/${filteredEvents[0].id}")})
         }
+
+        composable(
+            route = "goAlone/{eventId}",
+            arguments = listOf(navArgument("eventId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val event = backStackEntry.arguments?.getInt("eventId") ?: -1
+            val filteredEvents = events.value.filter { it.id.toInt() == event }
+            WillGoScreen(
+                filteredEvents[0].id,
+                paddingValues,
+                onBack = { navController.popBackStack() }
+            )
+        }
+
 
         composable(
             route = "comments/{nickname}",

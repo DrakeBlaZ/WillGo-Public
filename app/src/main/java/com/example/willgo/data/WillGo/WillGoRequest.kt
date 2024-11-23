@@ -1,4 +1,4 @@
-package com.example.willgo.data
+package com.example.willgo.data.WillGo
 
 import kotlinx.serialization.Serializable
 

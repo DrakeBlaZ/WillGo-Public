@@ -53,7 +53,8 @@ fun AppNavigation() {
                 EventDataScreen(
                     event = it,
                     paddingValues = PaddingValues(),
-                    onBack = { navController.popBackStack() }
+                    onBack = { navController.popBackStack() },
+                    goAlone = {navController.navigate("goAlone/${event.id}")}
                 )
             }
         }

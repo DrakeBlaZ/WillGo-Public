@@ -3,6 +3,7 @@ package com.example.willgo.view.screens
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -28,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -46,8 +48,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.willgo.data.Event
-import com.example.willgo.data.User
-import com.example.willgo.data.WillGo
+import com.example.willgo.data.User.User
+import com.example.willgo.data.User.UserResponse
+import com.example.willgo.data.WillGo.WillGo
 import com.example.willgo.view.sections.VerticalSeparator
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
@@ -57,264 +60,332 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
-fun EventDataScreen(event: Event, paddingValues: PaddingValues, onBack: () -> Unit){
-    var willgo by remember{ mutableStateOf(false)}
-    LaunchedEffect(Unit) {
-        willgo = getWillGo(event)
-    }
-    val coroutineScope = rememberCoroutineScope()
+fun EventDataScreen(
+    event: Event,
+    paddingValues: PaddingValues,
+    onBack: () -> Unit,
+    goAlone: () -> Unit
+) {
+
+
     LazyColumn(
         modifier = Modifier
             .background(Color.White)
             .fillMaxSize()
             .padding(paddingValues)
     ) {
-        item {
-            Box(modifier = Modifier
-                .fillMaxWidth()){
-                AsyncImage(
-                    model = event.image,
-                    contentDescription = "Imagen del evento",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp),
-                    contentScale = ContentScale.Crop
-                )
-                IconButton(
-                    onClick = onBack,
-                    modifier = Modifier.padding(8.dp),
-                    colors = IconButtonDefaults.iconButtonColors(Color.White))
-                {
-                    Icon(
-                        modifier = Modifier,
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "ArrowBack"
-                    )
-                }
-            }
+        // Secciones
+        item { EventHeader(event, onBack) }
+        item { EventDetails(event) }
+        item { EventCharacteristics(event) }
+        item { EventDescription(event) }
+        item { WillGoButtons(event, goAlone) }
+        item { EventLocation(event) }
+        item { ContactSection(event) }
+    }
+}
 
-        }
-        item {
-            Text(text = event.date.toString(), modifier = Modifier.padding(8.dp), color = Color.Blue)
-            Text(
-                text = event.name_event,
-                color = Color.Black,
-                fontSize = 36.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Start,
-                maxLines = 3,
-                overflow = TextOverflow.Ellipsis,
-                lineHeight = 36.sp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 8.dp, end = 8.dp, bottom = 16.dp)
+
+// Encabezado con imagen del evento
+@Composable
+fun EventHeader(event: Event, onBack: () -> Unit) {
+    Box(modifier = Modifier.fillMaxWidth()) {
+        AsyncImage(
+            model = event.image,
+            contentDescription = "Imagen del evento",
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp),
+            contentScale = ContentScale.Crop
+        )
+        IconButton(
+            onClick = onBack,
+            modifier = Modifier.padding(8.dp),
+            colors = IconButtonDefaults.iconButtonColors(Color.White)
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Volver"
             )
         }
-
-        item{
-            CharacteristicEvent("Tiempo", event.duration.toString(), modifier = Modifier.padding(start = 16.dp))
-            CharacteristicEvent("Precio", event.price.toString(), modifier = Modifier.padding(start = 16.dp))
-        }
-
-        item {
-
-            Text("Acerca de este evento",
-                color = Color.Black,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 16.dp, start = 8.dp, bottom = 8.dp))
-            event.description?.let {
-                Text(
-                    text = it,
-                    color = Color.Black,
-                    fontSize = 16.sp,
-                    textAlign = TextAlign.Start,
-                    modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 16.dp),
-                    )
-            }
-        }
-
-        item{ HorizontalDivider(modifier = Modifier.padding(start = 8.dp, end = 8.dp), thickness = 1.dp) }
-
-        item {
-            WillGo(willgo, event, coroutineScope) { newWillGo ->
-                willgo = newWillGo
-            }
-        }
-
-        item{ HorizontalDivider(modifier = Modifier.padding(start = 8.dp, end = 8.dp), thickness = 1.dp) }
-
-        item {
-            event.location?.let {
-                Text(
-                    "Ubicación",
-                    color = Color.Black,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 16.dp, start = 8.dp, bottom = 8.dp)
-                )
-
-                Text(
-                    text = it,
-                    fontSize = 16.sp,
-                    textAlign = TextAlign.Start,
-                    modifier = Modifier.padding(top = 16.dp, start = 8.dp, bottom = 8.dp)
-                )
-            }
-        }
-
-        item{
-            event.email_contact?.let {
-                Text("Contacta con nosotros",
-                    color = Color.Black,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 16.dp, start = 8.dp, bottom = 8.dp))
-
-                Text(
-                    text = it,
-                    fontSize = 16.sp,
-                    textAlign = TextAlign.Start,
-                    modifier = Modifier.padding(top = 16.dp, start = 8.dp, bottom = 8.dp)
-                )
-            }
-        }
-
     }
+}
 
+// Detalles del evento
+@Composable
+fun EventDetails(event: Event) {
+    Column(modifier = Modifier.padding(8.dp)) {
+        Text(text = event.date.toString(), color = Color.Blue)
+        Text(
+            text = event.name_event,
+            color = Color.Black,
+            fontSize = 36.sp,
+            fontWeight = FontWeight.Bold,
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+// Características clave (Tiempo y Precio)
+@Composable
+fun EventCharacteristics(event: Event) {
+    Column(modifier = Modifier.padding(start = 16.dp)) {
+        CharacteristicEvent("Tiempo", "${event.duration} Horas")
+        CharacteristicEvent("Precio", "${event.price} €")
+    }
 }
 
 @Composable
-fun CharacteristicEvent(type: String, text: String, modifier: Modifier){
-    Row(
-        modifier = modifier
-    ){
-        val image: ImageVector
-        val unit: String?
-        if(type == "Precio"){
-            image = Icons.Default.AttachMoney
-            unit = " €"
-        }
-        else{
-            image = Icons.Default.AvTimer
-            unit = " Horas"
-        }
-        Image(imageVector = image, contentDescription = null, modifier = Modifier.size(36.dp))
-        VerticalDivider(
-            modifier = Modifier.padding(horizontal = 4.dp),
-            thickness = 0.dp,)
-        Text(text + unit,
+fun CharacteristicEvent(label: String, value: String) {
+    Row(modifier = Modifier.padding(vertical = 4.dp)) {
+        Icon(
+            imageVector = if (label == "Precio") Icons.Default.AttachMoney else Icons.Default.AvTimer,
+            contentDescription = null,
+            modifier = Modifier.size(24.dp)
+        )
+        Text(
+            text = "$label: $value",
             fontSize = 18.sp,
-            modifier = Modifier.align(Alignment.CenterVertically))
+            modifier = Modifier.align(Alignment.CenterVertically)
+        )
+    }
+}
+
+// Descripción del evento
+@Composable
+fun EventDescription(event: Event) {
+    event.description?.let {
+        Column(modifier = Modifier.padding(8.dp)) {
+            Text(
+                text = "Acerca del evento",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = it,
+                fontSize = 16.sp
+            )
+        }
     }
 }
 
 @Composable
-fun WillGo(willGo: Boolean, event: Event, coroutineScope: CoroutineScope, onWillGoChanged: (Boolean) -> Unit) {
-    var attendants by remember { mutableIntStateOf(0) }
-    LaunchedEffect(event) {attendants = getAttendants(event)}
-    Box(
+fun WillGoButtons(
+    event: Event,
+    goAlone: () -> Unit,
+) {
+    var willGo by remember { mutableStateOf<WillGo?>(null) }
+    var alone by remember { mutableStateOf(false) }  // Estado para saber si el usuario va solo
+    var currentAttendants by remember { mutableStateOf(0)}
+    val coroutineScope = rememberCoroutineScope()
+
+    // Carga inicial de datos
+    LaunchedEffect(event) {
+        willGo = getWillGo(event)
+        alone = willGo?.alone ?: false
+        currentAttendants = getAttendants(event)
+    }
+
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 16.dp, horizontal = 8.dp)
+            .padding(8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Column(modifier = Modifier.align(Alignment.TopStart)){
-            Text(text = "Asistirán(${attendants})")
+        // Mostrar asistentes
+        Column {
+            Text(text = "Asistirán ($currentAttendants)")
             Row {
-                repeat(attendants){
-                    Image(imageVector = Icons.Default.AccountCircle, contentDescription = null)
+                // Limitar a los primeros 5 asistentes
+                val maxIconsToShow = 5
+                val attendantsToShow = List(minOf(currentAttendants, maxIconsToShow)) { Icons.Default.AccountCircle }
+
+                // Mostrar los iconos
+                attendantsToShow.forEach {
+                    Icon(imageVector = it, contentDescription = null)
+                }
+
+                // Si hay más de 5 asistentes, mostrar "y más"
+                if (currentAttendants > maxIconsToShow) {
+                    Text(text = "+${currentAttendants - maxIconsToShow}")
                 }
             }
         }
-        VerticalDivider(
-            modifier = Modifier.padding(horizontal = 4.dp),
-            thickness = 0.dp,)
 
-        Row(
-            modifier = Modifier.align(Alignment.TopEnd)
-                .height(48.dp),
-        ) {
+        // Botones de acción
+        Row {
+            // Botón de WillGo
             Button(
                 onClick = {
                     coroutineScope.launch {
-                            if (willGo) {
-                                deleteWillGo(event)
-                                attendants--
-                            } else {
-                                addWillGo(event)
-                                attendants++
-                            }
-                            onWillGoChanged(!willGo)
+                        if (willGo != null) {
+                            deleteWillGo(event)
+                            willGo = null
+                            alone = false
+                            currentAttendants--  // Decrementamos los asistentes
+                        } else {
+                            addWillGo(event)
+                            willGo = WillGo(event.id, getUser().nickname, false)
+                            currentAttendants++  // Incrementamos los asistentes
+                        }
                     }
-
-                },
-                modifier = Modifier
+                }
             ) {
-                Text(if (willGo) "WillGo ✔" else "WillGo")
+                Text(text = if (willGo != null) "WillGo ✔" else "WillGo")
             }
 
-            VerticalSeparator()
-
+            // Botón de Alone
             Button(
-                onClick = {},
-                modifier = Modifier,
+                onClick = {
+                    coroutineScope.launch {
+                        if (alone) {
+                            deleteAlone(event)
+                            alone = !alone// Eliminar el estado 'alone'
+                        } else {
+                            // Pasar 'exists' como parámetro para verificar si ya está registrado
+                            addAlone(event, willGo != null) { currentAttendants++ }  // Añadir 'alone' si es necesario
+                            goAlone()  // Navegar si va solo
+                        }
+                    }
+                },
                 colors = ButtonDefaults.buttonColors(
-                    Color.Gray)
-            ){
-                Text(text = "Voy solo")
+                    if (alone) Color.Green else Color.Gray
+                )
+            ) {
+                Text(text = if (alone) "Voy solo ✔" else "Voy solo")
             }
         }
     }
 }
 
+// Ubicación del evento
+@Composable
+fun EventLocation(event: Event) {
+    event.location?.let {
+        Column(modifier = Modifier.padding(8.dp)) {
+            Text(
+                text = "Ubicación",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Text(text = it, fontSize = 16.sp)
+        }
+    }
+}
 
-suspend fun getWillGo(event: Event): Boolean {
+// Contacto
+@Composable
+fun ContactSection(event: Event) {
+    event.email_contact?.let {
+        Column(modifier = Modifier.padding(8.dp)) {
+            Text(
+                text = "Contacto",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Text(text = it, fontSize = 16.sp)
+        }
+    }
+}
+
+suspend fun getWillGo(event: Event): WillGo? {
     val client = getClient()
     val userNickname = getUser().nickname
-    val supabaseResponse = client.postgrest["WillGo"].select {
+    return client.postgrest["WillGo"].select {
         filter {
             and {
-                eq("id_event", event.id) // Filtro por ID de evento
-                eq("users", userNickname) // Filtro por nickname del usuario
+                eq("id_event", event.id)
+                eq("user", userNickname)
+            }
+        }
+    }.decodeSingleOrNull()
+}
+
+suspend fun getAttendants(event: Event): Int {
+    val client = getClient()
+    val attendees = client.postgrest["WillGo"].select {
+        filter { eq("id_event", event.id) }
+    }.decodeList<WillGo>()
+    return attendees.size
+}
+
+// Otros métodos (`addWillGo`, `deleteWillGo`, etc.) se mantienen similares
+
+
+suspend fun addWillGo(event: Event) {
+    val user = getUser()
+    val willGo = user.nickname?.let { WillGo(event.id, it, false) }
+    val client = getClient()
+    try {
+        willGo?.let {
+            client.postgrest["WillGo"].insert(it)
+        }
+    } catch (e: Exception) {
+        Log.e("addWillGo", "El usuario ya está registrado como asistente")
+    }
+}
+
+
+suspend fun deleteWillGo(event: Event) {
+    val user = getUser()
+    val client = getClient()
+    client.postgrest["WillGo"].delete {
+        filter {
+            and {
+                eq("id_event", event.id)
+                eq("user", user.nickname)
             }
         }
     }
-    val data = supabaseResponse.decodeList<WillGo>()
-    return data.isNotEmpty() // Devuelve true si hay un registro
 }
 
-suspend fun getAttendants(event: Event):Int{
-    val client = getClient()
-    val supabaseResponse = client.postgrest["WillGo"].select(){
-        filter{eq("id_event", event.id)}
-    }
-    val data = supabaseResponse.decodeList<WillGo>()
-    return data.size
-}
 
-suspend fun addWillGo(event: Event){
+suspend fun addAlone(event: Event, exists: Boolean, addAttendants: () -> Unit) {
     val user = getUser()
-    val willGo = user.nickname?.let { WillGo(event.id.toInt(), it) }
+    val willGo = user.nickname?.let { WillGo(event.id, it, true) }
     val client = getClient()
-    try{
-        willGo?.let {
-            client.postgrest["WillGo"].insert(willGo)
 
+    if (exists) {
+        // Si ya está registrado como asistente, actualizamos solo el campo 'alone'
+
+        client.postgrest["WillGo"].update(
+            { set("alone", true) }
+        ) {
+            filter {
+                and {
+                    eq("id_event", event.id)
+                    eq("user", user.nickname)
+                    eq("alone", false)
+                }
+            }
         }
-    }catch(e: Exception){
-        print("Duplicado")
+    } else {
+        try {
+            // Si no está registrado, insertamos el nuevo registro
+            willGo?.let {
+                client.postgrest["WillGo"].insert(willGo)
+                addAttendants()  // Incrementar el contador de asistentes
+            }
+        } catch (e: Exception) {
+            Log.e("addAlone", "Error al añadir al usuario como solo: $e")
+        }
     }
 }
 
-
-suspend fun deleteWillGo(event: Event){
+suspend fun deleteAlone(event: Event) {
     val user = getUser()
     val client = getClient()
-    client.postgrest["WillGo"].delete(){
-        filter{
-            and{
+
+    // Actualiza el campo 'alone' a false para este usuario y evento
+    client.postgrest["WillGo"].update(
+        { set("alone", false) }
+    ) {
+        filter {
+            and {
                 eq("id_event", event.id)
-                eq("users", user.nickname)
+                eq("user", user.nickname)
+                eq("alone", true)
             }
         }
     }
@@ -329,6 +400,22 @@ suspend fun getUser(): User {
     return data[0]
 
 }
+
+suspend fun getUser(nick: String): User {
+    val client = getClient()
+    val supabaseResponse = client.postgrest["Usuario"].select(){
+        filter {
+            eq("nickname", nick)
+        }
+    }
+    val data = supabaseResponse.decodeList<User>()
+    Log.e("supabase", data.toString())
+    return data[0]
+
+}
+
+
+
 
 private suspend fun getData(){
 

@@ -15,9 +15,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Icon
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,41 +29,56 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.willgo.data.User.UserResponse
+import com.example.willgo.data.WillGo.WillGoItem
 
-@Preview
 @Composable
-fun WillGoUserItem(){
-    val selected by remember { mutableStateOf(false) }
+fun WillGoUserItem(
+    name: String,
+    nickname: String,
+    followers: Int,
+    onToggleSelect: () -> Boolean,
+    modifier: Modifier = Modifier,
+) {
+    var isSelected = remember { mutableStateOf(false) }
     Box(
-        modifier = Modifier
-            .background(Color.White)
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
             .height(84.dp)
-            .clickable {  },
+            .clickable { isSelected.value = onToggleSelect() }
+            .background(if (isSelected.value) Color.LightGray else Color.Transparent),
         contentAlignment = Alignment.Center
-    ){
+    ) {
         Row(
-            modifier = Modifier
-                .fillMaxSize(),
+            modifier = Modifier.fillMaxSize(),
             verticalAlignment = Alignment.CenterVertically
-        )
-        {
-            Box(modifier = Modifier.size(60.dp)){
-                Image(imageVector = Icons.Default.AccountCircle,
+        ) {
+            Box(modifier = Modifier.size(60.dp)) {
+                Image(
+                    imageVector = Icons.Default.AccountCircle,
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize())
+                    modifier = Modifier.fillMaxSize()
+                )
             }
-            Text(text = "Teresa Camarasa",
-                modifier = Modifier.fillMaxHeight().padding(top = 16.dp),
+            Text(
+                text = name,
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .padding(top = 16.dp),
                 textAlign = TextAlign.Center,
-                fontSize = 20.sp)
+                fontSize = 20.sp
+            )
         }
-        Box(modifier = Modifier.size(60.dp).align(Alignment.CenterEnd),
-            contentAlignment = Alignment.Center){
-            if(selected){
-                Icon(imageVector = Icons.Default.Check, contentDescription = "")
+        Box(
+            modifier = Modifier
+                .size(60.dp)
+                .align(Alignment.CenterEnd),
+            contentAlignment = Alignment.Center
+        ) {
+            if (isSelected.value) {
+                Icon(imageVector = Icons.Default.Check, contentDescription = "Selected")
             }
         }
     }
