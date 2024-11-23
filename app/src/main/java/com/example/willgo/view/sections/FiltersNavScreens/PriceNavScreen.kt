@@ -1,13 +1,8 @@
 package com.example.willgo.view.sections.FiltersNavScreens
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
@@ -21,9 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.willgo.data.Category
-import com.example.willgo.graphs.FiltersScreen
-import com.example.willgo.view.sections.FilterRow
 import com.example.willgo.view.sections.FilterValueRow
 
 @OptIn(ExperimentalMaterial3Api::class)
