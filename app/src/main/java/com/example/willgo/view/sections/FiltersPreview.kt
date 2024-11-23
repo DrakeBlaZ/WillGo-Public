@@ -94,7 +94,7 @@ fun CategoryItem(category: Category, isSelected: Boolean, navController: NavCont
     ElevatedButton(
         onClick = {
             onClick()
-            navController.navigate("searchResults?query=&category=${category.name.replace("_"," ")}")
+            navController.navigate("searchResults?query=&category=${category.name}")
         },
         colors = ButtonDefaults.elevatedButtonColors(containerColor = buttonColor)
     ) {
