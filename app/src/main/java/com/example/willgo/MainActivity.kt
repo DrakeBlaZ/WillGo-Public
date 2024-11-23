@@ -11,7 +11,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import com.example.willgo.data.Event
-import com.example.willgo.data.User
+import com.example.willgo.data.User.User
 import com.example.willgo.graphs.RootNavigationGraph
 import com.example.willgo.ui.theme.WillGoTheme
 import io.github.jan.supabase.SupabaseClient
@@ -61,7 +61,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private suspend fun getUser(): User{
+    private suspend fun getUser(): User {
         val client = getClient()
         val supabaseResponse = client.postgrest["Usuario"].select()
         val data = supabaseResponse.decodeList<User>()
