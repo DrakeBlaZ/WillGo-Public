@@ -275,7 +275,7 @@ suspend fun getWillGo(event: Event): Boolean {
         filter {
             and {
                 eq("id_event", event.id) // Filtro por ID de evento
-                eq("users", userNickname) // Filtro por nickname del usuario
+                eq("user", userNickname) // Filtro por nickname del usuario
             }
         }
     }
@@ -294,7 +294,7 @@ suspend fun getAttendants(event: Event):Int{
 
 suspend fun addWillGo(event: Event){
     val user = getUser()
-    val willGo = user.nickname?.let { WillGo(event.id.toInt(), it) }
+    val willGo = user.nickname?.let { WillGo(event.id.toInt(), it, alone = null) }
     val client = getClient()
     willGo?.let {
         client.postgrest["WillGo"].insert(willGo)
@@ -310,7 +310,7 @@ suspend fun deleteWillGo(event: Event){
         filter{
             and{
                 eq("id_event", event.id)
-                eq("users", user.nickname)
+                eq("user", user.nickname)
             }
         }
     }

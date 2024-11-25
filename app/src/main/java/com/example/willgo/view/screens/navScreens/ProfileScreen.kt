@@ -43,12 +43,15 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.willgo.data.Event
 import com.example.willgo.data.User
+import com.example.willgo.data.WillGo
 import com.example.willgo.view.screens.getClient
 import com.example.willgo.view.screens.getCommentsForUser
 import com.example.willgo.view.screens.getFollowersForUser
 import com.example.willgo.view.screens.getFollowingForUser
 import com.example.willgo.view.sections.CommonEventCard
 import io.github.jan.supabase.postgrest.postgrest
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 //@Preview
@@ -318,7 +321,7 @@ fun VerticalSeparator2(){
 suspend fun getWillgoForUser(nickname:String):List<Event> {
     val client = getClient()
     val supabaseResponseEvents = client.postgrest["WillGo"].select {
-        filter { eq("users", nickname) }
+        filter { eq("user", nickname) }
     }
     val willGoevents = supabaseResponseEvents.decodeList<EventosResponse>()
     val result:MutableList<Event> = mutableListOf()
@@ -333,6 +336,24 @@ suspend fun getWillgoForUser(nickname:String):List<Event> {
     return result
 }
 
+/*
+suspend fun getWillgoForUser(nickname:String):List<Event> {
+
+        val client = getClient()
+        val willGoResponse = client.postgrest["WillGo"].select {
+            filter {
+                eq("user", nickname)
+            }
+        }.decodeList<WillGo>()
+        return willGoResponse.map { response ->
+            client.postgrest["Evento"].select {
+                filter {
+                    eq("id", response.id_event)
+                }
+            }.decodeList<Event>()
+        }.flatten()
+}
+*/
 suspend fun getFavForUser(nickname:String):List<Event> {
     val client = getClient()
     val supabaseResponseEvents = client.postgrest["Eventos_favoritos"].select {
@@ -370,7 +391,8 @@ suspend fun getTotalfollowing(nickname: String) : Int {
 @kotlinx.serialization.Serializable
 data class EventosResponse(
     val id_event: Long,
-    val users: String
+    val user: String?,
+    val alone: Boolean?
 )
 
 @kotlinx.serialization.Serializable

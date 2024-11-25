@@ -5,5 +5,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class WillGo (
     val id_event: Int,
-    val users: String
+    val user: String?,
+    val alone: Boolean?,
 )

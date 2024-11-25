@@ -22,7 +22,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
@@ -63,7 +63,18 @@ fun HomeScreen(paddingValues: PaddingValues, events: List<Event>, navController:
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            TopBar()
+            TopBar(
+                navController ={
+                    Image(
+                        imageVector =  Icons.Default.CalendarMonth, contentDescription = "Calendario",
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clickable {
+                                navController.navigate("calendar")
+                            }
+                    )
+                }
+            )
             SearchBar(
                 text = query,
                 events = events,
@@ -97,7 +108,7 @@ fun HomeScreen(paddingValues: PaddingValues, events: List<Event>, navController:
 }
 
 @Composable
-fun TopBar(navigationIcon: @Composable () -> Unit = {}) {
+fun TopBar(navigationIcon: @Composable () -> Unit = {}, navController: @Composable () -> Unit = {}){
     Box(
         modifier = Modifier.padding(top = 12.dp, start = 12.dp, end = 12.dp)
             .fillMaxWidth()
@@ -118,12 +129,8 @@ fun TopBar(navigationIcon: @Composable () -> Unit = {}) {
             modifier = Modifier
                 .background(Color.White, shape = RoundedCornerShape(16.dp))
                 .align(Alignment.TopEnd)
-
         ) {
-            Image(
-                imageVector =  Icons.Default.AccountCircle, contentDescription = null,
-                modifier = Modifier.size(36.dp)
-            )
+            navController()
         }
     }
 }

@@ -17,18 +17,27 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.willgo.data.Event
 import com.example.willgo.graphs.BottomBarScreen
 import com.example.willgo.graphs.MainNavGraph
 import com.example.willgo.data.User
+import com.example.willgo.view.screens.navScreens.getWillgoForUser
 import com.example.willgo.view.screens.other.SplashScreen
 
 @Composable
 fun MainScreen(navController: NavHostController = rememberNavController()){
 
+    val userEvents = remember { mutableStateOf(emptyList<Event>()) }
     val user = remember { mutableStateOf<User?>(null) }
 
     LaunchedEffect(Unit) {
         user.value = getUser()
+    }
+
+    LaunchedEffect(user.value) {
+        user.value?.let { currentUser ->
+            userEvents.value = getWillgoForUser(currentUser.nickname) // Carga eventos cuando se obtiene el usuario
+        }
     }
 
     if (user.value == null) {
@@ -39,7 +48,7 @@ fun MainScreen(navController: NavHostController = rememberNavController()){
             bottomBar = { NavBar(navController ) }
         )
         {
-            MainNavGraph(navController = navController, paddingValues = it, user = user.value!!)
+            MainNavGraph(navController = navController, paddingValues = it, user = user.value!!, userEvents = userEvents)
         }
     }
 }

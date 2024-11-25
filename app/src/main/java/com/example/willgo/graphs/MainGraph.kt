@@ -15,6 +15,7 @@ import androidx.navigation.navArgument
 import com.example.willgo.data.Category
 import com.example.willgo.data.Event
 import com.example.willgo.data.User
+import com.example.willgo.view.screens.CalendarScreen
 import com.example.willgo.view.screens.EventDataScreen
 import com.example.willgo.view.screens.SearchResultsScreen
 import com.example.willgo.view.screens.navScreens.HomeScreen
@@ -24,14 +25,23 @@ import com.example.willgo.view.screens.other.CategoryScreen
 import com.example.willgo.view.screens.CommentsOnEvents
 import com.example.willgo.view.screens.FollowerScreen
 import com.example.willgo.view.screens.FollowingScreen
+import com.example.willgo.view.screens.navScreens.getWillgoForUser
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.postgrest.postgrest
+import io.ktor.events.Events
 
 @Composable
-fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues, user: User) {
+fun MainNavGraph(
+    navController: NavHostController,
+    paddingValues: PaddingValues,
+    user: User,
+    userEvents: MutableState<List<Event>>
+) {
+
     val events = remember { mutableStateOf(listOf<Event>()) }
+
     LaunchedEffect(Unit) {
         loadEventsFromSupabase(events)
     }
@@ -54,6 +64,11 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues,
 
         composable(route = BottomBarScreen.Profile.route) {
             ProfileScreen(navController = navController, paddingValues = paddingValues, user = user)
+        }
+
+        //Ruta para acceder al calendario
+        composable(route = "calendar") {
+            CalendarScreen(events = userEvents, navController = navController)
         }
 
         composable(
