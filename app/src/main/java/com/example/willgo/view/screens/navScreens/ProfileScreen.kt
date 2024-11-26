@@ -49,6 +49,8 @@ import com.example.willgo.view.screens.getFollowersForUser
 import com.example.willgo.view.screens.getFollowingForUser
 import com.example.willgo.view.sections.CommonEventCard
 import io.github.jan.supabase.postgrest.postgrest
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 //@Preview

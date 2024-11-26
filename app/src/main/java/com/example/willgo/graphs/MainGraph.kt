@@ -15,6 +15,7 @@ import androidx.navigation.navArgument
 import com.example.willgo.data.Category
 import com.example.willgo.data.Event
 import com.example.willgo.data.User.User
+import com.example.willgo.view.screens.CalendarScreen
 import com.example.willgo.view.screens.EventDataScreen
 import com.example.willgo.view.screens.SearchResultsScreen
 import com.example.willgo.view.screens.navScreens.HomeScreen
@@ -29,6 +30,7 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.postgrest.postgrest
+import io.ktor.events.Events
 
 @Composable
 fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues, user: User) {
@@ -55,6 +57,11 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues,
 
         composable(route = BottomBarScreen.Profile.route) {
             ProfileScreen(navController = navController, paddingValues = paddingValues, user = user)
+        }
+
+        //Ruta para acceder al calendario
+        composable(route = "calendar") {
+            CalendarScreen(userNickname = user.nickname, navController = navController, paddingValues = paddingValues)
         }
 
         composable(
@@ -174,7 +181,6 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues,
                 onBack = { navController.popBackStack() }
             )
         }
-
 
         composable(
             route = "comments/{nickname}",

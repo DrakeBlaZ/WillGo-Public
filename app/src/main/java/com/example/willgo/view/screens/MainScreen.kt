@@ -17,9 +17,11 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.willgo.data.Event
 import com.example.willgo.graphs.BottomBarScreen
 import com.example.willgo.graphs.MainNavGraph
 import com.example.willgo.data.User.User
+import com.example.willgo.view.screens.navScreens.getWillgoForUser
 import com.example.willgo.view.screens.other.SplashScreen
 
 @Composable
@@ -92,5 +94,4 @@ fun NavBar(navController: NavController){
             }
         }
     }
-
 }
