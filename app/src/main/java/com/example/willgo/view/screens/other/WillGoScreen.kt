@@ -23,8 +23,13 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -41,9 +46,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.willgo.data.Request
 import com.example.willgo.data.User.UserResponse
 import com.example.willgo.data.WillGo.WillGo
 import com.example.willgo.data.WillGo.WillGoItem
+import com.example.willgo.data.WillGo.WillGoRequest
 import com.example.willgo.view.screens.getClient
 import com.example.willgo.view.screens.getUser
 import com.example.willgo.view.screens.normalizeText
@@ -62,7 +69,10 @@ fun WillGoScreen(
     onBack: () -> Unit,
 ) {
     var user = remember { mutableStateListOf<WillGoItem>() }
+    var requestedUsers = remember { mutableStateListOf<WillGoItem>() }
     val selectedUsers = remember { mutableStateListOf<String>() }
+    var selectedTab by remember { mutableStateOf(0) } // Controla el tab seleccionado
+    val tabs = listOf("Usuarios", "Ya solicitados") // Títulos de los tabs
 
     // Cargar usuarios al iniciar la pantalla
     LaunchedEffect(Unit) {
@@ -153,32 +163,89 @@ fun WillGoScreen(
                 }
             }
             Spacer(modifier = Modifier.padding(top = 16.dp))
-            HorizontalDivider()
-            LazyColumn(
-                modifier = Modifier.fillMaxSize()
+            TabRow(
+                selectedTabIndex = selectedTab,
+                modifier = Modifier.fillMaxWidth(),
+                containerColor = Color.Transparent, // Fondo de la barra
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer, // Color del texto de las tabs
+                indicator = { tabPositions ->
+                    if (selectedTab < tabPositions.size) {
+                        TabRowDefaults.SecondaryIndicator(
+                            Modifier.tabIndicatorOffset(tabPositions[selectedTab]),
+                            color = MaterialTheme.colorScheme.primary // Color del indicador seleccionado
+                        )
+                    }
+                },
+                divider = {
+                    HorizontalDivider(color = MaterialTheme.colorScheme.secondary) // Línea divisoria
+                }
             ) {
-                items(user) { item ->
-                    WillGoUserItem(
-                        name = item.name!!,
-                        nickname = item.nickname,
-                        followers = item.followers!!,
-                        onToggleSelect = {
-                            item.isSelected = !(item.isSelected)!!
-                            if (item.isSelected == true) {
-                                selectedUsers.add(item.nickname ?: "")
-                            } else {
-                                selectedUsers.remove(item.nickname)
-                            }
-                            item.isSelected!!
-                        },
-                        modifier = Modifier
+                tabs.forEachIndexed { index, title ->
+                    Tab(
+                        selected = selectedTab == index,
+                        onClick = { selectedTab = index },
+                        text = { Text(title) }
                     )
                 }
+            }
+
+            when (selectedTab) {
+                0 -> RecienteContent(user, selectedUsers)
+                1 -> YaSolicitados(user, selectedUsers)
             }
         }
     }
 }
 
+// Función para mostrar la lista de usuarios recientes
+@Composable
+fun RecienteContent(user: SnapshotStateList<WillGoItem>, selectedUsers: SnapshotStateList<String>) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        items(user) { item ->
+            WillGoUserItem(
+                name = item.name!!,
+                nickname = item.nickname,
+                followers = item.followers!!,
+                onToggleSelect = {
+                    item.isSelected = !(item.isSelected)!!
+                    if (item.isSelected == true) {
+                        selectedUsers.add(item.nickname ?: "")
+                    } else {
+                        selectedUsers.remove(item.nickname)
+                    }
+                    item.isSelected!!
+                },
+                modifier = Modifier
+            )
+        }
+    }
+}
+
+// Función para mostrar la lista de usuarios ya solicitados
+@Composable
+fun YaSolicitados(
+    user: SnapshotStateList<WillGoItem>,
+    selectedUsers: SnapshotStateList<String>
+) {
+    val yaSolicitados = user.filter { selectedUsers.contains(it.nickname) }
+    LazyColumn(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        items(yaSolicitados) { item ->
+            WillGoUserItem(
+                name = item.name!!,
+                nickname = item.nickname,
+                followers = item.followers!!,
+                onToggleSelect = {
+                    item.isSelected!!
+                },
+                modifier = Modifier
+            )
+        }
+    }
+}
 
     @Preview
     @Composable
@@ -234,3 +301,30 @@ fun WillGoScreen(
             mutableStateOf<List<WillGoItem>>(aloneUsers) // Regresamos un MutableState
         return userState
     }
+
+suspend fun getAloneUsersRequested(idEvent: Long): MutableState<List<WillGoItem>> {
+    val response = getClient()
+        .postgrest["WillGo"]
+        .select {
+            filter {
+                and {
+                    eq("id_event", idEvent)
+                    neq("user", getUser().nickname)
+                    eq("alone", true)
+                }
+            }
+        }
+    val aloneUsersID = response.decodeList<WillGo>()
+    val aloneUsers =
+        mutableListOf<WillGoItem>()  // Lista que usaremos para cargar los datos
+
+    withContext(Dispatchers.IO) {
+        aloneUsersID.map {
+            aloneUsers.add(getUser(it.user).toWillGoItem()) // Transformamos los usuarios
+        }
+    }
+
+    val userState =
+        mutableStateOf<List<WillGoItem>>(aloneUsers) // Regresamos un MutableState
+    return userState
+}
