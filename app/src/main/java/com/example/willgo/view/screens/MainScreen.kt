@@ -101,5 +101,4 @@ fun NavBar(navController: NavController){
             }
         }
     }
-
 }

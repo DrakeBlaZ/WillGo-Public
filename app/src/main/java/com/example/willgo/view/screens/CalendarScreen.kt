@@ -31,17 +31,24 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.example.willgo.view.screens.navScreens.TopBar
+import com.example.willgo.view.screens.navScreens.getWillgoForUser
 import java.text.ParseException
 import java.util.*
 
 @Composable
-fun CalendarScreen(events: MutableState<List<Event>>, navController: NavController, paddingValues: PaddingValues) {
+fun CalendarScreen(
+    userNickname: String,
+    navController: NavController,
+    paddingValues: PaddingValues
+) {
 
     var selectedDate by remember{ mutableStateOf(Calendar.getInstance()) }
     val eventsByDate = remember { mutableStateOf<Map<String, List<Event>>>(emptyMap()) }
+    val userEvents = remember { mutableStateOf<List<Event>>(emptyList()) }
 
-    LaunchedEffect(events.value) {
-        eventsByDate.value = groupEventsByDate(events.value)
+    LaunchedEffect(userNickname) {
+        userEvents.value = getWillgoForUser(userNickname)
+        eventsByDate.value = groupEventsByDate(userEvents.value)
     }
 
     Box(

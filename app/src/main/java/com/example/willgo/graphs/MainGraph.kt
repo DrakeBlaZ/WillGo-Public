@@ -25,7 +25,6 @@ import com.example.willgo.view.screens.other.CategoryScreen
 import com.example.willgo.view.screens.CommentsOnEvents
 import com.example.willgo.view.screens.FollowerScreen
 import com.example.willgo.view.screens.FollowingScreen
-import com.example.willgo.view.screens.navScreens.getWillgoForUser
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
@@ -68,7 +67,7 @@ fun MainNavGraph(
 
         //Ruta para acceder al calendario
         composable(route = "calendar") {
-            CalendarScreen(events = userEvents, navController = navController, paddingValues = paddingValues)
+            CalendarScreen(userNickname = user.nickname, navController = navController, paddingValues = paddingValues)
         }
 
         composable(
