@@ -47,10 +47,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.willgo.data.Request
-import com.example.willgo.data.User.UserResponse
+import com.example.willgo.data.User.User
 import com.example.willgo.data.WillGo.WillGo
 import com.example.willgo.data.WillGo.WillGoItem
-import com.example.willgo.data.WillGo.WillGoRequest
 import com.example.willgo.view.screens.getClient
 import com.example.willgo.view.screens.getUser
 import com.example.willgo.view.screens.normalizeText
@@ -76,9 +75,11 @@ fun WillGoScreen(
 
     // Cargar usuarios al iniciar la pantalla
     LaunchedEffect(Unit) {
-        val result = getAloneUsers(idEvent)
+        val result = getAloneUsersItem(idEvent)
         user.addAll(result.value)
+        requestedUsers.addAll(getAloneUsersRequested(idEvent).value)
     }
+
 
     Scaffold(
         topBar = {
@@ -96,8 +97,11 @@ fun WillGoScreen(
                 Button(
                     onClick = {
                         // Remover los usuarios seleccionados
+                        val temp = user.toList()
                         user.clear()
-                        user.addAll(user.filter { !selectedUsers.contains(it.nickname) })
+                        user.addAll(temp.filter { !selectedUsers.contains(it.nickname) })
+                        println(user)
+                        sendWillGoRequests(selectedUsers)
                         selectedUsers.clear()
                     },
                     modifier = Modifier
@@ -191,7 +195,7 @@ fun WillGoScreen(
 
             when (selectedTab) {
                 0 -> RecienteContent(user, selectedUsers)
-                1 -> YaSolicitados(user, selectedUsers)
+                1 -> YaSolicitados(requestedUsers, selectedUsers)
             }
         }
     }
@@ -212,6 +216,7 @@ fun RecienteContent(user: SnapshotStateList<WillGoItem>, selectedUsers: Snapshot
                     item.isSelected = !(item.isSelected)!!
                     if (item.isSelected == true) {
                         selectedUsers.add(item.nickname ?: "")
+                        println(selectedUsers)
                     } else {
                         selectedUsers.remove(item.nickname)
                     }
@@ -229,11 +234,10 @@ fun YaSolicitados(
     user: SnapshotStateList<WillGoItem>,
     selectedUsers: SnapshotStateList<String>
 ) {
-    val yaSolicitados = user.filter { selectedUsers.contains(it.nickname) }
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
-        items(yaSolicitados) { item ->
+        items(user) { item ->
             WillGoUserItem(
                 name = item.name!!,
                 nickname = item.nickname,
@@ -261,38 +265,29 @@ fun YaSolicitados(
         }
     }
 
-    fun getRequests(idEvent: Int) {
-        CoroutineScope(Dispatchers.IO).launch {
-            getClient().postgrest["Solicitudes"].select() {
-                filter {
-                    and {
-                        eq("userRequested.id_event", idEvent)
+   suspend fun getAloneUsers(idEvent: Long): MutableState<List<WillGo>> {
+       val user = getUser()
+       val response = getClient()
+           .postgrest["WillGo"]
+           .select {
+               filter {
+                   and {
+                       eq("id_event", idEvent)
+                       neq("user", user.nickname)
+                       eq("alone", true)
+                   }
+               }
+           }
+       return mutableStateOf(response.decodeList<WillGo>())
+   }
 
-
-                    }
-                }
-            }
-        }
-    }
-
-    suspend fun getAloneUsers(idEvent: Long): MutableState<List<WillGoItem>> {
-        val response = getClient()
-            .postgrest["WillGo"]
-            .select {
-                filter {
-                    and {
-                        eq("id_event", idEvent)
-                        neq("user", getUser().nickname)
-                        eq("alone", true)
-                    }
-                }
-            }
-        val aloneUsersID = response.decodeList<WillGo>()
+    suspend fun getAloneUsersItem(idEvent: Long): MutableState<List<WillGoItem>> {
+        val aloneUsersID = getAloneUsers(idEvent)
         val aloneUsers =
             mutableListOf<WillGoItem>()  // Lista que usaremos para cargar los datos
 
         withContext(Dispatchers.IO) {
-            aloneUsersID.map {
+            aloneUsersID.value.map {
                 aloneUsers.add(getUser(it.user).toWillGoItem()) // Transformamos los usuarios
             }
         }
@@ -303,28 +298,49 @@ fun YaSolicitados(
     }
 
 suspend fun getAloneUsersRequested(idEvent: Long): MutableState<List<WillGoItem>> {
-    val response = getClient()
-        .postgrest["WillGo"]
-        .select {
-            filter {
-                and {
-                    eq("id_event", idEvent)
-                    neq("user", getUser().nickname)
-                    eq("alone", true)
-                }
-            }
-        }
-    val aloneUsersID = response.decodeList<WillGo>()
+    val aloneUsersID = getAloneUsers(idEvent)
     val aloneUsers =
         mutableListOf<WillGoItem>()  // Lista que usaremos para cargar los datos
-
+    val user = getUser()
+    val getRequestedUsers = aloneUsersID.value.mapNotNull { getRequest(it.id_event, user.nickname).value }
     withContext(Dispatchers.IO) {
-        aloneUsersID.map {
-            aloneUsers.add(getUser(it.user).toWillGoItem()) // Transformamos los usuarios
+        getRequestedUsers.map {
+            aloneUsers.add(
+                getUserFromWillGoID(it.userRequested).toWillGoItem()) // Transformamos los usuarios
         }
     }
 
     val userState =
         mutableStateOf<List<WillGoItem>>(aloneUsers) // Regresamos un MutableState
     return userState
+}
+
+suspend fun getUserFromWillGoID(idWillGo: Long): User {
+    val user = getUser()
+    val response = getClient()
+        .postgrest["WillGo"]
+        .select(Columns.list("user")) {
+            filter {
+                and {
+                    eq("id_event", idWillGo)
+                }
+            }
+        }
+    val userRequested = getUser(response.decodeSingle<String>())
+    return userRequested
+}
+
+suspend fun getRequest(idWillGo: Long, userRequesting: String): MutableState<Request?> {
+    val response = getClient()
+        .postgrest["Solicitudes"]
+        .select {
+            filter {
+                and {
+                    eq("userRequested", idWillGo)
+                    eq("userRequesting", userRequesting)
+                }
+            }
+        }
+    val request = response.decodeSingleOrNull<Request>() // Devuelve `null` si no hay resultados
+    return mutableStateOf(request)
 }

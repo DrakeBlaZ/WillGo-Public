@@ -5,6 +5,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Request(
     val userRequesting: String,
-    val userRequested: String,
+    val userRequested: Long,
     val state: String,
 )
