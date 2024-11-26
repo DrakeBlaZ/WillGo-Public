@@ -19,46 +19,77 @@ import java.util.Calendar
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.example.willgo.view.screens.navScreens.TopBar
 import java.text.ParseException
 import java.util.*
 
 @Composable
-fun CalendarScreen(events: MutableState<List<Event>>, navController: NavController) {
+fun CalendarScreen(events: MutableState<List<Event>>, navController: NavController, paddingValues: PaddingValues) {
 
     var selectedDate by remember{ mutableStateOf(Calendar.getInstance()) }
-    //val eventsByDate = remember(events) {groupEventsByDate(events.value)}
     val eventsByDate = remember { mutableStateOf<Map<String, List<Event>>>(emptyMap()) }
 
     LaunchedEffect(events.value) {
         eventsByDate.value = groupEventsByDate(events.value)
     }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(top = paddingValues.calculateTopPadding())
+            .background(Color.White)
     ){
-        //Título de la pantalla
-        Text(
-            text = "Calendario de Eventos",
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ){
+            TopBar(navigationIcon = {
+                IconButton(
+                    onClick = {
+                        //navController.navigate(BottomBarScreen.Home.route)
+                        navController.navigate("home") {
+                            // Establece `launchSingleTop` para evitar duplicados
+                            launchSingleTop = true
+                            // Establece `popUpTo` para limpiar el historial hasta `HomeScreen`
+                            popUpTo("home") { inclusive = true }
+                        }
+                    })
+                {
+                    Icon(
+                        modifier = Modifier,
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "ArrowBack"
+                    )
+                }
+            })
 
-        //Vista de los días de la semana
-        WeekView(selectedDate){ newDate ->
-            selectedDate = newDate
+            //Título de la pantalla
+            Text(
+                text = "Calendario de Eventos",
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            //Vista de los días de la semana
+            WeekView(selectedDate){ newDate ->
+                selectedDate = newDate
+            }
+
+            //Lista de eventos para la fecha seleccionada
+            EventList(selectedDate, eventsByDate.value, navController)
         }
-
-        //Lista de eventos para la fecha seleccionada
-        EventList(selectedDate, eventsByDate.value, navController)
     }
 }
 

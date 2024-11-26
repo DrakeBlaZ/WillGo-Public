@@ -68,7 +68,7 @@ fun MainNavGraph(
 
         //Ruta para acceder al calendario
         composable(route = "calendar") {
-            CalendarScreen(events = userEvents, navController = navController)
+            CalendarScreen(events = userEvents, navController = navController, paddingValues = paddingValues)
         }
 
         composable(
