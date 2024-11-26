@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.willgo.data.User.User
+
 import com.example.willgo.graphs.BottomBarScreen
 import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.coroutines.launch
