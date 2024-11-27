@@ -67,19 +67,20 @@ fun WillGoScreen(
     paddingValues: PaddingValues,
     onBack: () -> Unit,
 ) {
-    var user = remember { mutableStateListOf<WillGoItem>() }
-    var requestedUsers = remember { mutableStateListOf<WillGoItem>() }
-    val selectedUsers = remember { mutableStateListOf<String>() }
+    val user = remember { mutableStateListOf<WillGoItem>() }
+    val requestedUsers = remember { mutableStateListOf<WillGoItem>() }
+    val selectedUsers = remember { mutableStateListOf<WillGoItem>() } // Cambiado a lista de objetos
     var selectedTab by remember { mutableStateOf(0) } // Controla el tab seleccionado
     val tabs = listOf("Usuarios", "Ya solicitados") // Títulos de los tabs
 
-    // Cargar usuarios al iniciar la pantalla
+    var query by remember { mutableStateOf("") }
+    var active by remember { mutableStateOf(false) }
+    val searchBarPadding by animateDpAsState(targetValue = if (active) 0.dp else 16.dp,label = "")
     LaunchedEffect(Unit) {
         val result = getAloneUsersItem(idEvent)
         user.addAll(result.value)
         requestedUsers.addAll(getAloneUsersRequested(idEvent).value)
     }
-
 
     Scaffold(
         topBar = {
@@ -96,13 +97,13 @@ fun WillGoScreen(
             Box(modifier = Modifier.padding(8.dp)) {
                 Button(
                     onClick = {
-                        // Remover los usuarios seleccionados
-                        val temp = user.toList()
-                        user.clear()
-                        user.addAll(temp.filter { !selectedUsers.contains(it.nickname) })
-                        println(user)
-                        sendWillGoRequests(selectedUsers)
-                        selectedUsers.clear()
+                        // Enviar solicitudes y actualizar las listas
+                        sendWillGoRequests(selectedUsers, idEvent) {
+                            // Actualizar listas tras el éxito
+                            requestedUsers.addAll(selectedUsers)
+                            user.removeAll(selectedUsers)
+                            selectedUsers.clear()
+                        }
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -121,67 +122,38 @@ fun WillGoScreen(
                 .background(Color.White),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                var query by remember { mutableStateOf("") }
-                var active by remember { mutableStateOf(false) }
 
-                Log.d("Search", "Función de búsqueda inicializada")
+            SearchBar(query = query,
+                onQueryChange = { newQuery ->query = normalizeText(newQuery)},
+                onSearch = {},
+                active = active,
+                onActiveChange = {active = it},placeholder = {
+                    Text("Buscar evento")},
+                leadingIcon = {Icon(imageVector = Icons.Default.Search, contentDescription = "Search icon") },
+                trailingIcon = {if (active && query.isNotEmpty()) {
+                    Icon(imageVector = Icons.Default.Close,
+                        contentDescription = "Close icon",
+                        modifier = Modifier.clickable {query = ""})}},
+                modifier = Modifier.padding(horizontal = searchBarPadding),
+                windowInsets = WindowInsets(top = 0.dp, bottom = 0.dp),) {
 
-                val searchBarPadding by animateDpAsState(
-                    targetValue = if (active) 0.dp else 16.dp,
-                    label = ""
-                )
-
-                SearchBar(
-                    query = query,
-                    onQueryChange = { newQuery ->
-                        query = normalizeText(newQuery)
-                    },
-                    onSearch = {},
-                    active = active,
-                    onActiveChange = {
-                        active = it
-                    },
-                    placeholder = {
-                        Text("Buscar evento")
-                    },
-                    leadingIcon = {
-                        Icon(imageVector = Icons.Default.Search, contentDescription = "Search icon")
-                    },
-                    trailingIcon = {
-                        if (active && query.isNotEmpty()) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Close icon",
-                                modifier = Modifier.clickable {
-                                    query = ""
-                                }
-                            )
-                        }
-                    },
-                    modifier = Modifier.padding(horizontal = searchBarPadding),
-                    windowInsets = WindowInsets(top = 0.dp, bottom = 0.dp),
-                ) {
-                }
             }
-            Spacer(modifier = Modifier.padding(top = 16.dp))
+            // Contenido de la barra de búsqueda y tabs
             TabRow(
                 selectedTabIndex = selectedTab,
                 modifier = Modifier.fillMaxWidth(),
-                containerColor = Color.Transparent, // Fondo de la barra
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer, // Color del texto de las tabs
+                containerColor = Color.Transparent,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 indicator = { tabPositions ->
                     if (selectedTab < tabPositions.size) {
                         TabRowDefaults.SecondaryIndicator(
                             Modifier.tabIndicatorOffset(tabPositions[selectedTab]),
-                            color = MaterialTheme.colorScheme.primary // Color del indicador seleccionado
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
                 },
                 divider = {
-                    HorizontalDivider(color = MaterialTheme.colorScheme.secondary) // Línea divisoria
+                    HorizontalDivider(color = MaterialTheme.colorScheme.secondary)
                 }
             ) {
                 tabs.forEachIndexed { index, title ->
@@ -192,7 +164,6 @@ fun WillGoScreen(
                     )
                 }
             }
-
             when (selectedTab) {
                 0 -> RecienteContent(user, selectedUsers)
                 1 -> YaSolicitados(requestedUsers, selectedUsers)
@@ -203,7 +174,7 @@ fun WillGoScreen(
 
 // Función para mostrar la lista de usuarios recientes
 @Composable
-fun RecienteContent(user: SnapshotStateList<WillGoItem>, selectedUsers: SnapshotStateList<String>) {
+fun RecienteContent(user: SnapshotStateList<WillGoItem>, selectedUsers: SnapshotStateList<WillGoItem>) {
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -215,10 +186,10 @@ fun RecienteContent(user: SnapshotStateList<WillGoItem>, selectedUsers: Snapshot
                 onToggleSelect = {
                     item.isSelected = !(item.isSelected)!!
                     if (item.isSelected == true) {
-                        selectedUsers.add(item.nickname ?: "")
+                        selectedUsers.add(item)
                         println(selectedUsers)
                     } else {
-                        selectedUsers.remove(item.nickname)
+                        selectedUsers.remove(item)
                     }
                     item.isSelected!!
                 },
@@ -232,7 +203,7 @@ fun RecienteContent(user: SnapshotStateList<WillGoItem>, selectedUsers: Snapshot
 @Composable
 fun YaSolicitados(
     user: SnapshotStateList<WillGoItem>,
-    selectedUsers: SnapshotStateList<String>
+    selectedUsers: SnapshotStateList<WillGoItem>
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -258,12 +229,31 @@ fun YaSolicitados(
     }
 
 
-    fun sendWillGoRequests(selectedUsers: List<String>) {
-        CoroutineScope(Dispatchers.IO).launch {
-            getClient().postgrest["Solicitudes"].insert(selectedUsers)
+fun sendWillGoRequests(selectedUsers: List<WillGoItem>, idEvent: Long, onSuccess: () -> Unit) {
+    CoroutineScope(Dispatchers.IO).launch {
+        try {
+            val userRequesting = getUser().nickname // El usuario que envía las solicitudes
 
+            // Crear solicitudes para cada usuario seleccionado
+            val requests = selectedUsers.map { selectedUser ->
+                Request(
+                    userRequesting = userRequesting,
+                    userRequested = selectedUser.id!!, // Usar el ID de la tabla WillGo
+                    state = "Pending"
+                )
+            }
+
+            // Insertar las solicitudes en la tabla "Solicitudes"
+            getClient().postgrest["Solicitudes"].insert(requests)
+
+            withContext(Dispatchers.Main) {
+                onSuccess() // Notificar éxito
+            }
+        } catch (e: Exception) {
+            Log.e("sendWillGoRequests", "Error al enviar solicitudes: ${e.message}")
         }
     }
+}
 
    suspend fun getAloneUsers(idEvent: Long): MutableState<List<WillGo>> {
        val user = getUser()
@@ -281,38 +271,38 @@ fun YaSolicitados(
        return mutableStateOf(response.decodeList<WillGo>())
    }
 
-    suspend fun getAloneUsersItem(idEvent: Long): MutableState<List<WillGoItem>> {
-        val aloneUsersID = getAloneUsers(idEvent)
-        val aloneUsers =
-            mutableListOf<WillGoItem>()  // Lista que usaremos para cargar los datos
+suspend fun getAloneUsersItem(idEvent: Long): MutableState<List<WillGoItem>> {
+    val aloneUsersID = getAloneUsers(idEvent)
+    val aloneUsers = mutableListOf<WillGoItem>()
+    withContext(Dispatchers.IO) {
+        aloneUsersID.value.map {
+            val user = getUser(it.user)
+            aloneUsers.add(
+                WillGoItem(
+                    id = it.id, // Agregar ID de la tabla WillGo
+                    nickname = user.nickname,
+                    name = user.name,
+                    followers = user.followers,
+                    isSelected = false
+                )
+            )
+        }
+    }
+    return mutableStateOf(aloneUsers)
+}
 
-        withContext(Dispatchers.IO) {
-            aloneUsersID.value.map {
+suspend fun getAloneUsersRequested(idEvent: Long): MutableState<List<WillGoItem>> { // MODIFICADO
+    val aloneUsersID = getAloneUsers(idEvent)
+    val aloneUsers = mutableListOf<WillGoItem>()  // Lista que usaremos para cargar los datos
+    withContext(Dispatchers.IO) {
+        aloneUsersID.value.mapNotNull {
+            val request = getRequest(it.id_event, it.user).value
+            if (request?.state == "Pending") {
                 aloneUsers.add(getUser(it.user).toWillGoItem()) // Transformamos los usuarios
             }
         }
-
-        val userState =
-            mutableStateOf<List<WillGoItem>>(aloneUsers) // Regresamos un MutableState
-        return userState
     }
-
-suspend fun getAloneUsersRequested(idEvent: Long): MutableState<List<WillGoItem>> {
-    val aloneUsersID = getAloneUsers(idEvent)
-    val aloneUsers =
-        mutableListOf<WillGoItem>()  // Lista que usaremos para cargar los datos
-    val user = getUser()
-    val getRequestedUsers = aloneUsersID.value.mapNotNull { getRequest(it.id_event, user.nickname).value }
-    withContext(Dispatchers.IO) {
-        getRequestedUsers.map {
-            aloneUsers.add(
-                getUserFromWillGoID(it.userRequested).toWillGoItem()) // Transformamos los usuarios
-        }
-    }
-
-    val userState =
-        mutableStateOf<List<WillGoItem>>(aloneUsers) // Regresamos un MutableState
-    return userState
+    return mutableStateOf(aloneUsers)
 }
 
 suspend fun getUserFromWillGoID(idWillGo: Long): User {
@@ -330,17 +320,10 @@ suspend fun getUserFromWillGoID(idWillGo: Long): User {
     return userRequested
 }
 
-suspend fun getRequest(idWillGo: Long, userRequesting: String): MutableState<Request?> {
+suspend fun getRequest(idEvent: Long, userRequesting: String): MutableState<Request?> { // MODIFICADO
     val response = getClient()
         .postgrest["Solicitudes"]
-        .select {
-            filter {
-                and {
-                    eq("userRequested", idWillGo)
-                    eq("userRequesting", userRequesting)
-                }
-            }
-        }
-    val request = response.decodeSingleOrNull<Request>() // Devuelve `null` si no hay resultados
+        .select { filter { and { eq("userRequested", idEvent); eq("userRequesting", userRequesting) } } }
+    val request = response.decodeSingleOrNull<Request>() // Devuelve null si no hay resultados
     return mutableStateOf(request)
 }

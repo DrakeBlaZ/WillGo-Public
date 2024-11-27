@@ -55,11 +55,10 @@ fun WillGoUserItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(modifier = Modifier.size(60.dp)) {
-                Image(
+                Icon(
                     imageVector = Icons.Default.AccountCircle,
                     contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
+                    tint = if (isSelected.value) Color.Blue else Color.Gray // MODIFICADO
                 )
             }
             Text(
