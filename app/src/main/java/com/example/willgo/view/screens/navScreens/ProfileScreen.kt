@@ -35,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -136,7 +137,7 @@ private fun DataSection(name: String) {
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
-            //     modifier = Modifier.align(Alignment.Center)
+            modifier = Modifier.testTag("username")
         )
 
 
@@ -180,14 +181,14 @@ private fun FollowsSection(number1: Int, number2: Int) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(text = number1.toString())
-            Text(text = "Seguidores")
+            Text(text = "Seguidores", modifier = Modifier.testTag("followerText"))
         }
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(text = number2.toString())
-            Text(text = "Seguidos")
+            Text(text = "Seguidos", modifier = Modifier.testTag("followedText"))
         }
 
     }
