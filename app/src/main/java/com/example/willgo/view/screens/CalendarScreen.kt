@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.Card
@@ -105,11 +106,11 @@ fun CalendarScreen(
 @Composable
 fun WeekView(selectedDate: Calendar, onDateSelected: (Calendar) -> Unit){
 
-// Estado para mantener la semana actual visible en la vista
+    // Estado para mantener la semana actual visible en la vista
     var currentWeek by remember { mutableStateOf(selectedDate.clone() as Calendar) }
 
     // Obtiene los días de la semana basados en la fecha seleccionada
-    val weekDays = getWeekDays(currentWeek)
+    var weekDays by remember { mutableStateOf(getWeekDays(currentWeek)) }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -118,10 +119,11 @@ fun WeekView(selectedDate: Calendar, onDateSelected: (Calendar) -> Unit){
     ){
         //Flecha hacia la izquierda
         IconButton(onClick = {
-            currentWeek.add(Calendar.WEEK_OF_YEAR, -1)
+            currentWeek.add(Calendar.WEEK_OF_YEAR, -1) //Retrocede una semana
+            weekDays = getWeekDays(currentWeek) // Actualiza los días de la semana
         }) {
             Icon(
-                imageVector = Icons.Default.ArrowBack,
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = "Retroceder una semana"
             )
         }
@@ -162,9 +164,10 @@ fun WeekView(selectedDate: Calendar, onDateSelected: (Calendar) -> Unit){
         // Flecha hacia la derecha
         IconButton(onClick = {
             currentWeek.add(Calendar.WEEK_OF_YEAR, 1) // Avanza una semana
+            weekDays = getWeekDays(currentWeek) // Actualiza los días de la semana
         }) {
             Icon(
-                imageVector = Icons.Default.ArrowForward,
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                 contentDescription = "Avanzar semana"
             )
         }
