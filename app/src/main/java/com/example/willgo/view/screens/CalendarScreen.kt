@@ -22,8 +22,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -112,64 +110,80 @@ fun WeekView(selectedDate: Calendar, onDateSelected: (Calendar) -> Unit){
     // Obtiene los días de la semana basados en la fecha seleccionada
     var weekDays by remember { mutableStateOf(getWeekDays(currentWeek)) }
 
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ){
-        //Flecha hacia la izquierda
-        IconButton(onClick = {
-            currentWeek.add(Calendar.WEEK_OF_YEAR, -1) //Retrocede una semana
-            weekDays = getWeekDays(currentWeek) // Actualiza los días de la semana
-        }) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Retroceder una semana"
-            )
-        }
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        // Texto para mostrar el mes y año actuales
+        Text(
+            text = "${
+                currentWeek.getDisplayName(
+                    Calendar.MONTH,
+                    Calendar.LONG,
+                    Locale.getDefault()
+                )
+            } ${currentWeek.get(Calendar.YEAR)}",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
 
-        // Usa LazyRow para mostrar los días de la semana en una fila desplazable horizontalmente
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp), // Espaciado entre días
-            modifier = Modifier.weight(1f) // Usa todo el ancho de la pantalla
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            // Recorre cada día de la semana
-            items(weekDays.size) { index ->
-                val date = weekDays[index] // Obtén el día actual
-                // Comprueba si el día es el mismo que el seleccionado
-                val isSelected = isSameDay(date, selectedDate)
+            //Flecha hacia la izquierda
+            IconButton(onClick = {
+                currentWeek.add(Calendar.WEEK_OF_YEAR, -1) //Retrocede una semana
+                weekDays = getWeekDays(currentWeek) // Actualiza los días de la semana
+            }) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Retroceder una semana"
+                )
+            }
 
-                // Cada día se muestra como un círculo clicable
-                Box(
-                    contentAlignment = Alignment.Center, // Centra el contenido (número del día)
-                    modifier = Modifier
-                        .size(50.dp) // Tamaño del círculo
-                        .background(
-                            if (isSelected) MaterialTheme.colorScheme.primary else Color.LightGray, // Color según selección
-                            shape = CircleShape // Forma circular
+            // Usa LazyRow para mostrar los días de la semana en una fila desplazable horizontalmente
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp), // Espaciado entre días
+                modifier = Modifier.weight(1f) // Usa todo el ancho de la pantalla
+            ) {
+                // Recorre cada día de la semana
+                items(weekDays.size) { index ->
+                    val date = weekDays[index] // Obtén el día actual
+                    // Comprueba si el día es el mismo que el seleccionado
+                    val isSelected = isSameDay(date, selectedDate)
+
+                    // Cada día se muestra como un círculo clicable
+                    Box(
+                        contentAlignment = Alignment.Center, // Centra el contenido (número del día)
+                        modifier = Modifier
+                            .size(50.dp) // Tamaño del círculo
+                            .background(
+                                if (isSelected) MaterialTheme.colorScheme.primary else Color.LightGray, // Color según selección
+                                shape = CircleShape // Forma circular
+                            )
+                            .clickable { onDateSelected(date) } // Cambia la fecha seleccionada al hacer clic
+                    ) {
+                        // Texto que muestra el número del día
+                        Text(
+                            text = date.get(Calendar.DAY_OF_MONTH).toString(),
+                            color = if (isSelected) Color.White else Color.Black, // Color según selección
+                            fontWeight = FontWeight.Bold, // Texto en negrita
+                            fontSize = 16.sp // Tamaño de fuente
                         )
-                        .clickable { onDateSelected(date) } // Cambia la fecha seleccionada al hacer clic
-                ) {
-                    // Texto que muestra el número del día
-                    Text(
-                        text = date.get(Calendar.DAY_OF_MONTH).toString(),
-                        color = if (isSelected) Color.White else Color.Black, // Color según selección
-                        fontWeight = FontWeight.Bold, // Texto en negrita
-                        fontSize = 16.sp // Tamaño de fuente
-                    )
+                    }
                 }
             }
-        }
 
-        // Flecha hacia la derecha
-        IconButton(onClick = {
-            currentWeek.add(Calendar.WEEK_OF_YEAR, 1) // Avanza una semana
-            weekDays = getWeekDays(currentWeek) // Actualiza los días de la semana
-        }) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                contentDescription = "Avanzar semana"
-            )
+            // Flecha hacia la derecha
+            IconButton(onClick = {
+                currentWeek.add(Calendar.WEEK_OF_YEAR, 1) // Avanza una semana
+                weekDays = getWeekDays(currentWeek) // Actualiza los días de la semana
+            }) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = "Avanzar semana"
+                )
+            }
         }
     }
 }
