@@ -17,6 +17,7 @@ import androidx.navigation.NavController
 import com.example.willgo.data.Event
 import java.util.Calendar
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -37,6 +38,8 @@ import com.example.willgo.view.screens.navScreens.TopBar
 import com.example.willgo.view.screens.navScreens.getWillgoForUser
 import java.text.ParseException
 import java.util.*
+import com.example.willgo.view.sections.CommonEventCard
+import kotlin.math.absoluteValue
 
 @Composable
 fun CalendarScreen(
@@ -271,39 +274,22 @@ fun EventList(
         )
     } else {
         // Si hay eventos, los muestra en una columna
-        Column(
+        LazyColumn(
             verticalArrangement = Arrangement.spacedBy(8.dp), // Espaciado entre eventos
             modifier = Modifier.fillMaxWidth()
         ) {
             // Recorre cada evento y lo muestra como una tarjeta clicable
-            eventsForSelectedDate.forEach { event ->
-                Card(
+            items(eventsForSelectedDate.size) { index ->
+                val event = eventsForSelectedDate[index]
+                CommonEventCard(
+                    event = event,
                     modifier = Modifier
-                        .fillMaxWidth() // Cada tarjeta usa todo el ancho
-                        .clickable { navController.navigate("eventDetail/${event.id}") }, // Navega a los detalles del evento
-                ) {
-                    // Contenido de la tarjeta
-                    Row(
-                        modifier = Modifier
-                            .padding(16.dp) // Margen interior
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween, // Espaciado entre elementos
-                        verticalAlignment = Alignment.CenterVertically // Centrado vertical
-                    ) {
-                        // Nombre del evento
-                        Text(
-                            text = event.name_event,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
-                        )
-                        // Fecha u hora del evento
-                        Text(
-                            text = event.date.orEmpty(),
-                            color = Color.Gray,
-                            fontSize = 14.sp
-                        )
-                    }
-                }
+                        .fillMaxWidth()
+                        .clickable {
+                            navController.navigate("eventDetail/${event.id}") // Navega a los detalles del evento
+                        }
+                        .padding(vertical = 8.dp) // Espaciado entre tarjetas
+                )
             }
         }
     }
