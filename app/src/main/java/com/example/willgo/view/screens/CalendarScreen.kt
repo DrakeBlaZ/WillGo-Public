@@ -23,6 +23,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.*
@@ -110,20 +112,76 @@ fun WeekView(selectedDate: Calendar, onDateSelected: (Calendar) -> Unit){
     // Obtiene los días de la semana basados en la fecha seleccionada
     var weekDays by remember { mutableStateOf(getWeekDays(currentWeek)) }
 
+    // Estados para controlar el menú desplegable
+    var expandedMonth by remember { mutableStateOf(false) }
+    var expandedYear by remember { mutableStateOf(false) }
+    val months = (0..11).map { monthIndex ->
+        Calendar.getInstance().apply {
+            set(Calendar.MONTH, monthIndex)
+        }.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault())
+    }
+    val years = (2024..2100).toList()
+
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        // Texto para mostrar el mes y año actuales
-        Text(
-            text = "${
-                currentWeek.getDisplayName(
-                    Calendar.MONTH,
-                    Calendar.LONG,
-                    Locale.getDefault()
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Selector de mes
+            Box {
+                Text(
+                    text = currentWeek.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault())!!,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .clickable { expandedMonth = true }
+                        .padding(8.dp)
                 )
-            } ${currentWeek.get(Calendar.YEAR)}",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
+                DropdownMenu(
+                    expanded = expandedMonth,
+                    onDismissRequest = { expandedMonth = false }
+                ) {
+                    months.forEachIndexed { index, month ->
+                        DropdownMenuItem(
+                            text = { Text(text = month) },
+                            onClick = {
+                                currentWeek.set(Calendar.MONTH, index)
+                                weekDays = getWeekDays(currentWeek)
+                                expandedMonth = false
+                            }
+                        )
+                    }
+                }
+            }
+
+            // Selector de año
+            Box {
+                Text(
+                    text = currentWeek.get(Calendar.YEAR).toString(),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .clickable { expandedYear = true }
+                        .padding(8.dp)
+                )
+                DropdownMenu(
+                    expanded = expandedYear,
+                    onDismissRequest = { expandedYear = false }
+                ) {
+                    years.forEach { year ->
+                        DropdownMenuItem(
+                            text = { Text(text = year.toString()) },
+                            onClick = {
+                                currentWeek.set(Calendar.YEAR, year)
+                                weekDays = getWeekDays(currentWeek)
+                                expandedYear = false
+                            }
+                        )
+                    }
+                }
+            }
+        }
 
         Row(
             modifier = Modifier.fillMaxWidth(),
