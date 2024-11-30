@@ -7,4 +7,5 @@ data class Request(
     val userRequesting: String,
     val userRequested: Long,
     val state: String,
+    val nickRequested: String
 )

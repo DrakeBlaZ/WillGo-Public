@@ -70,9 +70,11 @@ fun WillGoScreen(
     val user = remember { mutableStateListOf<WillGoItem>() }
     val requestedUsers = remember { mutableStateListOf<WillGoItem>() }
     val selectedUsers = remember { mutableStateListOf<WillGoItem>() } // Cambiado a lista de objetos
+    val selectedRequestedUsers = remember { mutableStateListOf<WillGoItem>() } // Cambiado a lista de objetos
     var selectedTab by remember { mutableStateOf(0) } // Controla el tab seleccionado
     val tabs = listOf("Usuarios", "Ya solicitados") // Títulos de los tabs
 
+    //Para la barra de búsqueda
     var query by remember { mutableStateOf("") }
     var active by remember { mutableStateOf(false) }
     val searchBarPadding by animateDpAsState(targetValue = if (active) 0.dp else 16.dp,label = "")
@@ -98,7 +100,7 @@ fun WillGoScreen(
                 Button(
                     onClick = {
                         // Enviar solicitudes y actualizar las listas
-                        sendWillGoRequests(selectedUsers, idEvent) {
+                        sendWillGoRequests(selectedUsers) {
                             // Actualizar listas tras el éxito
                             requestedUsers.addAll(selectedUsers)
                             user.removeAll(selectedUsers)
@@ -166,7 +168,7 @@ fun WillGoScreen(
             }
             when (selectedTab) {
                 0 -> RecienteContent(user, selectedUsers)
-                1 -> YaSolicitados(requestedUsers, selectedUsers)
+                1 -> YaSolicitados(requestedUsers, selectedRequestedUsers)
             }
         }
     }
@@ -181,7 +183,7 @@ fun RecienteContent(user: SnapshotStateList<WillGoItem>, selectedUsers: Snapshot
         items(user) { item ->
             WillGoUserItem(
                 name = item.name!!,
-                nickname = item.nickname,
+                nickname = item.willGo.user,
                 followers = item.followers!!,
                 onToggleSelect = {
                     item.isSelected = !(item.isSelected)!!
@@ -211,9 +213,16 @@ fun YaSolicitados(
         items(user) { item ->
             WillGoUserItem(
                 name = item.name!!,
-                nickname = item.nickname,
+                nickname = item.willGo.user,
                 followers = item.followers!!,
                 onToggleSelect = {
+                    item.isSelected = !(item.isSelected)!!
+                    if (item.isSelected == true) {
+                        selectedUsers.add(item)
+                        println(selectedUsers)
+                    } else {
+                        selectedUsers.remove(item)
+                    }
                     item.isSelected!!
                 },
                 modifier = Modifier
@@ -229,7 +238,7 @@ fun YaSolicitados(
     }
 
 
-fun sendWillGoRequests(selectedUsers: List<WillGoItem>, idEvent: Long, onSuccess: () -> Unit) {
+fun sendWillGoRequests(selectedUsers: List<WillGoItem>, onSuccess: () -> Unit) {
     CoroutineScope(Dispatchers.IO).launch {
         try {
             val userRequesting = getUser().nickname // El usuario que envía las solicitudes
@@ -238,8 +247,9 @@ fun sendWillGoRequests(selectedUsers: List<WillGoItem>, idEvent: Long, onSuccess
             val requests = selectedUsers.map { selectedUser ->
                 Request(
                     userRequesting = userRequesting,
-                    userRequested = selectedUser.id!!, // Usar el ID de la tabla WillGo
-                    state = "Pending"
+                    userRequested = selectedUser.willGo.id, // Usar el ID de la tabla WillGo
+                    state = "Pending",
+                    nickRequested = selectedUser.willGo.user
                 )
             }
 
@@ -279,11 +289,9 @@ suspend fun getAloneUsersItem(idEvent: Long): MutableState<List<WillGoItem>> {
             val user = getUser(it.user)
             aloneUsers.add(
                 WillGoItem(
-                    id = it.id, // Agregar ID de la tabla WillGo
-                    nickname = user.nickname,
+                    it,
                     name = user.name,
                     followers = user.followers,
-                    isSelected = false
                 )
             )
         }
@@ -291,14 +299,31 @@ suspend fun getAloneUsersItem(idEvent: Long): MutableState<List<WillGoItem>> {
     return mutableStateOf(aloneUsers)
 }
 
+//suspend fun getAloneUsersRequested(idEvent: Long): MutableState<List<WillGoItem>> { // MODIFICADO
+//    val aloneUsersID = getAloneUsers(idEvent)
+//    val aloneUsers = mutableListOf<WillGoItem>()  // Lista que usaremos para cargar los datos
+//    withContext(Dispatchers.IO) {
+//        aloneUsersID.value.mapNotNull {
+//            val request = getRequest(it.id_event, it.user).value
+//            if (request?.state == "Pending") {
+//                aloneUsers.add(getUser(it.user).toWillGoItem()) // Transformamos los usuarios
+//            }
+//        }
+//    }
+//    return mutableStateOf(aloneUsers)
+//}
+
 suspend fun getAloneUsersRequested(idEvent: Long): MutableState<List<WillGoItem>> { // MODIFICADO
     val aloneUsersID = getAloneUsers(idEvent)
     val aloneUsers = mutableListOf<WillGoItem>()  // Lista que usaremos para cargar los datos
+
     withContext(Dispatchers.IO) {
         aloneUsersID.value.mapNotNull {
-            val request = getRequest(it.id_event, it.user).value
-            if (request?.state == "Pending") {
-                aloneUsers.add(getUser(it.user).toWillGoItem()) // Transformamos los usuarios
+            val request = getRequest(it.id_event, getUser().nickname,it.user).value
+            val user = getUser(it.user)
+            val id= it.id
+            request.let {
+                aloneUsers.add(WillGoItem(WillGo(id, idEvent, user.nickname, true), user.name, user.followed))
             }
         }
     }
@@ -320,10 +345,18 @@ suspend fun getUserFromWillGoID(idWillGo: Long): User {
     return userRequested
 }
 
-suspend fun getRequest(idEvent: Long, userRequesting: String): MutableState<Request?> { // MODIFICADO
+suspend fun getRequest(idEvent: Long, userRequesting: String, userRequested: String): MutableState<Request?> { // MODIFICADO
     val response = getClient()
         .postgrest["Solicitudes"]
-        .select { filter { and { eq("userRequested", idEvent); eq("userRequesting", userRequesting) } } }
+        .select {
+            filter {
+                and {
+                    eq("userRequested", idEvent);
+                    eq("userRequesting", userRequesting)
+                    eq("nickRequested", userRequested)
+                }
+            }
+        }
     val request = response.decodeSingleOrNull<Request>() // Devuelve null si no hay resultados
     return mutableStateOf(request)
 }
