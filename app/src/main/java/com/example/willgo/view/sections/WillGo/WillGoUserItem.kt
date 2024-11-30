@@ -11,9 +11,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.rounded.RemoveRedEye
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,7 +36,6 @@ import com.example.willgo.data.WillGo.WillGoItem
 
 @Composable
 fun WillGoUserItem(
-    name: String,
     nickname: String,
     followers: Int,
     onToggleSelect: () -> Boolean,
@@ -44,25 +45,28 @@ fun WillGoUserItem(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
             .height(84.dp)
             .clickable { isSelected.value = onToggleSelect() }
             .background(if (isSelected.value) Color.LightGray else Color.Transparent),
         contentAlignment = Alignment.Center
     ) {
         Row(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize()
+                .padding(start = 16.dp)
+            ,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(modifier = Modifier.size(60.dp)) {
+            Box(modifier = Modifier.size(60.dp)
+            ) {
                 Icon(
                     imageVector = Icons.Default.AccountCircle,
                     contentDescription = null,
-                    tint = if (isSelected.value) Color.Blue else Color.Gray // MODIFICADO
+                    tint = if (isSelected.value) Color.Blue else Color.Gray, // MODIFICADO,
+                    modifier = Modifier.fillMaxSize()
                 )
             }
             Text(
-                text = name,
+                text = nickname,
                 modifier = Modifier
                     .fillMaxHeight()
                     .padding(top = 16.dp),
@@ -72,13 +76,26 @@ fun WillGoUserItem(
         }
         Box(
             modifier = Modifier
-                .size(60.dp)
-                .align(Alignment.CenterEnd),
+                .align(Alignment.CenterEnd)
+                .wrapContentSize()
+                .padding(end = 16.dp)
+            ,
             contentAlignment = Alignment.Center
-        ) {
-            if (isSelected.value) {
-                Icon(imageVector = Icons.Default.Check, contentDescription = "Selected")
+        ){
+               Icon(imageVector = Icons.Rounded.RemoveRedEye,
+                   contentDescription = "Selected",
+                   modifier = Modifier.size(36.dp)
+                       .clickable {  },
+                   tint = if (isSelected.value) Color.Blue else Color.Gray)
+
             }
-        }
+
     }
+
+}
+
+@Preview
+@Composable
+fun WillGoUserItemPreview() {
+    WillGoUserItem("Paco Camarasa", 15, onToggleSelect = { true })
 }

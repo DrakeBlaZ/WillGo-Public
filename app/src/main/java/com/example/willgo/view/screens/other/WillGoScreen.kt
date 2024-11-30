@@ -40,6 +40,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotMutableState
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -79,9 +80,10 @@ fun WillGoScreen(
     var active by remember { mutableStateOf(false) }
     val searchBarPadding by animateDpAsState(targetValue = if (active) 0.dp else 16.dp,label = "")
     LaunchedEffect(Unit) {
-        val result = getAloneUsersItem(idEvent)
+        val result = getUsersNotRequested(idEvent)
         user.addAll(result.value)
         requestedUsers.addAll(getAloneUsersRequested(idEvent).value)
+        Log.e("WillGoScreen", requestedUsers.toString())
     }
 
     Scaffold(
@@ -97,22 +99,37 @@ fun WillGoScreen(
         },
         bottomBar = {
             Box(modifier = Modifier.padding(8.dp)) {
+                val selectedList = if (selectedTab == 0) selectedUsers else selectedRequestedUsers
                 Button(
                     onClick = {
                         // Enviar solicitudes y actualizar las listas
-                        sendWillGoRequests(selectedUsers) {
-                            // Actualizar listas tras el éxito
-                            requestedUsers.addAll(selectedUsers)
-                            user.removeAll(selectedUsers)
-                            selectedUsers.clear()
+                        if(selectedTab == 0) {
+                            sendWillGoRequests(selectedList) {
+                                // Actualizar listas tras el éxito
+                                requestedUsers.addAll(selectedUsers)
+                                requestedUsers.map { it.isSelected = false }
+                                user.removeAll(selectedUsers)
+                                selectedUsers.clear()
+                            }
+                        }else{
+                            cancelWillGoRequests(selectedList){
+                                user.addAll(selectedRequestedUsers)
+                                user.map { it.isSelected = false }
+                                requestedUsers.removeAll(selectedRequestedUsers)
+                                selectedRequestedUsers.clear()
+                            }
                         }
                     },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(8.dp),
-                    enabled = selectedUsers.isNotEmpty()
+                    enabled = selectedList.isNotEmpty()
                 ) {
-                    Text(text = "Enviar solicitud")
+                    if(selectedTab == 0){
+                        Text(text = "Enviar solicitud")
+                    }else{
+                        Text(text = "Cancelar solicitud")
+                    }
                 }
             }
         }
@@ -155,13 +172,20 @@ fun WillGoScreen(
                     }
                 },
                 divider = {
-                    HorizontalDivider(color = MaterialTheme.colorScheme.secondary)
+                    //HorizontalDivider(color = MaterialTheme.colorScheme.secondary)
                 }
             ) {
                 tabs.forEachIndexed { index, title ->
                     Tab(
                         selected = selectedTab == index,
-                        onClick = { selectedTab = index },
+                        onClick = {
+                            selectedTab = index
+                            if (selectedTab == 1) {
+                                clearSelectedUsers(selectedUsers, user)
+                            } else {
+                                clearSelectedUsers(selectedRequestedUsers, requestedUsers)
+                            }
+                        },
                         text = { Text(title) }
                     )
                 }
@@ -182,7 +206,6 @@ fun RecienteContent(user: SnapshotStateList<WillGoItem>, selectedUsers: Snapshot
     ) {
         items(user) { item ->
             WillGoUserItem(
-                name = item.name!!,
                 nickname = item.willGo.user,
                 followers = item.followers!!,
                 onToggleSelect = {
@@ -212,7 +235,6 @@ fun YaSolicitados(
     ) {
         items(user) { item ->
             WillGoUserItem(
-                name = item.name!!,
                 nickname = item.willGo.user,
                 followers = item.followers!!,
                 onToggleSelect = {
@@ -231,14 +253,42 @@ fun YaSolicitados(
     }
 }
 
-    @Preview
-    @Composable
-    fun WillGoScreenPreview() {
-        WillGoScreen(3, PaddingValues(0.dp), {})
+fun clearSelectedUsers(selectedUsers: SnapshotStateList<WillGoItem>, users: SnapshotStateList<WillGoItem>) {
+    users.map { it.isSelected = false }
+    selectedUsers.clear()
+}
+
+@Preview
+@Composable
+fun WillGoScreenPreview() {
+    WillGoScreen(3, PaddingValues(0.dp), {})
+}
+
+
+fun cancelWillGoRequests(selectedUsers: List<WillGoItem>, onSuccess: () -> Unit) {
+    CoroutineScope(Dispatchers.IO).launch {
+        try {
+            val userRequesting = getUser().nickname // El usuario que envía las solicitudes
+
+            val requests = selectedUsers.forEach { selectedUser ->
+                getClient().postgrest["Solicitudes"].delete {
+                    filter {
+                        eq("userRequesting", userRequesting) // Coincide con el usuario solicitante
+                        eq("userRequested", selectedUser.willGo.id) // Coincide con el ID solicitado
+                    }
+                }
+            }
+
+            withContext(Dispatchers.Main) {
+                onSuccess() // Notificar éxito
+            }
+        } catch (e: Exception) {
+            Log.e("sendWillGoRequests", "Error al enviar solicitudes: ${e.message}")
+        }
     }
+}
 
-
-fun sendWillGoRequests(selectedUsers: List<WillGoItem>, onSuccess: () -> Unit) {
+fun sendWillGoRequests(selectedUsers: List<WillGoItem>, onSuccess: () -> Unit){
     CoroutineScope(Dispatchers.IO).launch {
         try {
             val userRequesting = getUser().nickname // El usuario que envía las solicitudes
@@ -252,7 +302,6 @@ fun sendWillGoRequests(selectedUsers: List<WillGoItem>, onSuccess: () -> Unit) {
                     nickRequested = selectedUser.willGo.user
                 )
             }
-
             // Insertar las solicitudes en la tabla "Solicitudes"
             getClient().postgrest["Solicitudes"].insert(requests)
 
@@ -280,6 +329,33 @@ fun sendWillGoRequests(selectedUsers: List<WillGoItem>, onSuccess: () -> Unit) {
            }
        return mutableStateOf(response.decodeList<WillGo>())
    }
+
+suspend fun getUsersNotRequested(idEvent: Long): MutableState<List<WillGoItem>> {
+    val aloneUsersID = getAloneUsers(idEvent)
+    val aloneUsersRequested = mutableListOf<WillGoItem>()  // Lista que usaremos para cargar los datos
+    val aloneUsersNotRequested = mutableListOf<WillGoItem>()
+
+    withContext(Dispatchers.IO) {
+        aloneUsersID.value.forEach {
+            val request = getRequest(it.id, getUser().nickname,it.user).value
+            val user = getUser(it.user)
+            val willGoItem = WillGoItem(WillGo(it.id, idEvent, user.nickname, true), user.name, user.followed)
+            if (request != null) {
+                // Si el usuario ya está en "solicitados"
+                aloneUsersRequested.add(
+                    willGoItem
+                )
+            } else {
+                // Si el usuario NO está solicitado
+                aloneUsersNotRequested.add(
+                   willGoItem
+                )
+            }
+        }
+    }
+    Log.e("getUsersNotRequested", aloneUsersNotRequested.toString())
+    return mutableStateOf(aloneUsersNotRequested)
+}
 
 suspend fun getAloneUsersItem(idEvent: Long): MutableState<List<WillGoItem>> {
     val aloneUsersID = getAloneUsers(idEvent)
@@ -315,19 +391,23 @@ suspend fun getAloneUsersItem(idEvent: Long): MutableState<List<WillGoItem>> {
 
 suspend fun getAloneUsersRequested(idEvent: Long): MutableState<List<WillGoItem>> { // MODIFICADO
     val aloneUsersID = getAloneUsers(idEvent)
-    val aloneUsers = mutableListOf<WillGoItem>()  // Lista que usaremos para cargar los datos
+    val aloneUsersRequested = mutableListOf<WillGoItem>()  // Lista que usaremos para cargar los datos
 
     withContext(Dispatchers.IO) {
-        aloneUsersID.value.mapNotNull {
-            val request = getRequest(it.id_event, getUser().nickname,it.user).value
+        aloneUsersID.value.forEach {
+            val request = getRequest(it.id, getUser().nickname,it.user).value
             val user = getUser(it.user)
-            val id= it.id
-            request.let {
-                aloneUsers.add(WillGoItem(WillGo(id, idEvent, user.nickname, true), user.name, user.followed))
+            val willGoItem = WillGoItem(WillGo(it.id, idEvent, user.nickname, true), user.name, user.followed)
+            if (request != null) {
+                // Si el usuario ya está en "solicitados"
+                aloneUsersRequested.add(
+                    willGoItem
+                )
             }
         }
     }
-    return mutableStateOf(aloneUsers)
+    Log.e("getUsersRequested", aloneUsersRequested.toString())
+    return mutableStateOf(aloneUsersRequested)
 }
 
 suspend fun getUserFromWillGoID(idWillGo: Long): User {
@@ -345,7 +425,7 @@ suspend fun getUserFromWillGoID(idWillGo: Long): User {
     return userRequested
 }
 
-suspend fun getRequest(idEvent: Long, userRequesting: String, userRequested: String): MutableState<Request?> { // MODIFICADO
+suspend fun getRequest(idEvent: Long, userRequesting: String, nickRequested: String): MutableState<Request?> { // MODIFICADO
     val response = getClient()
         .postgrest["Solicitudes"]
         .select {
@@ -353,7 +433,7 @@ suspend fun getRequest(idEvent: Long, userRequesting: String, userRequested: Str
                 and {
                     eq("userRequested", idEvent);
                     eq("userRequesting", userRequesting)
-                    eq("nickRequested", userRequested)
+                    eq("nickRequested", nickRequested)
                 }
             }
         }
