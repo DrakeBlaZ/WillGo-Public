@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -20,6 +21,7 @@ import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
+import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -33,6 +35,8 @@ import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarColors
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -75,23 +79,47 @@ fun WillGoScreen(
     onBack: () -> Unit,
     navHostController: NavHostController
 ) {
+    // Listas mutables
     val user = remember { mutableStateListOf<WillGoItem>() }
     val requestedUsers = remember { mutableStateListOf<WillGoItem>() }
-    val selectedUsers = remember { mutableStateListOf<WillGoItem>() } // Cambiado a lista de objetos
-    val selectedRequestedUsers = remember { mutableStateListOf<WillGoItem>() } // Cambiado a lista de objetos
-    var selectedTab by remember { mutableStateOf(0) } // Controla el tab seleccionado
-    val tabs = listOf("Usuarios", "Ya solicitados") // Títulos de los tabs
 
-    //Para la barra de búsqueda
+    // Listas filtradas para búsqueda
+    val filteredUsers = remember { mutableStateListOf<WillGoItem>() }
+    val filteredRequestedUsers = remember { mutableStateListOf<WillGoItem>() }
+
+    val selectedUsers = remember { mutableStateListOf<WillGoItem>() }
+    val selectedRequestedUsers = remember { mutableStateListOf<WillGoItem>() }
+
+    var selectedTab by remember { mutableStateOf(0) }
+    val tabs = listOf("Usuarios", "Ya solicitados")
+
     var query by remember { mutableStateOf("") }
     var active by remember { mutableStateOf(false) }
-    val searchBarPadding by animateDpAsState(targetValue = if (active) 0.dp else 16.dp,label = "")
+    val searchBarPadding by animateDpAsState(targetValue = if (active) 0.dp else 16.dp)
+    // Función para filtrar usuarios
+    fun filterUsers(query: String) {
+        filteredUsers.clear()
+        filteredRequestedUsers.clear()
+
+        if (query.isNotEmpty()) {
+            filteredUsers.addAll(user.filter { it.willGo.user.contains(query, ignoreCase = true) })
+            filteredRequestedUsers.addAll(requestedUsers.filter { it.willGo.user.contains(query, ignoreCase = true) })
+        } else {
+            filteredUsers.addAll(user)
+            filteredRequestedUsers.addAll(requestedUsers)
+        }
+    }
+
+    // Obtener datos iniciales
     LaunchedEffect(Unit) {
         val result = getUsersNotRequested(idEvent)
         user.addAll(result.value)
         requestedUsers.addAll(getAloneUsersRequested(idEvent).value)
-        Log.e("WillGoScreen", requestedUsers.toString())
+
+        // Aplicar el filtro inicial
+        filterUsers(query)
     }
+
 
     Scaffold(
         modifier = Modifier.padding(bottom = paddingValues.calculateBottomPadding()),
@@ -102,7 +130,12 @@ fun WillGoScreen(
                     IconButton(onClick = onBack) {
                         Icon(imageVector = Icons.Default.ArrowBackIosNew, contentDescription = null)
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.White,
+                    titleContentColor = Color.Black,
+                    navigationIconContentColor = Color.Black
+                )
             )
         },
         bottomBar = {
@@ -110,17 +143,15 @@ fun WillGoScreen(
                 val selectedList = if (selectedTab == 0) selectedUsers else selectedRequestedUsers
                 Button(
                     onClick = {
-                        // Enviar solicitudes y actualizar las listas
-                        if(selectedTab == 0) {
+                        if (selectedTab == 0) {
                             sendWillGoRequests(selectedList) {
-                                // Actualizar listas tras el éxito
                                 requestedUsers.addAll(selectedUsers)
                                 requestedUsers.map { it.isSelected = false }
                                 user.removeAll(selectedUsers)
                                 selectedUsers.clear()
                             }
-                        }else{
-                            cancelWillGoRequests(selectedList){
+                        } else {
+                            cancelWillGoRequests(selectedList) {
                                 user.addAll(selectedRequestedUsers)
                                 user.map { it.isSelected = false }
                                 requestedUsers.removeAll(selectedRequestedUsers)
@@ -128,16 +159,10 @@ fun WillGoScreen(
                             }
                         }
                     },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
+                    modifier = Modifier.fillMaxWidth().padding(8.dp),
                     enabled = selectedList.isNotEmpty()
                 ) {
-                    if(selectedTab == 0){
-                        Text(text = "Enviar solicitud")
-                    }else{
-                        Text(text = "Cancelar solicitud")
-                    }
+                    Text(text = if (selectedTab == 0) "Enviar solicitud" else "Cancelar solicitud")
                 }
             }
         }
@@ -149,23 +174,32 @@ fun WillGoScreen(
                 .background(Color.White),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Box(modifier = Modifier.height(56.dp)){
 
-            SearchBar(query = query,
-                onQueryChange = { newQuery ->query = normalizeText(newQuery)},
-                onSearch = {},
-                active = active,
-                onActiveChange = {active = it},placeholder = {
-                    Text("Buscar evento")},
-                leadingIcon = {Icon(imageVector = Icons.Default.Search, contentDescription = "Search icon") },
-                trailingIcon = {if (active && query.isNotEmpty()) {
-                    Icon(imageVector = Icons.Default.Close,
-                        contentDescription = "Close icon",
-                        modifier = Modifier.clickable {query = ""})}},
-                modifier = Modifier.padding(horizontal = searchBarPadding),
-                windowInsets = WindowInsets(top = 0.dp, bottom = 0.dp),) {
-
+                // Barra de búsqueda
+                DockedSearchBar(
+                    query = query,
+                    onQueryChange = { newQuery ->
+                        query = normalizeText(newQuery)
+                        filterUsers(query) // Filtra cuando cambia el texto
+                    },
+                    onSearch = { active = false },
+                    active = active,
+                    onActiveChange = { active = it },
+                    placeholder = { Text("Buscar usuario") },
+                    leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = "Search icon") },
+                    trailingIcon = {
+                        if (active && query.isNotEmpty()) {
+                            Icon(imageVector = Icons.Default.Close,
+                                contentDescription = "Close icon",
+                                modifier = Modifier.clickable { query = "" })
+                        }
+                    },
+                    modifier = Modifier.padding(horizontal = searchBarPadding),
+                ){}
             }
-            // Contenido de la barra de búsqueda y tabs
+
+            // Tabs
             TabRow(
                 selectedTabIndex = selectedTab,
                 modifier = Modifier.fillMaxWidth(),
@@ -178,9 +212,6 @@ fun WillGoScreen(
                             color = MaterialTheme.colorScheme.primary
                         )
                     }
-                },
-                divider = {
-                    //HorizontalDivider(color = MaterialTheme.colorScheme.secondary)
                 }
             ) {
                 tabs.forEachIndexed { index, title ->
@@ -198,13 +229,16 @@ fun WillGoScreen(
                     )
                 }
             }
+
+            // Contenido de acuerdo a la pestaña seleccionada
             when (selectedTab) {
-                0 -> RecienteContent(user, selectedUsers, navHostController = navHostController)
-                1 -> YaSolicitados(requestedUsers, selectedRequestedUsers)
+                0 -> RecienteContent(filteredUsers, selectedUsers, navHostController)
+                1 -> YaSolicitados(filteredRequestedUsers, selectedRequestedUsers)
             }
         }
     }
 }
+
 
 // Función para mostrar la lista de usuarios recientes
 @Composable
@@ -227,7 +261,7 @@ fun RecienteContent(user: SnapshotStateList<WillGoItem>, selectedUsers: Snapshot
                     item.isSelected!!
                 },
                 modifier = Modifier,
-                onClick = {navHostController.navigate("profile/${item.willGo.user}")}
+                onClick = { navHostController.navigate("profile/${item.willGo.user}") }
             )
         }
     }
@@ -236,13 +270,13 @@ fun RecienteContent(user: SnapshotStateList<WillGoItem>, selectedUsers: Snapshot
 // Función para mostrar la lista de usuarios ya solicitados
 @Composable
 fun YaSolicitados(
-    user: SnapshotStateList<WillGoItem>,
-    selectedUsers: SnapshotStateList<WillGoItem>
+    requestedUsers: SnapshotStateList<WillGoItem>,
+    selectedRequestedUsers: SnapshotStateList<WillGoItem>
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
-        items(user) { item ->
+        items(requestedUsers) { item ->
             val state = remember { mutableStateOf<String?>(null) }
             LaunchedEffect(item) {
                 state.value = getStateRequest(item.willGo.id, getUser().nickname, item.willGo.user)
@@ -255,25 +289,28 @@ fun YaSolicitados(
                     onToggleSelect = {
                         item.isSelected = !(item.isSelected)!!
                         if (item.isSelected == true) {
-                            selectedUsers.add(item)
-                            println(selectedUsers)
+                            selectedRequestedUsers.add(item)
+                            println(selectedRequestedUsers)
                         } else {
-                            selectedUsers.remove(item)
+                            selectedRequestedUsers.remove(item)
                         }
                         item.isSelected!!
                     },
                     modifier = Modifier,
                     onClick = {
-                        cancelWillGoRequests(listOf(item), {})
-                        user.remove(item)
-                        selectedUsers.remove(item)
+                        cancelWillGoRequests(listOf(item)) {}
+                        requestedUsers.remove(item)
+                        selectedRequestedUsers.remove(item)
                     }
                 )
             }
-
         }
     }
 }
+
+
+
+
 
 suspend fun getStateRequest(idEvent: Long, userRequesting: String, nickRequested: String): String {
     val response = getClient()
