@@ -21,9 +21,12 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -53,7 +56,12 @@ import kotlinx.coroutines.launch
 
 //@Preview
 @Composable
-fun ProfileScreen(navController: NavHostController = rememberNavController(), paddingValues: PaddingValues, user: User){
+fun ProfileScreen(
+    navController: NavHostController,
+    paddingValues: PaddingValues,
+    user: User,
+    showBackArrow: Boolean
+){
     val willGoevents = remember { mutableStateOf(listOf<Event>()) }
     val favevents = remember { mutableStateOf(listOf<Event>()) }
     val totalfollowers = remember { mutableStateOf(0)}
@@ -65,13 +73,14 @@ fun ProfileScreen(navController: NavHostController = rememberNavController(), pa
         totalfollowing.value = getTotalfollowing(user.nickname)
     }
     var coroutineScope = rememberCoroutineScope()
+
     Column(modifier = Modifier
         .fillMaxSize()
         .background(Color.White)
         .padding(paddingValues)
     )
     {
-        TopBar2()
+        TopBar2(showBackArrow = showBackArrow, onBackClick = { navController.popBackStack() })
 
         LazyColumn(
             modifier = Modifier
@@ -220,12 +229,20 @@ fun SectionTitle2(title: String) {
 }
 
 @Composable
-fun TopBar2() {
+fun TopBar2(
+    showBackArrow: Boolean,
+    onBackClick: () -> Unit = {}
+) {
     Box(
-        modifier = Modifier.padding(12.dp)
+        modifier = Modifier
+            .padding(12.dp)
             .fillMaxWidth()
     ) {
-
+        if (showBackArrow) {
+            IconButton(onClick = onBackClick) {
+                Icon(imageVector = Icons.Default.ArrowBackIosNew, contentDescription = null)
+            }
+        }
         Text(
             text = "Perfil",
             color = Color.Black,
