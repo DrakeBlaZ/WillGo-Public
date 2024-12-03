@@ -11,48 +11,61 @@ import androidx.compose.foundation.layout.*    // Para los espacios y layouts
 import androidx.compose.foundation.lazy.LazyColumn  // Para listas optimizadas
 import androidx.compose.foundation.lazy.items       // Para iterar sobre listas en Compose
 import androidx.compose.material.*            // Para componentes de Material Design como Card, Button, etc.
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*             // Para estados como `remember` y `LaunchedEffect`
 import androidx.compose.ui.Modifier           // Para modificaciones de tamaño y layout
 import androidx.compose.ui.unit.dp            // Para definir márgenes, paddings, etc.
 import com.example.willgo.data.SharedCar
+import kotlinx.coroutines.launch
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TopAppBar
 
 
-
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CarListScreen(eventId: Int, onAddCarClicked: () -> Unit) {
+fun CarListScreen(eventId: Int, onAddCarClicked: () -> Unit, onBack: () -> Unit) {
     val client = getClient()
     var carList by remember { mutableStateOf(emptyList<SharedCar>()) }
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(eventId) {
-        try {
-            val response = client.postgrest["Coche_compartido"].select {
-                filter{
-                    eq("event_id", eventId) // Filtra por event_id
-                }
-            }
-                .decodeList<SharedCar>()
-
-            carList = response
-        } catch (e: Exception) {
-            Log.e("CarListScreen", "Error al obtener la lista de coches: $e")
+        coroutineScope.launch {
+            carList = getCarList(eventId)
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text("Coches compartidos")
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Coches disponibles") },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
 
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Volver"
+                        )
+                    }
+                }
+            )
+        }
+    ){ paddingValues ->
         LazyColumn {
-            items(carList) { car ->
-                Card(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+            items(carList) { sharedCar ->
+                Card(modifier = Modifier.fillMaxWidth().padding(paddingValues)) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Usuario: ${car.userId}")
-                        Text("Plazas disponibles: ${car.seatsAvailable}")
-                        Text("Hora de salida: ${car.departureTime}")
-                        Text("Dirección: ${car.departureAddress}")
+                        Text("Usuario: ${sharedCar.userId}")
+                        Text("Plazas disponibles: ${sharedCar.seatsAvailable}")
+                        Text("Hora de salida: ${sharedCar.departureTime}")
+                        Text("Dirección: ${sharedCar.departureAddress}")
                     }
                 }
             }
@@ -65,7 +78,10 @@ fun CarListScreen(eventId: Int, onAddCarClicked: () -> Unit) {
             Text("Añadir mi coche")
         }
     }
+
+
 }
+
 
 
 
@@ -90,6 +106,7 @@ suspend fun addCarToDatabase(
 
     try {
         // Insertar el nuevo coche en la base de datos
+        Log.d("OOOOOOOOOOOOOOOOOO", "Datos del coche: eventId=$eventId, userId=${user.nickname}, seatsAvailable=$seatsAvailable, departureTime=$departureTime, departureAddress=$departureAddress")
         client.postgrest["Coche_compartido"].insert(car)
         onSuccess() // Llamar a la función de éxito para actualizar la UI
     } catch (e: Exception) {

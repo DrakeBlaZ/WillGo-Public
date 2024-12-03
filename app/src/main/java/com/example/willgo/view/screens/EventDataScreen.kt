@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.willgo.data.Event
+import com.example.willgo.data.SharedCar
 import com.example.willgo.data.User.User
 import com.example.willgo.data.User.UserResponse
 import com.example.willgo.data.WillGo.WillGo
@@ -65,7 +66,8 @@ fun EventDataScreen(
     event: Event,
     paddingValues: PaddingValues,
     onBack: () -> Unit,
-    goAlone: () -> Unit
+    goAlone: () -> Unit,
+    goCar: () -> Unit
 ) {
 
 
@@ -80,7 +82,7 @@ fun EventDataScreen(
         item { EventDetails(event) }
         item { EventCharacteristics(event) }
         item { EventDescription(event) }
-        item { WillGoButtons(event, goAlone) }
+        item { WillGoButtons(event, goAlone, goCar) }
         item { EventLocation(event) }
         item { ContactSection(event) }
     }
@@ -175,6 +177,7 @@ fun EventDescription(event: Event) {
 fun WillGoButtons(
     event: Event,
     goAlone: () -> Unit,
+    goCar: () -> Unit
 ) {
     var willGo by remember { mutableStateOf<WillGo?>(null) }
     var alone by remember { mutableStateOf(false) }  // Estado para saber si el usuario va solo
@@ -233,7 +236,7 @@ fun WillGoButtons(
                     }
                 }, modifier = Modifier.testTag("attendButton")
             ) {
-                Text(text = if (willGo != null) "WillGo ✔" else "WillGo")
+                Text(text = if (willGo != null) "WillGo ✔" else "WillGo", modifier = Modifier.testTag("willGoText"))
             }
 
             // Botón de Alone
@@ -255,6 +258,13 @@ fun WillGoButtons(
                 )
             ) {
                 Text(text = if (alone) "Voy solo ✔" else "Voy solo")
+            }
+
+            // Botón de Coche
+            Button(
+                onClick = { goCar() }, modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Cars")
             }
         }
     }
@@ -415,6 +425,13 @@ suspend fun getUser(nick: String): User {
 
 }
 
+
+suspend fun getCarList(eventId: Int): List<SharedCar> {
+    val client = getClient()
+    return client.postgrest["Coche_compartido"].select {
+        filter { eq("event_id", eventId) }
+    }.decodeList<SharedCar>()
+}
 
 
 

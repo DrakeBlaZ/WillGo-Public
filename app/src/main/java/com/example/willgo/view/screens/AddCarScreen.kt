@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
 @Composable
-fun AddCarScreen(eventId: Int, onCarAdded: () -> Unit) {
+fun AddCarScreen(eventId: Int, onBack: () -> Unit,) {
     var seatsAvailable by remember { mutableStateOf("") }
     var departureTime by remember { mutableStateOf("") }
     var departureAddress by remember { mutableStateOf("") }
@@ -65,10 +65,13 @@ fun AddCarScreen(eventId: Int, onCarAdded: () -> Unit) {
                         eventId = eventId,
                         seatsAvailable = seatsAvailable.toInt(),
                         departureTime = departureTime,
-                        departureAddress = departureAddress
-                    ) {
-                        onCarAdded() // Actualizar la UI tras añadir el coche
-                    }
+                        departureAddress = departureAddress,
+                        onSuccess = {
+                            println("Coche añadido correctamente")
+                            onBack() // Vuelve a la pantalla anterior
+                        }
+                    )
+
                 }
             }
         }) {

@@ -161,7 +161,9 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues,
             val event = backStackEntry.arguments?.getInt("eventId") ?: -1
             val filteredEvents = events.value.filter { it.id.toInt() == event }
             EventDataScreen(filteredEvents[0], paddingValues, onBack = { navController.popBackStack() },
-                goAlone ={navController.navigate("goAlone/${filteredEvents[0].id}")})
+                goAlone ={navController.navigate("goAlone/${filteredEvents[0].id}")},
+                goCar ={navController.navigate("carListScreen/${event}")}
+            )
         }
 
         composable(
@@ -230,16 +232,19 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues,
 
         composable("carListScreen/{eventId}") { backStackEntry ->
             val eventId = backStackEntry.arguments?.getString("eventId")?.toIntOrNull() ?: 0
-            CarListScreen(eventId) {
-                navController.navigate("addCarScreen/$eventId")
-            }
+            CarListScreen(
+                eventId = eventId,
+                onAddCarClicked = { navController.navigate("addCarScreen/$eventId") },
+                onBack = { navController.popBackStack() }
+            )
         }
 
         composable("addCarScreen/{eventId}") { backStackEntry ->
             val eventId = backStackEntry.arguments?.getString("eventId")?.toIntOrNull() ?: 0
-            AddCarScreen(eventId) {
-                navController.popBackStack()
-            }
+            AddCarScreen(
+                eventId = eventId,
+                onBack = { navController.popBackStack() }
+            )
         }
 
     }
