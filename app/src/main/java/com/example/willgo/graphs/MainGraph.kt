@@ -179,11 +179,11 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues,
             WillGoScreen(
                 filteredEvents[0].id,
                 paddingValues,
-                onBack = { navController.popBackStack() }
                 onBack = { navController.popBackStack() },
                 navHostController = navController
             )
         }
+
 
         composable(
             route = "comments/{nickname}",
