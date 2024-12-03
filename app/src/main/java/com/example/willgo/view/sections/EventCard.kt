@@ -40,13 +40,6 @@ fun CommonEventCard(event: Event, modifier: Modifier){
                 .weight(3/2f)
                 .background(Color.Transparent)
         ){
-            /*Image(painter = painterResource(id = R.drawable.ac_dc),
-                contentDescription = "Imagen de fondo",
-                modifier = Modifier
-                    .fillMaxSize()
-                    ,
-                contentScale = ContentScale.Crop)*/
-
             // Usa Coil para cargar la imagen desde la URL
             AsyncImage(
                 model = event.image, // Cargar la imagen desde la URL de tu base de datos

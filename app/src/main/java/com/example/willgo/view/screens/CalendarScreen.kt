@@ -17,11 +17,15 @@ import androidx.navigation.NavController
 import com.example.willgo.data.Event
 import java.util.Calendar
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.*
@@ -34,6 +38,8 @@ import com.example.willgo.view.screens.navScreens.TopBar
 import com.example.willgo.view.screens.navScreens.getWillgoForUser
 import java.text.ParseException
 import java.util.*
+import com.example.willgo.view.sections.CommonEventCard
+import kotlin.math.absoluteValue
 
 @Composable
 fun CalendarScreen(
@@ -103,37 +109,140 @@ fun CalendarScreen(
 @Composable
 fun WeekView(selectedDate: Calendar, onDateSelected: (Calendar) -> Unit){
 
+    // Estado para mantener la semana actual visible en la vista
+    var currentWeek by remember { mutableStateOf(selectedDate.clone() as Calendar) }
+
     // Obtiene los días de la semana basados en la fecha seleccionada
-    val weekDays = getWeekDays(selectedDate)
+    var weekDays by remember { mutableStateOf(getWeekDays(currentWeek)) }
 
-    // Usa LazyRow para mostrar los días de la semana en una fila desplazable horizontalmente
-    LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp), // Espaciado entre días
-        modifier = Modifier.fillMaxWidth() // Usa todo el ancho de la pantalla
-    ) {
-        // Recorre cada día de la semana
-        items(weekDays.size) { index ->
-            val date = weekDays[index] // Obtén el día actual
-            // Comprueba si el día es el mismo que el seleccionado
-            val isSelected = isSameDay(date, selectedDate)
+    // Estados para controlar el menú desplegable
+    var expandedMonth by remember { mutableStateOf(false) }
+    var expandedYear by remember { mutableStateOf(false) }
+    val months = (0..11).map { monthIndex ->
+        Calendar.getInstance().apply {
+            set(Calendar.MONTH, monthIndex)
+        }.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault())
+    }
+    val years = (2024..2100).toList()
 
-            // Cada día se muestra como un círculo clicable
-            Box(
-                contentAlignment = Alignment.Center, // Centra el contenido (número del día)
-                modifier = Modifier
-                    .size(50.dp) // Tamaño del círculo
-                    .background(
-                        if (isSelected) MaterialTheme.colorScheme.primary else Color.LightGray, // Color según selección
-                        shape = CircleShape // Forma circular
-                    )
-                    .clickable { onDateSelected(date) } // Cambia la fecha seleccionada al hacer clic
-            ) {
-                // Texto que muestra el número del día
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Selector de mes
+            Box {
                 Text(
-                    text = date.get(Calendar.DAY_OF_MONTH).toString(),
-                    color = if (isSelected) Color.White else Color.Black, // Color según selección
-                    fontWeight = FontWeight.Bold, // Texto en negrita
-                    fontSize = 16.sp // Tamaño de fuente
+                    text = currentWeek.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault())!!,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .clickable { expandedMonth = true }
+                        .padding(8.dp)
+                )
+                DropdownMenu(
+                    expanded = expandedMonth,
+                    onDismissRequest = { expandedMonth = false }
+                ) {
+                    months.forEachIndexed { index, month ->
+                        DropdownMenuItem(
+                            text = { Text(text = month) },
+                            onClick = {
+                                currentWeek.set(Calendar.MONTH, index)
+                                weekDays = getWeekDays(currentWeek)
+                                expandedMonth = false
+                            }
+                        )
+                    }
+                }
+            }
+
+            // Selector de año
+            Box {
+                Text(
+                    text = currentWeek.get(Calendar.YEAR).toString(),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .clickable { expandedYear = true }
+                        .padding(8.dp)
+                )
+                DropdownMenu(
+                    expanded = expandedYear,
+                    onDismissRequest = { expandedYear = false }
+                ) {
+                    years.forEach { year ->
+                        DropdownMenuItem(
+                            text = { Text(text = year.toString()) },
+                            onClick = {
+                                currentWeek.set(Calendar.YEAR, year)
+                                weekDays = getWeekDays(currentWeek)
+                                expandedYear = false
+                            }
+                        )
+                    }
+                }
+            }
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            //Flecha hacia la izquierda
+            IconButton(onClick = {
+                currentWeek.add(Calendar.WEEK_OF_YEAR, -1) //Retrocede una semana
+                weekDays = getWeekDays(currentWeek) // Actualiza los días de la semana
+            }) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Retroceder una semana"
+                )
+            }
+
+            // Usa LazyRow para mostrar los días de la semana en una fila desplazable horizontalmente
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp), // Espaciado entre días
+                modifier = Modifier.weight(1f) // Usa todo el ancho de la pantalla
+            ) {
+                // Recorre cada día de la semana
+                items(weekDays.size) { index ->
+                    val date = weekDays[index] // Obtén el día actual
+                    // Comprueba si el día es el mismo que el seleccionado
+                    val isSelected = isSameDay(date, selectedDate)
+
+                    // Cada día se muestra como un círculo clicable
+                    Box(
+                        contentAlignment = Alignment.Center, // Centra el contenido (número del día)
+                        modifier = Modifier
+                            .size(50.dp) // Tamaño del círculo
+                            .background(
+                                if (isSelected) MaterialTheme.colorScheme.primary else Color.LightGray, // Color según selección
+                                shape = CircleShape // Forma circular
+                            )
+                            .clickable { onDateSelected(date) } // Cambia la fecha seleccionada al hacer clic
+                    ) {
+                        // Texto que muestra el número del día
+                        Text(
+                            text = date.get(Calendar.DAY_OF_MONTH).toString(),
+                            color = if (isSelected) Color.White else Color.Black, // Color según selección
+                            fontWeight = FontWeight.Bold, // Texto en negrita
+                            fontSize = 16.sp // Tamaño de fuente
+                        )
+                    }
+                }
+            }
+
+            // Flecha hacia la derecha
+            IconButton(onClick = {
+                currentWeek.add(Calendar.WEEK_OF_YEAR, 1) // Avanza una semana
+                weekDays = getWeekDays(currentWeek) // Actualiza los días de la semana
+            }) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = "Avanzar semana"
                 )
             }
         }
@@ -165,39 +274,22 @@ fun EventList(
         )
     } else {
         // Si hay eventos, los muestra en una columna
-        Column(
+        LazyColumn(
             verticalArrangement = Arrangement.spacedBy(8.dp), // Espaciado entre eventos
             modifier = Modifier.fillMaxWidth()
         ) {
             // Recorre cada evento y lo muestra como una tarjeta clicable
-            eventsForSelectedDate.forEach { event ->
-                Card(
+            items(eventsForSelectedDate.size) { index ->
+                val event = eventsForSelectedDate[index]
+                CommonEventCard(
+                    event = event,
                     modifier = Modifier
-                        .fillMaxWidth() // Cada tarjeta usa todo el ancho
-                        .clickable { navController.navigate("eventDetail/${event.id}") }, // Navega a los detalles del evento
-                ) {
-                    // Contenido de la tarjeta
-                    Row(
-                        modifier = Modifier
-                            .padding(16.dp) // Margen interior
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween, // Espaciado entre elementos
-                        verticalAlignment = Alignment.CenterVertically // Centrado vertical
-                    ) {
-                        // Nombre del evento
-                        Text(
-                            text = event.name_event,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
-                        )
-                        // Fecha u hora del evento
-                        Text(
-                            text = event.date.orEmpty(),
-                            color = Color.Gray,
-                            fontSize = 14.sp
-                        )
-                    }
-                }
+                        .fillMaxWidth()
+                        .clickable {
+                            navController.navigate("eventDetail/${event.id}") // Navega a los detalles del evento
+                        }
+                        .padding(vertical = 8.dp) // Espaciado entre tarjetas
+                )
             }
         }
     }
