@@ -4,9 +4,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class WillGoItem(
-    val nickname: String,
-    var isSelected: Boolean?,
+    val willGo: WillGo,
     val name: String?,
     val followers: Int?,
-
-    )
+    var isSelected: Boolean? = false
+)

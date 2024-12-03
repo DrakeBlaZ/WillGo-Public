@@ -19,12 +19,6 @@ data class User (
             followers = followers,)
     }
 
-    fun toWillGoItem(): WillGoItem {
-        return WillGoItem(
-            name = name,
-            nickname = nickname,
-            followers = followers,
-            isSelected = false
-        )
-    }
+
+
 }

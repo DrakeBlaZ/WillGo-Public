@@ -226,7 +226,7 @@ fun WillGoButtons(
                             currentAttendants--  // Decrementamos los asistentes
                         } else {
                             addWillGo(event)
-                            willGo = WillGo(event.id, getUser().nickname, false)
+                            willGo = WillGo(0L, event.id, getUser().nickname, false)
                             currentAttendants++  // Incrementamos los asistentes
                         }
                     }
@@ -315,7 +315,7 @@ suspend fun getAttendants(event: Event): Int {
 
 suspend fun addWillGo(event: Event) {
     val user = getUser()
-    val willGo = user.nickname?.let { WillGo(event.id, it, false) }
+    val willGo = user.nickname?.let { WillGo(id = 0L,event.id, it, false) }
     val client = getClient()
     try {
         willGo?.let {
@@ -343,7 +343,7 @@ suspend fun deleteWillGo(event: Event) {
 
 suspend fun addAlone(event: Event, exists: Boolean, addAttendants: () -> Unit) {
     val user = getUser()
-    val willGo = user.nickname?.let { WillGo(event.id, it, true) }
+    val willGo = user.nickname?.let { WillGo(0L, event.id, it, true) }
     val client = getClient()
 
     if (exists) {

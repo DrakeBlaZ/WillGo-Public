@@ -25,6 +25,7 @@ import com.example.willgo.view.screens.other.CategoryScreen
 import com.example.willgo.view.screens.CommentsOnEvents
 import com.example.willgo.view.screens.FollowerScreen
 import com.example.willgo.view.screens.FollowingScreen
+import com.example.willgo.view.screens.getUser
 import com.example.willgo.view.screens.other.WillGoScreen
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
@@ -56,7 +57,7 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues,
         }
 
         composable(route = BottomBarScreen.Profile.route) {
-            ProfileScreen(navController = navController, paddingValues = paddingValues, user = user)
+            ProfileScreen(navController = navController, paddingValues = paddingValues, user = user,false)
         }
 
         //Ruta para acceder al calendario
@@ -179,6 +180,8 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues,
                 filteredEvents[0].id,
                 paddingValues,
                 onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                navHostController = navController
             )
         }
 
@@ -193,6 +196,28 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues,
                 paddingValues = paddingValues,
                 onBack = { navController.popBackStack() }
             )
+        }
+
+        composable(
+            route = "profile/{nickname}",
+            arguments = listOf(navArgument("nickname") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val nickname = backStackEntry.arguments?.getString("nickname") ?: ""
+            val userState = remember { mutableStateOf<User?>(null) }
+
+            LaunchedEffect(nickname) {
+                userState.value = getUser(nickname)
+            }
+
+            // Mientras `user` es nulo, puedes mostrar una pantalla de carga o un placeholder
+            if (userState.value != null) {
+                ProfileScreen(
+                    navController = navController,
+                    paddingValues = paddingValues,
+                    user = userState.value!!,
+                    showBackArrow = true
+                )
+            }
         }
 
         composable(
