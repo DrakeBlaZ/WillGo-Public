@@ -385,7 +385,8 @@ fun sendWillGoRequests(selectedUsers: List<WillGoItem>, onSuccess: () -> Unit){
                     userRequesting = userRequesting,
                     userRequested = selectedUser.willGo.id, // Usar el ID de la tabla WillGo
                     state = "Pendiente",
-                    nickRequested = selectedUser.willGo.user
+                    nickRequested = selectedUser.willGo.user,
+                    idEvent = selectedUser.willGo.id_event
                 )
             }
             // Insertar las solicitudes en la tabla "Solicitudes"
