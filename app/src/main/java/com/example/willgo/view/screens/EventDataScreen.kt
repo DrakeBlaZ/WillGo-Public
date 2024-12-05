@@ -48,6 +48,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.willgo.data.Comment
 import com.example.willgo.data.Event
 import com.example.willgo.data.SharedCar
 import com.example.willgo.data.User.User
@@ -427,10 +428,16 @@ suspend fun getUser(nick: String): User {
 
 
 suspend fun getCarList(eventId: Int): List<SharedCar> {
+    Log.d("UUUUUUUUUUUUUUUUUU", "llego a lista de coches eventId=$eventId")
     val client = getClient()
-    return client.postgrest["Coche_compartido"].select {
+    val supabaseResponse = client.postgrest["Coche_compartido"].select {
         filter { eq("event_id", eventId) }
-    }.decodeList<SharedCar>()
+    }
+    return try { supabaseResponse.decodeList<SharedCar>()
+    } catch (e: Exception) {
+        Log.e("getCarsForEvent", "Error al obtener coches: $e")
+        emptyList()
+    }
 }
 
 
@@ -445,6 +452,7 @@ private suspend fun getData(){
 }
 
 public fun getClient(): SupabaseClient {
+    Log.d("OOOOOOOOOOOOOOOOOO", "llego a getClient")
     return createSupabaseClient(
         supabaseUrl = "https://trpgyhwsghxnaakpoftt.supabase.co",
         supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRycGd5aHdzZ2h4bmFha3BvZnR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjgwMjgwNDcsImV4cCI6MjA0MzYwNDA0N30.IJthecg-DH9rwOob2XE6ANunb6IskxCbMAacducBVPE"

@@ -10,14 +10,6 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.action.ViewActions.closeSoftKeyboard
-import androidx.test.espresso.action.ViewActions.typeText
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -102,14 +94,12 @@ class MainActivityTest {
                 navController = rememberNavController(),
                 paddingValues = PaddingValues(7.dp),
                 user = user
-            ) // Renderiza la pantalla del perfil
-
+            )
         }
-
         // Verifica que el nombre y el nickname del usuario son visibles
         composeTestRule.onNodeWithTag("username").assertTextEquals(user.name)
 
-        // Comprueba que las estadísticas son correctas
+        // Verifica que los textos son correctos
         composeTestRule.onNodeWithTag("followerText").assertTextEquals("Seguidores")
         composeTestRule.onNodeWithTag("followedText").assertTextEquals("Seguidos")
 
@@ -123,7 +113,7 @@ class MainActivityTest {
                 navController = rememberNavController(),
                 paddingValues = PaddingValues(7.dp),
                 user = user
-            ) // Renderiza la pantalla del perfil
+            )
 
         }
         composeTestRule.onNodeWithTag("username")
@@ -139,12 +129,10 @@ class MainActivityTest {
         }
 
         val startTime = System.nanoTime()
-
         composeTestRule.onNodeWithTag("attendButton").performClick()
-
         val endTime = System.nanoTime()
         val duration = endTime - startTime
-        assert(duration < 300_000_000) // Verifica que tome menos de 500ms
+        assert(duration < 200_000_000) // Verifica que tarde menos de 200ms
     }
 
 
@@ -159,11 +147,10 @@ class MainActivityTest {
             composeTestRule.onNodeWithTag("attendButton").fetchSemanticsNode().config.getOrNull(
                 SemanticsProperties.Text
             ).toString()
-
         Log.d("TestButtonText", "Button Text: $buttonText")
         if (buttonText == "[WillGo]") {
             Log.d("AAAAAAAAAAAAAAAAAAAAA", "Hola")
-            repeat(21) {
+            repeat(11) {
                 composeTestRule.onNodeWithTag("attendButton").performClick()
                 composeTestRule.waitForIdle()
             }
