@@ -95,8 +95,10 @@ fun WillGoManagerScreen(
     LaunchedEffect(Unit) {
         val logedIn = getUser()
         val result = getReceivedRequests(logedIn.nickname)
-        receivedRequests = result
-        sentRequests = getSentRequests(logedIn.nickname)
+        receivedRequests.clear()
+        receivedRequests.addAll(result)
+        sentRequests.clear()
+        sentRequests.addAll(getSentRequests(logedIn.nickname))
 
         // Aplicar el filtro inicial
         filterUsers(query)
