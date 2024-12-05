@@ -53,6 +53,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.willgo.data.Event
 import com.example.willgo.data.User.User
+import com.example.willgo.graphs.BottomBarScreen
 import com.example.willgo.view.screens.getClient
 import com.example.willgo.view.screens.getCommentsForUser
 import com.example.willgo.view.screens.getFollowersForUser
@@ -89,7 +90,7 @@ fun ProfileScreen(
         .padding(paddingValues)
     )
     {
-        TopBar2(showBackArrow = showBackArrow, onBackClick = { navController.popBackStack() })
+        TopBar2(showBackArrow = showBackArrow, onBackClick = { navController.popBackStack() }, navController)
 
         LazyColumn(
             modifier = Modifier
@@ -260,7 +261,8 @@ fun SectionTitle2(title: String) {
 @Composable
 fun TopBar2(
     showBackArrow: Boolean,
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
+    navController: NavHostController
 ) {
     Box(
         modifier = Modifier
@@ -281,29 +283,33 @@ fun TopBar2(
             modifier = Modifier.align(Alignment.Center)
         )
 
-        Button(
-            onClick = { /* Acción */ },
-            shape = RoundedCornerShape(50), // Forma completamente redondeada
-            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp), // Ajuste del tamaño interno
-            modifier = Modifier.align(Alignment.CenterEnd)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp) // Espacio entre ícono y texto
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Comment,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(16.dp) // Ícono más pequeño
-                )
-                Text(
-                    text = "Solicitudes",
-                    color = Color.White,
-                    fontSize = 14.sp // Tamaño de texto ajustado
-                )
-            }
+        LaunchedEffect(Unit) {
+
         }
+        if(navController.currentDestination?.route == BottomBarScreen.Profile.route)
+            Button(
+                onClick = { navController.navigate("WillGoManager") },
+                shape = RoundedCornerShape(50), // Forma completamente redondeada
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp), // Ajuste del tamaño interno
+                modifier = Modifier.align(Alignment.CenterEnd)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp) // Espacio entre ícono y texto
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.Comment,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(16.dp) // Ícono más pequeño
+                    )
+                    Text(
+                        text = "Solicitudes",
+                        color = Color.White,
+                        fontSize = 14.sp // Tamaño de texto ajustado
+                    )
+                }
+            }
 
     }
 }

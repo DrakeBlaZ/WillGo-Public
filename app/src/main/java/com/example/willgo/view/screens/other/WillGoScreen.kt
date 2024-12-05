@@ -356,7 +356,7 @@ fun cancelWillGoRequests(selectedUsers: List<WillGoItem>, onSuccess: () -> Unit)
         try {
             val userRequesting = getUser().nickname // El usuario que envía las solicitudes
 
-            val requests = selectedUsers.forEach { selectedUser ->
+            selectedUsers.forEach { selectedUser ->
                 getClient().postgrest["Solicitudes"].delete {
                     filter {
                         eq("userRequesting", userRequesting) // Coincide con el usuario solicitante
@@ -382,11 +382,12 @@ fun sendWillGoRequests(selectedUsers: List<WillGoItem>, onSuccess: () -> Unit){
             // Crear solicitudes para cada usuario seleccionado
             val requests = selectedUsers.map { selectedUser ->
                 Request(
+                    id = 0L,
                     userRequesting = userRequesting,
                     userRequested = selectedUser.willGo.id, // Usar el ID de la tabla WillGo
                     state = "Pendiente",
                     nickRequested = selectedUser.willGo.user,
-                    idEvent = selectedUser.willGo.id_event
+                    id_Event = selectedUser.willGo.id_event
                 )
             }
             // Insertar las solicitudes en la tabla "Solicitudes"

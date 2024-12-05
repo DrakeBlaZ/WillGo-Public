@@ -31,7 +31,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -46,29 +45,31 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.example.willgo.data.WillGo.WillGo
-import com.example.willgo.data.WillGo.WillGoItem
+import com.example.willgo.data.Request
 import com.example.willgo.view.screens.getClient
+import com.example.willgo.view.screens.getUser
 import com.example.willgo.view.screens.normalizeText
+import com.example.willgo.view.sections.WillGo.ReceivedRequestsItem
+import com.example.willgo.view.sections.WillGo.SentRequestsItem
 import io.github.jan.supabase.postgrest.postgrest
-import io.github.jan.supabase.postgrest.query.Columns
-import okhttp3.Request
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WillGoManagerScreen(
-    idEvent: Long,
     paddingValues: PaddingValues,
     onBack: () -> Unit,
     navHostController: NavHostController
 ) {
     // Listas mutables
-    val user = remember { mutableStateListOf<WillGoItem>() }
-    val requestedUsers = remember { mutableStateListOf<WillGoItem>() }
+    var receivedRequests = remember { mutableStateListOf<Request>() }
+    var sentRequests = remember { mutableStateListOf<Request>() }
 
     // Listas filtradas para búsqueda
-    val filteredUsers = remember { mutableStateListOf<WillGoItem>() }
-    val filteredRequestedUsers = remember { mutableStateListOf<WillGoItem>() }
+    val filteredReceived = remember { mutableStateListOf<Request>() }
+    val filteredSent = remember { mutableStateListOf<Request>() }
 
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("Usuarios", "Ya solicitados")
@@ -78,23 +79,24 @@ fun WillGoManagerScreen(
     val searchBarPadding by animateDpAsState(targetValue = if (active) 0.dp else 16.dp)
     // Función para filtrar usuarios
     fun filterUsers(query: String) {
-        filteredUsers.clear()
-        filteredRequestedUsers.clear()
+        filteredReceived.clear()
+        filteredSent.clear()
 
         if (query.isNotEmpty()) {
-            filteredUsers.addAll(user.filter { it.willGo.user.contains(query, ignoreCase = true) })
-            filteredRequestedUsers.addAll(requestedUsers.filter { it.willGo.user.contains(query, ignoreCase = true) })
+            filteredReceived.addAll(receivedRequests.filter { it.userRequesting.contains(query, ignoreCase = true) })
+            filteredSent.addAll(sentRequests.filter { it.nickRequested.contains(query, ignoreCase = true) })
         } else {
-            filteredUsers.addAll(user)
-            filteredRequestedUsers.addAll(requestedUsers)
+            filteredReceived.addAll(receivedRequests)
+            filteredSent.addAll(sentRequests)
         }
     }
 
     // Obtener datos iniciales
     LaunchedEffect(Unit) {
-        val result = getUsersNotRequested(idEvent)
-        user.addAll(result.value)
-        requestedUsers.addAll(getAloneUsersRequested(idEvent).value)
+        val logedIn = getUser()
+        val result = getReceivedRequests(logedIn.nickname)
+        receivedRequests = result
+        sentRequests = getSentRequests(logedIn.nickname)
 
         // Aplicar el filtro inicial
         filterUsers(query)
@@ -179,8 +181,8 @@ fun WillGoManagerScreen(
 
             // Contenido de acuerdo a la pestaña seleccionada
             when (selectedTab) {
-                0 -> MyRequests(filteredUsers, requestedUsers, navHostController)
-                1 -> OtherRequests(filteredRequestedUsers, user)
+                0 -> Received(filteredReceived, navHostController)
+                1 -> Sent(filteredSent)
             }
         }
     }
@@ -189,40 +191,91 @@ fun WillGoManagerScreen(
 
 // Función para mostrar la lista de usuarios recientes
 @Composable
-fun MyRequests(user: SnapshotStateList<WillGoItem>, selectedUsers: SnapshotStateList<WillGoItem>, navHostController: NavHostController) {
+fun Received(filteredUsers: SnapshotStateList<Request>, navHostController: NavHostController) {
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
-        items(user) { item ->
-
+        items(filteredUsers) { item ->
+            ReceivedRequestsItem(
+                idEvent = item.id_Event,
+                nickname = item.userRequesting,
+                state = item.state,
+                onClick = { navHostController.navigate("profile/${item.userRequesting}") },
+                accept = {
+                    acceptRequest(item.id)
+                },
+                decline = {
+                    cancelRequest(item.id)
+                }
+            )
         }
     }
 }
 
 // Función para mostrar la lista de usuarios ya solicitados
 @Composable
-fun OtherRequests(
-    requestedUsers: SnapshotStateList<WillGoItem>,
-    selectedRequestedUsers: SnapshotStateList<WillGoItem>
+fun Sent(
+    filteredUsers: SnapshotStateList<Request>
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
-        items(requestedUsers) { item ->
-
+        items(filteredUsers) { item ->
+            SentRequestsItem(
+                idEvent = item.id_Event,
+                nickname = item.nickRequested,
+                state = item.state,
+                onClick = {
+                    cancelRequest(item.id)
+                    filteredUsers.remove(item)
+                }
+            )
         }
     }
 }
 
-
-suspend fun getRequests(idEvent: Long, userRequesting: String):SnapshotStateList<Request>{
-    val response = getClient().postgrest["Solicitudes"]
-        .select(Columns.list("userRequesting")){
+fun cancelRequest(id: Long){
+    val client = getClient()
+    CoroutineScope(Dispatchers.IO).launch {
+        client.postgrest["Solicitudes"].update(
+            {set("state", "Cancelada")}
+        ) {
             filter {
-                and{
-                    eq("userRequesting", userRequesting)
-                    eq("idEvent", idEvent)
-                }
+                eq("id", id)
+            }
+        }
+    }
+}
+
+fun acceptRequest(id: Long) {
+    val client = getClient()
+    CoroutineScope(Dispatchers.IO).launch {
+        client.postgrest["Solicitudes"].update(
+            {set("state", "Aceptada")}
+        ){
+            filter {
+                eq("id", id)
+            }
+        }
+    }
+}
+
+suspend fun getReceivedRequests(nickRequested: String):SnapshotStateList<Request>{
+    val response = getClient().postgrest["Solicitudes"]
+        .select{
+            filter {
+                eq("nickRequested", nickRequested)
+            }
+        }
+    val requests = response.decodeList<Request>()
+    return requests.toMutableStateList()
+}
+
+suspend fun getSentRequests(userRequesting: String):SnapshotStateList<Request>{
+    val response = getClient().postgrest["Solicitudes"]
+        .select{
+            filter {
+                eq("userRequesting", userRequesting)
             }
         }
     val requests = response.decodeList<Request>()
@@ -234,6 +287,6 @@ suspend fun getRequests(idEvent: Long, userRequesting: String):SnapshotStateList
 @Preview
 @Composable
 fun WillGoManagerPreview() {
-    WillGoManagerScreen(3, PaddingValues(0.dp), {}, navHostController = NavHostController(LocalContext.current))
+    WillGoManagerScreen( PaddingValues(0.dp), {}, navHostController = NavHostController(LocalContext.current))
 }
 

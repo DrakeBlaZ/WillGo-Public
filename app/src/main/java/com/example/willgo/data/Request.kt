@@ -4,9 +4,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Request(
+    val id: Long,
     val userRequesting: String,
     val userRequested: Long,
     val state: String,
     val nickRequested: String,
-    val idEvent: Long
+    val id_Event: Long
 )
