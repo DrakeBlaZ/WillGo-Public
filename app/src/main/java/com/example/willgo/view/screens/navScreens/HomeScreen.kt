@@ -38,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -145,11 +146,16 @@ fun CategorySection(title: Category, events: List<Event>, navController: NavHost
     )
     Spacer(modifier = Modifier.height(16.dp))
     LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.testTag("eventList")
     ) {
         item{}
         items(events) { event ->
-            CommonEventCard(event = event, modifier = Modifier.clickable {navController.navigate("eventDetail/${event.id}")})  // Muestra cada evento en su tarjeta
+            CommonEventCard(event = event,
+                            modifier = Modifier
+                                .clickable {navController.navigate("eventDetail/${event.id}")}
+                                .testTag("event_${event.id}"),
+            )
         }
         item {}
     }

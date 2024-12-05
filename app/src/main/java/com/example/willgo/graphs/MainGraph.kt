@@ -24,6 +24,8 @@ import com.example.willgo.view.screens.navScreens.ProfileScreen
 import com.example.willgo.view.screens.other.CategoryScreen
 import com.example.willgo.view.screens.CommentsOnEvents
 import com.example.willgo.view.screens.FollowerScreen
+import com.example.willgo.view.screens.CarListScreen
+import com.example.willgo.view.screens.AddCarScreen
 import com.example.willgo.view.screens.FollowingScreen
 import com.example.willgo.view.screens.getUser
 import com.example.willgo.view.screens.other.WillGoScreen
@@ -167,7 +169,9 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues,
             val event = backStackEntry.arguments?.getInt("eventId") ?: -1
             val filteredEvents = events.value.filter { it.id.toInt() == event }
             EventDataScreen(filteredEvents[0], paddingValues, onBack = { navController.popBackStack() },
-                goAlone ={navController.navigate("goAlone/${filteredEvents[0].id}")})
+                goAlone ={navController.navigate("goAlone/${filteredEvents[0].id}")},
+                goCar ={navController.navigate("carListScreen/${event}")}
+            )
         }
 
         composable(
@@ -255,6 +259,25 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues,
             val category = getCategory(categoryName) // Usa el nombre para obtener la categoría correcta
             CategoryScreen(onBack = { navController.popBackStack() }, category = category, events.value, navController, paddingValues)
         }
+
+
+        composable("carListScreen/{eventId}") { backStackEntry ->
+            val eventId = backStackEntry.arguments?.getString("eventId")?.toIntOrNull() ?: 0
+            CarListScreen(
+                eventId = eventId,
+                onAddCarClicked = { navController.navigate("addCarScreen/$eventId") },
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable("addCarScreen/{eventId}") { backStackEntry ->
+            val eventId = backStackEntry.arguments?.getString("eventId")?.toIntOrNull() ?: 0
+            AddCarScreen(
+                eventId = eventId,
+                onBack = { navController.popBackStack() }
+            )
+        }
+
     }
 }
 

@@ -41,13 +41,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.willgo.data.Comment
 import com.example.willgo.data.Event
+import com.example.willgo.data.SharedCar
 import com.example.willgo.data.User.User
 import com.example.willgo.data.User.UserResponse
 import com.example.willgo.data.WillGo.WillGo
@@ -64,7 +67,8 @@ fun EventDataScreen(
     event: Event,
     paddingValues: PaddingValues,
     onBack: () -> Unit,
-    goAlone: () -> Unit
+    goAlone: () -> Unit,
+    goCar: () -> Unit
 ) {
 
 
@@ -79,7 +83,7 @@ fun EventDataScreen(
         item { EventDetails(event) }
         item { EventCharacteristics(event) }
         item { EventDescription(event) }
-        item { WillGoButtons(event, goAlone) }
+        item { WillGoButtons(event, goAlone, goCar) }
         item { EventLocation(event) }
         item { ContactSection(event) }
     }
@@ -174,6 +178,7 @@ fun EventDescription(event: Event) {
 fun WillGoButtons(
     event: Event,
     goAlone: () -> Unit,
+    goCar: () -> Unit
 ) {
     var willGo by remember { mutableStateOf<WillGo?>(null) }
     var alone by remember { mutableStateOf(false) }  // Estado para saber si el usuario va solo
@@ -230,9 +235,9 @@ fun WillGoButtons(
                             currentAttendants++  // Incrementamos los asistentes
                         }
                     }
-                }
+                }, modifier = Modifier.testTag("attendButton")
             ) {
-                Text(text = if (willGo != null) "WillGo ✔" else "WillGo")
+                Text(text = if (willGo != null) "WillGo ✔" else "WillGo", modifier = Modifier.testTag("willGoText"))
             }
 
             // Botón de Alone
@@ -254,6 +259,13 @@ fun WillGoButtons(
                 )
             ) {
                 Text(text = if (alone) "Voy solo ✔" else "Voy solo")
+            }
+
+            // Botón de Coche
+            Button(
+                onClick = { goCar() }, modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Cars")
             }
         }
     }
@@ -415,6 +427,19 @@ suspend fun getUser(nick: String): User {
 }
 
 
+suspend fun getCarList(eventId: Int): List<SharedCar> {
+    Log.d("UUUUUUUUUUUUUUUUUU", "llego a lista de coches eventId=$eventId")
+    val client = getClient()
+    val supabaseResponse = client.postgrest["Coche_compartido"].select {
+        filter { eq("event_id", eventId) }
+    }
+    return try { supabaseResponse.decodeList<SharedCar>()
+    } catch (e: Exception) {
+        Log.e("getCarsForEvent", "Error al obtener coches: $e")
+        emptyList()
+    }
+}
+
 
 
 private suspend fun getData(){
@@ -427,6 +452,7 @@ private suspend fun getData(){
 }
 
 public fun getClient(): SupabaseClient {
+    Log.d("OOOOOOOOOOOOOOOOOO", "llego a getClient")
     return createSupabaseClient(
         supabaseUrl = "https://trpgyhwsghxnaakpoftt.supabase.co",
         supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRycGd5aHdzZ2h4bmFha3BvZnR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjgwMjgwNDcsImV4cCI6MjA0MzYwNDA0N30.IJthecg-DH9rwOob2XE6ANunb6IskxCbMAacducBVPE"
