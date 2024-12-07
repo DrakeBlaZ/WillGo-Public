@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.willgo.data.Event
+import com.example.willgo.data.FavoriteEvent
 import com.example.willgo.data.User.User
 import com.example.willgo.data.User.UserResponse
 import com.example.willgo.data.WillGo.WillGo
@@ -470,8 +471,9 @@ public fun getClient(): SupabaseClient {
 
 suspend fun addToFavorite(event: Event) {
     val client = getClient()
+    val user = getUser()
     try {
-        client.postgrest["Eventos_favoritos"].insert(mapOf("event_id" to event.id))
+        client.postgrest["Eventos_favoritos"].insert(mapOf("event_id" to event.id, "user_nickname" to user.nickname))
     } catch (e: Exception) {
         Log.e("addToFavorite", "Error adding to favorites: $e")
     }
@@ -479,9 +481,13 @@ suspend fun addToFavorite(event: Event) {
 
 suspend fun removeFromFavorite(event: Event) {
     val client = getClient()
+    val user = getUser()
     try {
         client.postgrest["Eventos_favoritos"].delete {
-            filter { eq("event_id", event.id) }
+            filter {
+                eq("event_id", event.id)
+                eq("user_nickname", user.nickname)
+            }
         }
     } catch (e: Exception) {
         Log.e("removeFromFavorite", "Error removing from favorites: $e")
@@ -490,15 +496,17 @@ suspend fun removeFromFavorite(event: Event) {
 
 suspend fun checkIfFavorite(event: Event): Boolean {
     val client = getClient()
+    val user = getUser()
 
     return try {
         val response = client.postgrest["Eventos_favoritos"]
             .select() {
                 filter {
                     eq("event_id", event.id)
+                    eq("user_nickname", user.nickname)
                 }
             }
-            .decodeList<Event>()
+            .decodeList<FavoriteEvent>()
 
         response.isNotEmpty() // Returns true if the event is a favorite
     } catch (e: Exception) {

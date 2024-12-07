@@ -337,7 +337,7 @@ suspend fun getFavoriteEventIds(): List<Long> {
         client.postgrest["Eventos_favoritos"]
             .select()
             .decodeList<FavoriteEvent>()
-            .map { it.id }
+            .map { it.event_id }
     } catch (e: Exception) {
         Log.e("getFavoriteEventIds", "Error retrieving favorite event IDs: ${e.message}")
         emptyList()

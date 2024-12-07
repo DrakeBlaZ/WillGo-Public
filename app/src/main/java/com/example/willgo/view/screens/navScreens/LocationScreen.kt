@@ -27,8 +27,7 @@ fun MapScreen(
     eventsState: MutableState<List<Event>>,
     onEventClick: (Event) -> Unit
 ){
-//    val marker = LatLng(39.482298, -0.346236)
-//    val marker1 = LatLng(45.482298, -5.346236)
+
     val coroutineScope = rememberCoroutineScope()
     val uiSettings by remember { mutableStateOf(MapUiSettings(zoomControlsEnabled = true)) }
     val events by eventsState
