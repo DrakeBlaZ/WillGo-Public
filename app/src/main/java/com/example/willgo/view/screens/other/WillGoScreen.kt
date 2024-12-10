@@ -152,6 +152,7 @@ fun WillGoScreen(
                                 requestedUsers.map { it.isSelected = false }
                                 user.removeAll(selectedUsers)
                                 selectedUsers.clear()
+                                filterUsers(query)
                             }
                         } else {
                             cancelWillGoRequests(selectedList) {
@@ -159,6 +160,7 @@ fun WillGoScreen(
                                 user.map { it.isSelected = false }
                                 requestedUsers.removeAll(selectedRequestedUsers)
                                 selectedRequestedUsers.clear()
+                                filterUsers(query)
                             }
                         }
                     },
@@ -279,7 +281,7 @@ fun RecienteContent(user: SnapshotStateList<WillGoItem>, selectedUsers: Snapshot
 @Composable
 fun YaSolicitados(
     requestedUsers: SnapshotStateList<WillGoItem>,
-    selectedRequestedUsers: SnapshotStateList<WillGoItem>
+    selectedRequestedUsers: SnapshotStateList<WillGoItem>,
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -287,7 +289,7 @@ fun YaSolicitados(
         items(requestedUsers) { item ->
             val state = remember { mutableStateOf<String?>(null) }
             LaunchedEffect(item) {
-                state.value = getStateRequest(item.willGo.id, getUser().nickname, item.willGo.user)
+                state.value = getStateRequest(item.willGo.id!!, getUser().nickname, item.willGo.user)
             }
             if (state.value != null) {
                 WillGoRequestedUserItem(
@@ -356,11 +358,11 @@ fun cancelWillGoRequests(selectedUsers: List<WillGoItem>, onSuccess: () -> Unit)
         try {
             val userRequesting = getUser().nickname // El usuario que envía las solicitudes
 
-            val requests = selectedUsers.forEach { selectedUser ->
+            selectedUsers.forEach { selectedUser ->
                 getClient().postgrest["Solicitudes"].delete {
                     filter {
                         eq("userRequesting", userRequesting) // Coincide con el usuario solicitante
-                        eq("userRequested", selectedUser.willGo.id) // Coincide con el ID solicitado
+                        eq("userRequested", selectedUser.willGo.id!!) // Coincide con el ID solicitado
                     }
                 }
             }
@@ -382,10 +384,12 @@ fun sendWillGoRequests(selectedUsers: List<WillGoItem>, onSuccess: () -> Unit){
             // Crear solicitudes para cada usuario seleccionado
             val requests = selectedUsers.map { selectedUser ->
                 Request(
+                    id = null,
                     userRequesting = userRequesting,
-                    userRequested = selectedUser.willGo.id, // Usar el ID de la tabla WillGo
+                    userRequested = selectedUser.willGo.id!!, // Usar el ID de la tabla WillGo
                     state = "Pendiente",
-                    nickRequested = selectedUser.willGo.user
+                    nickRequested = selectedUser.willGo.user,
+                    id_Event = selectedUser.willGo.id_event
                 )
             }
             // Insertar las solicitudes en la tabla "Solicitudes"
@@ -423,7 +427,7 @@ suspend fun getUsersNotRequested(idEvent: Long): MutableState<List<WillGoItem>> 
 
     withContext(Dispatchers.IO) {
         aloneUsersID.value.forEach {
-            val request = getRequest(it.id, getUser().nickname,it.user).value
+            val request = getRequest(it.id!!, getUser().nickname,it.user).value
             val user = getUser(it.user)
             val willGoItem = WillGoItem(WillGo(it.id, idEvent, user.nickname, true), user.name, user.followed)
             if (request != null) {
@@ -469,7 +473,7 @@ suspend fun getAloneUsersRequested(idEvent: Long): MutableState<List<WillGoItem>
 
     withContext(Dispatchers.IO) {
         aloneUsersID.value.forEach {
-            val request = getRequest(it.id, getUser().nickname,it.user).value
+            val request = getRequest(it.id!!, getUser().nickname,it.user).value
             val user = getUser(it.user)
             val willGoItem = WillGoItem(WillGo(it.id, idEvent, user.nickname, true), user.name, user.followed)
             if (request != null) {

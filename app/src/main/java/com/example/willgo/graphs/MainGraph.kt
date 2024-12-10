@@ -28,6 +28,7 @@ import com.example.willgo.view.screens.CarListScreen
 import com.example.willgo.view.screens.AddCarScreen
 import com.example.willgo.view.screens.FollowingScreen
 import com.example.willgo.view.screens.getUser
+import com.example.willgo.view.screens.other.WillGoManagerScreen
 import com.example.willgo.view.screens.other.WillGoScreen
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
@@ -250,6 +251,15 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues,
             )
         }
 
+        composable(
+            route = "WillGoManager"
+        ) {
+            WillGoManagerScreen(
+                paddingValues = paddingValues,
+                onBack = { navController.popBackStack() },
+                navHostController = navController
+            )
+        }
 
         composable(
             route = "Category_Section/{categoryName}", // Cambiado para aceptar un parámetro de ruta

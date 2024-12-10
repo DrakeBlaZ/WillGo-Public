@@ -16,14 +16,20 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Comment
+import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Comment
+import androidx.compose.material.icons.filled.Message
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -41,12 +47,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.willgo.data.Event
 import com.example.willgo.data.User.User
+import com.example.willgo.graphs.BottomBarScreen
 import com.example.willgo.view.screens.getClient
 import com.example.willgo.view.screens.getCommentsForUser
 import com.example.willgo.view.screens.getFollowersForUser
@@ -83,7 +91,7 @@ fun ProfileScreen(
         .padding(paddingValues)
     )
     {
-        TopBar2(showBackArrow = showBackArrow, onBackClick = { navController.popBackStack() })
+        TopBar2(showBackArrow = showBackArrow, onBackClick = { navController.popBackStack() }, navController)
 
         LazyColumn(
             modifier = Modifier
@@ -97,7 +105,30 @@ fun ProfileScreen(
                 ProfilePic2()
                 DataSection(name = user.name)
                 Spacer(Modifier.height(16.dp))
-                ButtonsSection(
+//                ButtonsSection(
+//                    onSeguirClick = {
+//                        coroutineScope.launch {
+//                            val userFollowing = getFollowingForUser(user.nickname)
+//                            navController.navigate("following/${user.nickname}")
+//                        }
+//                    },
+//                    onSeguidoresClik = {
+//                        coroutineScope.launch {
+//                            val userFollowing = getFollowersForUser(user.nickname)
+//                            navController.navigate("follower/${user.nickname}")
+//                        }
+//                    },
+//                    onComentariosClick = {
+//                        coroutineScope.launch {
+//                            val userComments = getCommentsForUser(user.nickname)
+//                            navController.navigate("comments/${user.nickname}")
+//                        }
+//                    }
+//                )
+                Spacer(modifier = Modifier.height(16.dp))
+                FollowsSection(
+                    totalfollowers.value,
+                    totalfollowing.value,
                     onSeguirClick = {
                         coroutineScope.launch {
                             val userFollowing = getFollowingForUser(user.nickname)
@@ -109,16 +140,7 @@ fun ProfileScreen(
                             val userFollowing = getFollowersForUser(user.nickname)
                             navController.navigate("follower/${user.nickname}")
                         }
-                    },
-                    onComentariosClick = {
-                        coroutineScope.launch {
-                            val userComments = getCommentsForUser(user.nickname)
-                            navController.navigate("comments/${user.nickname}")
-                        }
-                    }
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                FollowsSection(totalfollowers.value, totalfollowing.value)
+                    })
                 Spacer(Modifier.height(16.dp))
                 SectionTitle2(title = "Eventos favoritos")
                 Spacer(Modifier.height(16.dp))
@@ -174,7 +196,7 @@ private fun ButtonsSection(onSeguirClick: () -> Unit, onComentariosClick: () -> 
 }
 
 @Composable
-private fun FollowsSection(number1: Int, number2: Int) {
+private fun FollowsSection(number1: Int, number2: Int, onSeguirClick: () -> Unit, onSeguidoresClik:()->Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
@@ -189,14 +211,20 @@ private fun FollowsSection(number1: Int, number2: Int) {
         }
 */
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.clickable {
+                onSeguidoresClik()
+            }
         ) {
             Text(text = number1.toString())
             Text(text = "Seguidores", modifier = Modifier.testTag("followerText"))
         }
 
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.clickable {
+                onSeguirClick()
+            }
         ) {
             Text(text = number2.toString())
             Text(text = "Seguidos", modifier = Modifier.testTag("followedText"))
@@ -234,7 +262,8 @@ fun SectionTitle2(title: String) {
 @Composable
 fun TopBar2(
     showBackArrow: Boolean,
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
+    navController: NavHostController
 ) {
     Box(
         modifier = Modifier
@@ -254,6 +283,34 @@ fun TopBar2(
             textAlign = TextAlign.Center,
             modifier = Modifier.align(Alignment.Center)
         )
+
+        LaunchedEffect(Unit) {
+
+        }
+        if(navController.currentDestination?.route == BottomBarScreen.Profile.route)
+            Button(
+                onClick = { navController.navigate("WillGoManager") },
+                shape = RoundedCornerShape(50), // Forma completamente redondeada
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp), // Ajuste del tamaño interno
+                modifier = Modifier.align(Alignment.CenterEnd)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp) // Espacio entre ícono y texto
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.Comment,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(16.dp) // Ícono más pequeño
+                    )
+                    Text(
+                        text = "Solicitudes",
+                        color = Color.White,
+                        fontSize = 14.sp // Tamaño de texto ajustado
+                    )
+                }
+            }
 
     }
 }
@@ -404,3 +461,18 @@ data class Seg(
     val following : String,
     val follower : String
 )
+
+@Preview
+@Composable
+fun ProfileScreenPreview() {
+    val navController = rememberNavController()
+    val paddingValues = PaddingValues(16.dp)
+    val user = User(
+        name = "John Doe",
+        nickname = "JohnMH",
+        password = "123456",
+        email = "william.henry.harrison@example-pet-store.com",
+        followed = 5,
+        followers = 10)
+    ProfileScreen(navController, paddingValues, user, true)
+}
