@@ -315,7 +315,7 @@ suspend fun getAttendants(event: Event): Int {
 
 suspend fun addWillGo(event: Event) {
     val user = getUser()
-    val willGo = user.nickname?.let { WillGo(id = 0L,event.id, it, false) }
+    val willGo = WillGo(null,event.id, user.nickname, false)
     val client = getClient()
     try {
         willGo?.let {

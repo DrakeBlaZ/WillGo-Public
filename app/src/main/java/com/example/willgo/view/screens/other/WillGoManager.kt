@@ -204,10 +204,10 @@ fun Received(filteredUsers: SnapshotStateList<Request>, navHostController: NavHo
                 state = item.state,
                 onClick = { navHostController.navigate("profile/${item.userRequesting}") },
                 accept = {
-                    acceptRequest(item.id)
+                    acceptRequest(item.id!!)
                 },
                 decline = {
-                    cancelRequest(item.id)
+                    cancelRequest(item.id!!)
                 }
             )
         }
@@ -228,7 +228,7 @@ fun Sent(
                 nickname = item.nickRequested,
                 state = item.state,
                 onClick = {
-                    cancelRequest(item.id)
+                    cancelRequest(item.id!!)
                     filteredUsers.remove(item)
                 }
             )
