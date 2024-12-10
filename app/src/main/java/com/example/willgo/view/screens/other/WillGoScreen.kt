@@ -80,7 +80,8 @@ fun WillGoScreen(
     idEvent: Long,
     paddingValues: PaddingValues,
     onBack: () -> Unit,
-    navHostController: NavHostController
+    navHostController: NavHostController,
+    goCar: () -> Unit
 ) {
     // Listas mutables
     val user = remember { mutableStateListOf<WillGoItem>() }
@@ -172,7 +173,7 @@ fun WillGoScreen(
             }
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { /*TODO*/ }) {
+            FloatingActionButton(onClick = { goCar() }) {
                 Icon(imageVector = Icons.Rounded.DirectionsCar, contentDescription = null)
             }
         }
@@ -349,7 +350,7 @@ fun clearSelectedUsers(selectedUsers: SnapshotStateList<WillGoItem>, users: Snap
 @Preview
 @Composable
 fun WillGoScreenPreview() {
-    WillGoScreen(3, PaddingValues(0.dp), {}, navHostController = NavHostController(LocalContext.current))
+    WillGoScreen(3, PaddingValues(0.dp), {}, navHostController = NavHostController(LocalContext.current), goCar = {})
 }
 
 

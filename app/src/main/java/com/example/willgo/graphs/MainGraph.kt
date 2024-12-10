@@ -171,7 +171,7 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues,
             val filteredEvents = events.value.filter { it.id.toInt() == event }
             EventDataScreen(filteredEvents[0], paddingValues, onBack = { navController.popBackStack() },
                 goAlone ={navController.navigate("goAlone/${filteredEvents[0].id}")},
-                goCar ={navController.navigate("carListScreen/${event}")}
+
             )
         }
 
@@ -185,7 +185,8 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues,
                 filteredEvents[0].id,
                 paddingValues,
                 onBack = { navController.popBackStack() },
-                navHostController = navController
+                navHostController = navController,
+                goCar ={navController.navigate("carListScreen/${event}")}
             )
         }
 

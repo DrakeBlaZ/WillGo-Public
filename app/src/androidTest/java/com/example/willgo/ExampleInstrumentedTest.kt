@@ -93,7 +93,8 @@ class MainActivityTest {
             ProfileScreen(
                 navController = rememberNavController(),
                 paddingValues = PaddingValues(7.dp),
-                user = user
+                user = user,
+                showBackArrow = true
             )
         }
         // Verifica que el nombre y el nickname del usuario son visibles
@@ -112,7 +113,8 @@ class MainActivityTest {
             ProfileScreen(
                 navController = rememberNavController(),
                 paddingValues = PaddingValues(7.dp),
-                user = user
+                user = user,
+                showBackArrow = true
             )
 
         }
@@ -124,7 +126,7 @@ class MainActivityTest {
     fun testButtonClickPerformance() {
         composeTestRule.setContent {
             EventDataScreen(event, paddingValues = PaddingValues(7.dp), onBack = { },
-                goAlone = {}, goCar = {})
+                goAlone = {})
 
         }
 
@@ -140,7 +142,7 @@ class MainActivityTest {
     fun testButtonStressClick() {
         composeTestRule.setContent {
             EventDataScreen(event, paddingValues = PaddingValues(7.dp), onBack = { },
-                goAlone = {}, goCar = {})
+                goAlone = {})
 
         }
         val buttonText =

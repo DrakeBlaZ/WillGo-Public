@@ -68,7 +68,6 @@ fun EventDataScreen(
     paddingValues: PaddingValues,
     onBack: () -> Unit,
     goAlone: () -> Unit,
-    goCar: () -> Unit
 ) {
 
 
@@ -83,7 +82,7 @@ fun EventDataScreen(
         item { EventDetails(event) }
         item { EventCharacteristics(event) }
         item { EventDescription(event) }
-        item { WillGoButtons(event, goAlone, goCar) }
+        item { WillGoButtons(event, goAlone) }
         item { EventLocation(event) }
         item { ContactSection(event) }
     }
@@ -178,7 +177,6 @@ fun EventDescription(event: Event) {
 fun WillGoButtons(
     event: Event,
     goAlone: () -> Unit,
-    goCar: () -> Unit
 ) {
     var willGo by remember { mutableStateOf<WillGo?>(null) }
     var alone by remember { mutableStateOf(false) }  // Estado para saber si el usuario va solo
@@ -259,13 +257,6 @@ fun WillGoButtons(
                 )
             ) {
                 Text(text = if (alone) "Voy solo ✔" else "Voy solo")
-            }
-
-            // Botón de Coche
-            Button(
-                onClick = { goCar() }, modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Cars")
             }
         }
     }
