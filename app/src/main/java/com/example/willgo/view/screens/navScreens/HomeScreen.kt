@@ -70,13 +70,22 @@ fun HomeScreen(paddingValues: PaddingValues, events: List<Event>, navController:
     //var filteredEvents by remember { mutableStateOf(events) }
     var query by remember { mutableStateOf("") }
 
-    var selectedIndex by remember { mutableStateOf(0) }
-
     // Duplicamos las categorías para simular un carrusel circular
     val circularCategories = CategorySectionData.categories
 
-    // Usamos HorizontalPager para la paginación
-    val pagerState = rememberPagerState(initialPage = circularCategories.size / 2,pageCount = {circularCategories.size})
+    val pagerState = rememberPagerState(initialPage = Int.MAX_VALUE / 2, pageCount = { Int.MAX_VALUE })
+
+    // Número real de categorías
+    val realPageCount = circularCategories.size
+
+    // Ajustar automáticamente el índice del pager si se acerca a los límites
+    LaunchedEffect(pagerState.currentPage) {
+        if (pagerState.currentPage <= realPageCount || pagerState.currentPage >= Int.MAX_VALUE - realPageCount) {
+            pagerState.scrollToPage(Int.MAX_VALUE / 2 + (pagerState.currentPage % realPageCount))
+        }
+    }
+
+
     Box(modifier = Modifier
         .fillMaxSize()
         .padding(top = paddingValues.calculateTopPadding())
@@ -139,7 +148,10 @@ fun HomeScreen(paddingValues: PaddingValues, events: List<Event>, navController:
                     //pageSpacing = 16.dp, // Espacio entre las páginas
                     verticalAlignment = Alignment.CenterVertically
                 ) { page ->
-                CategoryCard(category = circularCategories[page], navigationTo = {navController.navigate("Category_Section/${circularCategories[page].category.name}")})
+                    val adjustedPage = page % realPageCount
+                    val validIndex = if (adjustedPage >= 0) adjustedPage else adjustedPage + realPageCount
+
+                    CategoryCard(category = circularCategories[validIndex], navigationTo = {navController.navigate("Category_Section/${circularCategories[validIndex].category.name}")})
             }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -219,12 +231,13 @@ fun CategoryCard(category: CategorySectionData, navigationTo: () -> Unit) {
                     contentDescription = "Card de ${category.title}",
                     modifier = Modifier
                         .fillMaxSize()
-                        .clickable {navigationTo()}
+                        .clickable { navigationTo() }
                     ,
                     contentScale = ContentScale.Crop,
                 )
                 Box(
-                    modifier = Modifier.padding(12.dp)
+                    modifier = Modifier
+                        .padding(12.dp)
                         .align(Alignment.BottomEnd)
                         .clip(CircleShape)
                 ) {
