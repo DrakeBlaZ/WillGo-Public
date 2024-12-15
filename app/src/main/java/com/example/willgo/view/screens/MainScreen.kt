@@ -116,6 +116,7 @@ fun NavBar(navController: NavController){
         Box (
             contentAlignment = Alignment.Center,
             modifier = Modifier.fillMaxWidth()
+                .height(80.dp)
                 .background(Color.Transparent)
                 .padding(PaddingValues(bottom = BottomAppBarDefaults.windowInsets.asPaddingValues().calculateBottomPadding()))
         ){

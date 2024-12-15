@@ -17,29 +17,38 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Card
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -48,16 +57,27 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.willgo.data.Category
+import com.example.willgo.data.CategorySectionData
 import com.example.willgo.data.Event
 import com.example.willgo.view.screens.normalizeText
-import com.example.willgo.view.sections.CommonEventCard
 import com.example.willgo.view.sections.FiltersPreview
 
 @Composable
-fun HomeScreen(paddingValues: PaddingValues, events: List<Event>, navController: NavHostController){
+fun HomeScreen(paddingValues: PaddingValues, events: List<Event>, navController: NavHostController, name: String){
     //var filteredEvents by remember { mutableStateOf(events) }
     var query by remember { mutableStateOf("") }
 
+    var selectedIndex by remember { mutableStateOf(0) }
+
+    // ScrollState para detectar el índice visible en el LazyRow
+    val scrollState = rememberLazyListState()
+    // Aquí capturamos el scrollState y usamos `derivedStateOf` para recomponer cada vez que el primer índice visible cambie
+    val firstVisibleItemIndex = remember { derivedStateOf { scrollState.firstVisibleItemIndex } }
+
+    // Actualizar el selectedIndex cada vez que el primer índice visible cambie
+    if (firstVisibleItemIndex.value != selectedIndex) {
+        selectedIndex = firstVisibleItemIndex.value
+    }
     Box(modifier = Modifier
         .fillMaxSize()
         .padding(top = paddingValues.calculateTopPadding())
@@ -91,29 +111,75 @@ fun HomeScreen(paddingValues: PaddingValues, events: List<Event>, navController:
             )
 
             Spacer(modifier = Modifier.height(12.dp))
-            LazyColumn(modifier = Modifier
-                .padding(bottom = paddingValues.calculateBottomPadding())
-                .fillMaxSize()
-                .background(Color.White)
-            )
-            {
-                items(1) {
-                    CategorySection(title = Category.Actuacion_musical, events = getEventsByCategory(events, Category.Actuacion_musical), navController)
-                    CategorySection(title = Category.Comedia, events = getEventsByCategory(events, Category.Comedia), navController)
-                    CategorySection(title = Category.Cultura, events = getEventsByCategory(events, Category.Cultura), navController)
-                    CategorySection(title = Category.Deporte, events = getEventsByCategory(events, Category.Deporte), navController)
-                    CategorySection(title = Category.Discoteca, events = getEventsByCategory(events, Category.Discoteca), navController)
-                    CategorySection(title = Category.Teatro, events = getEventsByCategory(events, Category.Teatro), navController)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Texto principal
+                Text(
+                    text = "Hola ${name},",
+                    style = TextStyle(color = Color.Black, fontSize = 32.sp),
+                    modifier = Modifier
+                        .padding(start = 24.dp, end = 16.dp)
+                        .fillMaxWidth()
+                )
+                Text(
+                    text = "¿qué toca hoy?",
+                    style = TextStyle(color = Color.Black, fontSize = 32.sp),
+                    modifier = Modifier
+                        .padding(start = 24.dp, end = 16.dp, bottom = 32.dp)
+                        .fillMaxWidth()
+                )
+
+                // Scroll horizontal con tarjetas
+                LazyRow(
+                    modifier = Modifier.padding(top = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    state = scrollState
+                ) {
+                    item{Spacer(modifier = Modifier.padding(start = 16.dp))}
+                    items(CategorySectionData.categories) { category ->
+                        CategoryCard(category)
+                    }
+                    item{Spacer(modifier = Modifier.padding(end = 16.dp))}
                 }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    CategorySectionData.categories.forEachIndexed { index, _ ->
+                        IndicatorDot(isSelected = index == selectedIndex)
+                    }
+                }
+
+                // Simulación de espacio extra abajo
+                Spacer(modifier = Modifier.height(50.dp))
             }
         }
     }
 }
 
 @Composable
+fun IndicatorDot(isSelected: Boolean) {
+    val color = if (isSelected) Color.Black else Color.Gray
+    Box(
+        modifier = Modifier
+            .size(8.dp)
+            .clip(CircleShape)
+            .background(color)
+    )
+}
+
+@Composable
 fun TopBar(navigationIcon: @Composable () -> Unit = {}, navController: @Composable () -> Unit = {}){
     Box(
-        modifier = Modifier.padding(top = 12.dp, start = 12.dp, end = 12.dp)
+        modifier = Modifier
+            .padding(top = 12.dp, start = 12.dp, end = 12.dp)
             .fillMaxWidth()
             .height(48.dp)
     ) {
@@ -139,29 +205,32 @@ fun TopBar(navigationIcon: @Composable () -> Unit = {}, navController: @Composab
 }
 
 @Composable
-fun CategorySection(title: Category, events: List<Event>, navController: NavHostController) {
-    SectionTitle(
-        title = title,
-        modifier = Modifier.clickable {
-            navController.navigate("Category_Section/${title.name}")
-        }
+fun CategoryCard(category: CategorySectionData) {
+    Column(
     )
-    Spacer(modifier = Modifier.height(16.dp))
-    LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.testTag("eventList")
-    ) {
-        item{}
-        items(events) { event ->
-            CommonEventCard(event = event,
-                            modifier = Modifier
-                                .clickable {navController.navigate("eventDetail/${event.id}")}
-                                .testTag("event_${event.id}"),
+    {
+        Card(
+            shape = RoundedCornerShape(16.dp),
+            modifier = Modifier.size(284.dp)
+        )
+        {
+            Image(
+                painter = painterResource(id = category.imageId),
+                contentDescription = "Card de ${category.title}",
+                modifier = Modifier
+                    .fillMaxSize(),
+                contentScale = ContentScale.Crop,
             )
         }
-        item {}
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = category.title,
+            fontSize = 24.sp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.CenterHorizontally)
+        )
     }
-    Spacer(modifier = Modifier.height(16.dp))
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -247,5 +316,5 @@ fun getEventsByCategory(events: List<Event>, category: Category): List<Event> {
 @Preview
 @Composable
 fun HomePreview() {
-    HomeScreen(PaddingValues(0.dp), listOf(), NavHostController(LocalContext.current))
+    HomeScreen(PaddingValues(0.dp), listOf(), NavHostController(LocalContext.current), "Carlitos")
 }
