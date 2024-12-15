@@ -51,10 +51,10 @@ sealed class CategorySectionData(
 
     companion object {
         val categories = listOf(
-            Discotecas,
+            ActuacionMusical,
             Comedia,
             Cultura,
-            ActuacionMusical,
+            Discotecas,
             Teatro,
             Deporte
         )

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.BottomAppBar
@@ -59,9 +61,10 @@ fun MainScreen(navController: NavHostController = rememberNavController()){
     if (user.value == null) {
         SplashScreen(navController)
     } else {
-
         Scaffold(
-            bottomBar = { NavBar(navController ) }
+            bottomBar = {
+                NavBar(navController)
+            }
         )
         {
             MainNavGraph(navController = navController, paddingValues = PaddingValues(top = it.calculateTopPadding(), bottom = BottomAppBarDefaults.windowInsets.asPaddingValues().calculateBottomPadding()), user = user.value!!)
@@ -116,9 +119,9 @@ fun NavBar(navController: NavController){
         Box (
             contentAlignment = Alignment.Center,
             modifier = Modifier.fillMaxWidth()
-                .height(80.dp)
                 .background(Color.Transparent)
-                .padding(PaddingValues(bottom = BottomAppBarDefaults.windowInsets.asPaddingValues().calculateBottomPadding()))
+                .padding(PaddingValues(bottom = BottomAppBarDefaults.windowInsets.asPaddingValues().calculateBottomPadding() + 16.dp))
+                .height(54.dp)
         ){
             Box(
                 modifier = Modifier
@@ -132,7 +135,7 @@ fun NavBar(navController: NavController){
                         .background(Color.Gray)
                         .clip(CircleShape)
                         .width(280.dp)
-                        .height(70.dp),
+                        .wrapContentHeight(),
                     horizontalArrangement = Arrangement.SpaceAround
                 ) {
                     screens.forEach { screen ->

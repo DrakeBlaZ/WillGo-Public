@@ -20,10 +20,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowOutward
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
@@ -32,6 +34,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -69,15 +72,11 @@ fun HomeScreen(paddingValues: PaddingValues, events: List<Event>, navController:
 
     var selectedIndex by remember { mutableStateOf(0) }
 
-    // ScrollState para detectar el índice visible en el LazyRow
-    val scrollState = rememberLazyListState()
-    // Aquí capturamos el scrollState y usamos `derivedStateOf` para recomponer cada vez que el primer índice visible cambie
-    val firstVisibleItemIndex = remember { derivedStateOf { scrollState.firstVisibleItemIndex } }
+    // Duplicamos las categorías para simular un carrusel circular
+    val circularCategories = CategorySectionData.categories
 
-    // Actualizar el selectedIndex cada vez que el primer índice visible cambie
-    if (firstVisibleItemIndex.value != selectedIndex) {
-        selectedIndex = firstVisibleItemIndex.value
-    }
+    // Usamos HorizontalPager para la paginación
+    val pagerState = rememberPagerState(initialPage = circularCategories.size / 2,pageCount = {circularCategories.size})
     Box(modifier = Modifier
         .fillMaxSize()
         .padding(top = paddingValues.calculateTopPadding())
@@ -133,18 +132,15 @@ fun HomeScreen(paddingValues: PaddingValues, events: List<Event>, navController:
                         .fillMaxWidth()
                 )
 
-                // Scroll horizontal con tarjetas
-                LazyRow(
-                    modifier = Modifier.padding(top = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    state = scrollState
-                ) {
-                    item{Spacer(modifier = Modifier.padding(start = 16.dp))}
-                    items(CategorySectionData.categories) { category ->
-                        CategoryCard(category)
-                    }
-                    item{Spacer(modifier = Modifier.padding(end = 16.dp))}
-                }
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(horizontal = 36.dp), // Ajuste del padding para mostrar páginas adyacentes
+                    //pageSpacing = 16.dp, // Espacio entre las páginas
+                    verticalAlignment = Alignment.CenterVertically
+                ) { page ->
+                CategoryCard(category = circularCategories[page], navigationTo = {navController.navigate("Category_Section/${circularCategories[page].category.name}")})
+            }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -152,9 +148,8 @@ fun HomeScreen(paddingValues: PaddingValues, events: List<Event>, navController:
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    CategorySectionData.categories.forEachIndexed { index, _ ->
-                        IndicatorDot(isSelected = index == selectedIndex)
-                    }
+                    circularCategories.forEachIndexed { index, _ ->
+                        IndicatorDot(isSelected = index == pagerState.currentPage % circularCategories.size)                    }
                 }
 
                 // Simulación de espacio extra abajo
@@ -205,8 +200,9 @@ fun TopBar(navigationIcon: @Composable () -> Unit = {}, navController: @Composab
 }
 
 @Composable
-fun CategoryCard(category: CategorySectionData) {
+fun CategoryCard(category: CategorySectionData, navigationTo: () -> Unit) {
     Column(
+        horizontalAlignment = Alignment.CenterHorizontally
     )
     {
         Card(
@@ -214,21 +210,45 @@ fun CategoryCard(category: CategorySectionData) {
             modifier = Modifier.size(284.dp)
         )
         {
-            Image(
-                painter = painterResource(id = category.imageId),
-                contentDescription = "Card de ${category.title}",
+            Box(
                 modifier = Modifier
-                    .fillMaxSize(),
-                contentScale = ContentScale.Crop,
-            )
+                .fillMaxSize()
+            ){
+                Image(
+                    painter = painterResource(id = category.imageId),
+                    contentDescription = "Card de ${category.title}",
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable {navigationTo()}
+                    ,
+                    contentScale = ContentScale.Crop,
+                )
+                Box(
+                    modifier = Modifier.padding(12.dp)
+                        .align(Alignment.BottomEnd)
+                        .clip(CircleShape)
+                ) {
+                    IconButton(
+                        onClick = {navigationTo()},
+                        modifier = Modifier
+                            .background(Color.White)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowOutward,
+                            tint = Color.Black,
+                            contentDescription = ">"
+                        )
+                    }
+                }
+            }
         }
         Spacer(modifier = Modifier.height(12.dp))
         Text(
             text = category.title,
             fontSize = 24.sp,
+            textAlign = TextAlign.Center,
             modifier = Modifier
                 .fillMaxWidth()
-                .align(Alignment.CenterHorizontally)
         )
     }
 }
