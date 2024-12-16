@@ -5,6 +5,9 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class BottomBarScreen(
@@ -15,18 +18,18 @@ sealed class BottomBarScreen(
     object Home: BottomBarScreen(
         route = "Home",
         title = "Home",
-        icon = Icons.Default.Home
+        icon = Icons.Outlined.Home
     )
 
     object Location: BottomBarScreen(
         route = "Location",
         title = "Location",
-        icon = Icons.Default.LocationOn
+        icon = Icons.Outlined.LocationOn
     )
 
     object Profile: BottomBarScreen(
         route = "Profile",
         title = "Profile",
-        icon = Icons.Default.Person
+        icon = Icons.Outlined.Person
     )
 }

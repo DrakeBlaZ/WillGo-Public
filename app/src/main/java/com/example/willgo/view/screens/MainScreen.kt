@@ -1,7 +1,25 @@
 package com.example.willgo.view.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -10,6 +28,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -21,6 +45,7 @@ import com.example.willgo.data.Event
 import com.example.willgo.graphs.BottomBarScreen
 import com.example.willgo.graphs.MainNavGraph
 import com.example.willgo.data.User.User
+import com.example.willgo.view.screens.navScreens.HomeScreen
 import com.example.willgo.view.screens.navScreens.getWillgoForUser
 import com.example.willgo.view.screens.other.SplashScreen
 
@@ -36,12 +61,13 @@ fun MainScreen(navController: NavHostController = rememberNavController()){
     if (user.value == null) {
         SplashScreen(navController)
     } else {
-
         Scaffold(
-            bottomBar = { NavBar(navController ) }
+            bottomBar = {
+                NavBar(navController)
+            }
         )
         {
-            MainNavGraph(navController = navController, paddingValues = it, user = user.value!!)
+            MainNavGraph(navController = navController, paddingValues = PaddingValues(top = it.calculateTopPadding(), bottom = BottomAppBarDefaults.windowInsets.asPaddingValues().calculateBottomPadding()), user = user.value!!)
         }
     }
 }
@@ -57,6 +83,7 @@ fun RowScope.AddItems(screen: BottomBarScreen, currentDestination: NavDestinatio
     }
 
     NavigationBarItem(
+
         selected =  isSelected,
         onClick = {
             navController.navigate(screen.route){
@@ -64,17 +91,22 @@ fun RowScope.AddItems(screen: BottomBarScreen, currentDestination: NavDestinatio
                 launchSingleTop = true
             }
         },
-        icon = { Icon(imageVector = screen.icon,
-            contentDescription = "image"
-        ) }
+        icon = { Icon(
+            imageVector = screen.icon,
+            contentDescription = "image",
+            tint = if (isSelected) Color.Gray else Color.White,
+            modifier = Modifier.size(36.dp)
+
+        ) },
+        modifier = Modifier.wrapContentSize().clip(CircleShape),
     )
 }
 
 @Composable
 fun NavBar(navController: NavController){
     val screens = listOf(
-        BottomBarScreen.Home,
         BottomBarScreen.Location,
+        BottomBarScreen.Home,
         BottomBarScreen.Profile)
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -84,14 +116,44 @@ fun NavBar(navController: NavController){
             ||
             currentDestination?.route?.contains("Category_Section/{categoryName}") == true
     if(bottomBarDestination) {
-        BottomAppBar {
-            screens.forEach { screen ->
-                AddItems(
-                    screen = screen,
-                    currentDestination = currentDestination,
-                    navController = navController
-                )
+        Box (
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxWidth()
+                .background(Color.Transparent)
+                .padding(PaddingValues(bottom = BottomAppBarDefaults.windowInsets.asPaddingValues().calculateBottomPadding() + 16.dp))
+                .height(54.dp)
+        ){
+            Box(
+                modifier = Modifier
+                    .wrapContentSize()
+                    .clip(CircleShape),
+                contentAlignment = Alignment.Center
+
+            ){
+                Row(
+                    modifier = Modifier
+                        .background(Color.Gray)
+                        .clip(CircleShape)
+                        .width(280.dp)
+                        .wrapContentHeight(),
+                    horizontalArrangement = Arrangement.SpaceAround
+                ) {
+                    screens.forEach { screen ->
+                        AddItems(
+                            screen = screen,
+                            currentDestination = currentDestination,
+                            navController = navController
+                        )
+                    }
+                }
             }
+
         }
     }
+}
+
+@Preview
+@Composable
+fun MainScreenPreview() {
+    MainScreen()
 }

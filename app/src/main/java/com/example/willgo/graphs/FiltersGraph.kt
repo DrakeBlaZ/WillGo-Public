@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -14,6 +15,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.willgo.data.Category
 import com.example.willgo.data.Event
+import com.example.willgo.view.screens.getUser
 import com.example.willgo.view.screens.navScreens.HomeScreen
 import com.example.willgo.view.sections.FiltersNavScreens.AllFilters
 import com.example.willgo.view.sections.FiltersNavScreens.CategoriesNavScreen
@@ -36,6 +38,12 @@ fun FiltersNavGraph(navController: NavHostController, events: List<Event>, paddi
     val onBack: () -> Unit = { navController.popBackStack() }
     val modifier = Modifier.fillMaxWidth().height(56.dp)
 
+    val user = remember {mutableStateOf("")}
+    LaunchedEffect(Unit) {
+        user.value = getUser().name
+
+
+    }
     val externalSelectedCategory = remember { mutableStateOf<Category?>(null) }
     val maxPriceFilter = remember { mutableStateOf<Float?>(null) }
     val selectedTypeFilter = remember { mutableStateOf<String?>(null) }
@@ -93,7 +101,7 @@ fun FiltersNavGraph(navController: NavHostController, events: List<Event>, paddi
         }
 
         composable(route = "home") {
-            HomeScreen(paddingValues = paddingValues, events, navController)
+            HomeScreen(paddingValues = paddingValues, events, navController, user.value)
         }
     }
 }
