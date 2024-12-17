@@ -19,11 +19,13 @@ import java.util.Calendar
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material3.Card
+import androidx.compose.material.icons.filled.ArrowCircleLeft
+import androidx.compose.material.icons.filled.ArrowCircleRight
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -39,7 +41,6 @@ import com.example.willgo.view.screens.navScreens.getWillgoForUser
 import java.text.ParseException
 import java.util.*
 import com.example.willgo.view.sections.CommonEventCard
-import kotlin.math.absoluteValue
 
 @Composable
 fun CalendarScreen(
@@ -51,199 +52,265 @@ fun CalendarScreen(
     var selectedDate by remember{ mutableStateOf(Calendar.getInstance()) }
     val eventsByDate = remember { mutableStateOf<Map<String, List<Event>>>(emptyMap()) }
     val userEvents = remember { mutableStateOf<List<Event>>(emptyList()) }
+    var viewMode by remember { mutableStateOf("Semana") }
+
+    var weekDays by remember {
+        mutableStateOf(
+            if (viewMode == "Semana") getWeekDays(selectedDate, viewMode)
+            else getMonthDays(selectedDate)
+        )
+    }
+
+
+    var expandedMonth by remember { mutableStateOf(false) }
+    var expandedYear by remember { mutableStateOf(false) }
 
     LaunchedEffect(userNickname) {
         userEvents.value = getWillgoForUser(userNickname)
         eventsByDate.value = groupEventsByDate(userEvents.value)
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(top = paddingValues.calculateTopPadding())
-            .background(Color.White)
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp)
     ){
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ){
-            TopBar(navigationIcon = {
-                IconButton(
-                    onClick = {
-                        //navController.navigate(BottomBarScreen.Home.route)
-                        navController.navigate("home") {
-                            // Establece `launchSingleTop` para evitar duplicados
-                            launchSingleTop = true
-                            // Establece `popUpTo` para limpiar el historial hasta `HomeScreen`
-                            popUpTo("home") { inclusive = true }
-                        }
-                    })
-                {
-                    Icon(
-                        modifier = Modifier,
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "ArrowBack"
-                    )
-                }
-            })
-
-            //Título de la pantalla
-            Text(
-                text = "Calendario de Eventos",
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-
-            //Vista de los días de la semana
-            WeekView(selectedDate){ newDate ->
-                selectedDate = newDate
+        TopBar(navigationIcon = {
+            IconButton(
+                onClick = {
+                    //navController.navigate(BottomBarScreen.Home.route)
+                    navController.navigate("home") {
+                        // Establece `launchSingleTop` para evitar duplicados
+                        launchSingleTop = true
+                        // Establece `popUpTo` para limpiar el historial hasta `HomeScreen`
+                        popUpTo("home") { inclusive = true }
+                    }
+                })
+            {
+                Icon(
+                    modifier = Modifier,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "ArrowBack"
+                )
             }
+        })
 
-            //Lista de eventos para la fecha seleccionada
-            EventList(selectedDate, eventsByDate.value, navController)
-        }
-    }
-}
-
-@Composable
-fun WeekView(selectedDate: Calendar, onDateSelected: (Calendar) -> Unit){
-
-    // Estado para mantener la semana actual visible en la vista
-    var currentWeek by remember { mutableStateOf(selectedDate.clone() as Calendar) }
-
-    // Obtiene los días de la semana basados en la fecha seleccionada
-    var weekDays by remember { mutableStateOf(getWeekDays(currentWeek)) }
-
-    // Estados para controlar el menú desplegable
-    var expandedMonth by remember { mutableStateOf(false) }
-    var expandedYear by remember { mutableStateOf(false) }
-    val months = (0..11).map { monthIndex ->
-        Calendar.getInstance().apply {
-            set(Calendar.MONTH, monthIndex)
-        }.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault())
-    }
-    val years = (2024..2100).toList()
-
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-
+        // Encabezado Mes y Vista Seleccionable
         Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Selector de mes
+            //Flecha izquierda
+            IconButton(onClick = {
+                if(viewMode == "Semana"){
+                    selectedDate.add(Calendar.WEEK_OF_YEAR, -1)
+                    weekDays = getWeekDays(selectedDate, viewMode)
+                } else{
+                    selectedDate.add(Calendar.MONTH, -1)
+                    weekDays = getMonthDays(selectedDate)
+                }
+            }) {
+                Icon(Icons.Default.ArrowCircleLeft, contentDescription = "Anterior")
+            }
+
+            // Texto de mes clicable
             Box {
                 Text(
-                    text = currentWeek.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault())!!,
-                    style = MaterialTheme.typography.titleMedium,
+                    text = SimpleDateFormat("MMMM", Locale.getDefault()).format(selectedDate.time),
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier
-                        .clickable { expandedMonth = true }
-                        .padding(8.dp)
+                    modifier = Modifier.clickable { expandedMonth = true }
                 )
                 DropdownMenu(
                     expanded = expandedMonth,
                     onDismissRequest = { expandedMonth = false }
                 ) {
+                    val months = listOf(
+                        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+                        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+                    )
                     months.forEachIndexed { index, month ->
-                        DropdownMenuItem(
-                            text = { Text(text = month) },
-                            onClick = {
-                                currentWeek.set(Calendar.MONTH, index)
-                                weekDays = getWeekDays(currentWeek)
-                                expandedMonth = false
-                            }
-                        )
+                        DropdownMenuItem(text = { Text(month) }, onClick = {
+                            selectedDate.set(Calendar.MONTH, index)
+                            weekDays = getWeekDays(selectedDate, viewMode)
+                            expandedMonth = false
+                        })
                     }
                 }
             }
 
-            // Selector de año
+            // Texto de año clicable
             Box {
                 Text(
-                    text = currentWeek.get(Calendar.YEAR).toString(),
-                    style = MaterialTheme.typography.titleMedium,
+                    text = SimpleDateFormat("yyyy", Locale.getDefault()).format(selectedDate.time),
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier
-                        .clickable { expandedYear = true }
-                        .padding(8.dp)
+                    modifier = Modifier.clickable { expandedYear = true }
                 )
                 DropdownMenu(
                     expanded = expandedYear,
                     onDismissRequest = { expandedYear = false }
                 ) {
+                    val currentYear = selectedDate.get(Calendar.YEAR)
+                    val years = (2024 ..2050).toList()
                     years.forEach { year ->
-                        DropdownMenuItem(
-                            text = { Text(text = year.toString()) },
-                            onClick = {
-                                currentWeek.set(Calendar.YEAR, year)
-                                weekDays = getWeekDays(currentWeek)
-                                expandedYear = false
-                            }
-                        )
+                        DropdownMenuItem(text = { Text(year.toString()) }, onClick = {
+                            selectedDate.set(Calendar.YEAR, year)
+                            weekDays = getWeekDays(selectedDate, viewMode)
+                            expandedYear = false
+                        })
                     }
                 }
+            }
+
+            //Flecha derecha
+            IconButton(onClick = {
+                if (viewMode == "Semana"){
+                    selectedDate.add(Calendar.WEEK_OF_YEAR, 1)
+                    weekDays = getWeekDays(selectedDate, viewMode)
+                } else{
+                    selectedDate.add(Calendar.MONTH, 1)
+                    weekDays = getMonthDays(selectedDate)
+                }
+            }) {
+                Icon(Icons.Default.ArrowCircleRight, contentDescription = "Siguiente")
             }
         }
 
+        // Botón de Vista Completa o Semana
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.Center
         ) {
-            //Flecha hacia la izquierda
-            IconButton(onClick = {
-                currentWeek.add(Calendar.WEEK_OF_YEAR, -1) //Retrocede una semana
-                weekDays = getWeekDays(currentWeek) // Actualiza los días de la semana
-            }) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Retroceder una semana"
-                )
+            ToggleButton(viewMode) { mode ->
+                viewMode = mode
+                weekDays = if (mode == "Semana") getWeekDays(selectedDate, mode)
+                else getMonthDays(selectedDate)
             }
+        }
 
-            // Usa LazyRow para mostrar los días de la semana en una fila desplazable horizontalmente
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp), // Espaciado entre días
-                modifier = Modifier.weight(1f) // Usa todo el ancho de la pantalla
+        // Vista de Semana o Mes
+        if (viewMode == "Semana") {
+            WeekDaysRow(weekDays, selectedDate) { newDate ->
+                selectedDate = newDate
+            }
+        } else {
+            MonthView(selectedDate) { newDate ->
+                selectedDate = newDate
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Lista de Eventos
+        Text(
+            text = "Próximas actividades",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(vertical = 8.dp)
+        )
+        EventList(selectedDate, eventsByDate.value, navController)
+    }
+}
+
+@Composable
+fun MonthView(selectedDate: Calendar, onDateSelected: (Calendar) -> Unit) {
+    val monthDays = getMonthDays(selectedDate)
+    LazyVerticalGrid(columns = GridCells.Fixed(7), modifier = Modifier.fillMaxWidth()) {
+        items(monthDays.size) { index ->
+            val date = monthDays[index]
+            val isSelected = isSameDay(date, selectedDate)
+            Box(
+                modifier = Modifier
+                    .padding(4.dp)
+                    .size(40.dp)
+                    .background(
+                        if (isSelected) MaterialTheme.colorScheme.primary else Color.LightGray,
+                        shape = CircleShape
+                    )
+                    .clickable { onDateSelected(date) },
+                contentAlignment = Alignment.Center
             ) {
-                // Recorre cada día de la semana
-                items(weekDays.size) { index ->
-                    val date = weekDays[index] // Obtén el día actual
-                    // Comprueba si el día es el mismo que el seleccionado
-                    val isSelected = isSameDay(date, selectedDate)
-
-                    // Cada día se muestra como un círculo clicable
-                    Box(
-                        contentAlignment = Alignment.Center, // Centra el contenido (número del día)
-                        modifier = Modifier
-                            .size(50.dp) // Tamaño del círculo
-                            .background(
-                                if (isSelected) MaterialTheme.colorScheme.primary else Color.LightGray, // Color según selección
-                                shape = CircleShape // Forma circular
-                            )
-                            .clickable { onDateSelected(date) } // Cambia la fecha seleccionada al hacer clic
-                    ) {
-                        // Texto que muestra el número del día
-                        Text(
-                            text = date.get(Calendar.DAY_OF_MONTH).toString(),
-                            color = if (isSelected) Color.White else Color.Black, // Color según selección
-                            fontWeight = FontWeight.Bold, // Texto en negrita
-                            fontSize = 16.sp // Tamaño de fuente
-                        )
-                    }
-                }
-            }
-
-            // Flecha hacia la derecha
-            IconButton(onClick = {
-                currentWeek.add(Calendar.WEEK_OF_YEAR, 1) // Avanza una semana
-                weekDays = getWeekDays(currentWeek) // Actualiza los días de la semana
-            }) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = "Avanzar semana"
+                Text(
+                    text = date.get(Calendar.DAY_OF_MONTH).toString(),
+                    color = if (isSelected) Color.White else Color.Black,
+                    fontWeight = FontWeight.Bold
                 )
+            }
+        }
+    }
+}
+
+fun getMonthDays(baseDate: Calendar): List<Calendar> {
+    val result = mutableListOf<Calendar>()
+    val firstDayOfMonth = baseDate.clone() as Calendar
+    firstDayOfMonth.set(Calendar.DAY_OF_MONTH, 1)
+    val daysInMonth = firstDayOfMonth.getActualMaximum(Calendar.DAY_OF_MONTH)
+
+    repeat(daysInMonth) {
+        result.add(firstDayOfMonth.clone() as Calendar)
+        firstDayOfMonth.add(Calendar.DAY_OF_MONTH, 1)
+    }
+    return result
+}
+
+@Composable
+fun ToggleButton(viewMode: String, onModeChange: (String) -> Unit) {
+    Row(
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.LightGray, shape = CircleShape)
+    ) {
+        val modes = listOf("Mes completo", "Semana")
+        modes.forEach { mode ->
+            Text(
+                text = mode,
+                color = if (mode == viewMode) Color.White else Color.Black,
+                modifier = Modifier
+                    .padding(8.dp)
+                    .background(
+                        if (mode == viewMode) MaterialTheme.colorScheme.primary else Color.Transparent,
+                        shape = CircleShape
+                    )
+                    .clickable { onModeChange(mode) },
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+@Composable
+fun WeekDaysRow(weekDays: List<Calendar>, selectedDate: Calendar, onDateSelected: (Calendar) -> Unit) {
+    LazyRow(
+        horizontalArrangement = Arrangement.SpaceAround,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        items(weekDays.size) { index ->
+            val date = weekDays[index]
+            val isSelected = isSameDay(date, selectedDate)
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.clickable { onDateSelected(date) }
+            ) {
+                Text(
+                    text = SimpleDateFormat("E", Locale.getDefault()).format(date.time),
+                    fontSize = 14.sp,
+                    color = Color.Gray
+                )
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(
+                            if (isSelected) MaterialTheme.colorScheme.primary else Color.LightGray,
+                            shape = CircleShape
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = date.get(Calendar.DAY_OF_MONTH).toString(),
+                        color = if (isSelected) Color.White else Color.Black,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
     }
@@ -317,18 +384,18 @@ fun groupEventsByDate(events: List<Event>): Map<String, List<Event>> {
     }.filterKeys { it.isNotEmpty() } // Filtra claves vacías
 }
 
-
-fun getWeekDays(baseDate: Calendar): List<Calendar> {
-    // Ajusta el calendario al primer día de la semana
+fun getWeekDays(baseDate: Calendar, viewMode: String): List<Calendar> {
+    val result = mutableListOf<Calendar>()
     val startOfWeek = baseDate.clone() as Calendar
-    startOfWeek.set(Calendar.DAY_OF_WEEK, startOfWeek.firstDayOfWeek)
+    startOfWeek.firstDayOfWeek = Calendar.MONDAY
+    startOfWeek.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
 
-    // Genera una lista con los 7 días de la semana
-    return (0..6).map {
-        (startOfWeek.clone() as Calendar).apply {
-            add(Calendar.DAY_OF_WEEK, it) // Avanza un día en cada iteración
-        }
+    val days = if (viewMode == "Semana") 7 else 30
+    repeat(days) {
+        result.add(startOfWeek.clone() as Calendar)
+        startOfWeek.add(Calendar.DAY_OF_MONTH, 1)
     }
+    return result
 }
 
 fun isSameDay(date1: Calendar, date2: Calendar): Boolean {
