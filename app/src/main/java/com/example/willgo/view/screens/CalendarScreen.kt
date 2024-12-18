@@ -61,7 +61,6 @@ fun CalendarScreen(
         )
     }
 
-
     var expandedMonth by remember { mutableStateOf(false) }
     var expandedYear by remember { mutableStateOf(false) }
 
@@ -130,7 +129,11 @@ fun CalendarScreen(
                     months.forEachIndexed { index, month ->
                         DropdownMenuItem(text = { Text(month) }, onClick = {
                             selectedDate.set(Calendar.MONTH, index)
-                            weekDays = getWeekDays(selectedDate, viewMode)
+                            weekDays = if (viewMode == "Semana") {
+                                        getWeekDays(selectedDate, viewMode)
+                                        } else{
+                                            getMonthDays(selectedDate)
+                                        }
                             expandedMonth = false
                         })
                     }
@@ -154,7 +157,11 @@ fun CalendarScreen(
                     years.forEach { year ->
                         DropdownMenuItem(text = { Text(year.toString()) }, onClick = {
                             selectedDate.set(Calendar.YEAR, year)
-                            weekDays = getWeekDays(selectedDate, viewMode)
+                            weekDays = if (viewMode == "Semana"){
+                                            getWeekDays(selectedDate, viewMode)
+                                        } else {
+                                            getMonthDays(selectedDate)
+                                        }
                             expandedYear = false
                         })
                     }
@@ -193,7 +200,7 @@ fun CalendarScreen(
                 selectedDate = newDate
             }
         } else {
-            MonthView(selectedDate) { newDate ->
+            MonthView( weekDays,selectedDate) { newDate ->
                 selectedDate = newDate
             }
         }
@@ -212,8 +219,7 @@ fun CalendarScreen(
 }
 
 @Composable
-fun MonthView(selectedDate: Calendar, onDateSelected: (Calendar) -> Unit) {
-    val monthDays = getMonthDays(selectedDate)
+fun MonthView(monthDays: List<Calendar>,selectedDate: Calendar, onDateSelected: (Calendar) -> Unit) {
     LazyVerticalGrid(columns = GridCells.Fixed(7), modifier = Modifier.fillMaxWidth()) {
         items(monthDays.size) { index ->
             val date = monthDays[index]
