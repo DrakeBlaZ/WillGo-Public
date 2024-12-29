@@ -88,6 +88,7 @@ fun EventDataScreen(
         item { WillGoButtons(event, goAlone) }
         item { EventLocation(event) }
         item { ContactSection(event) }
+//        item { AddToFavouritesButton(event)}
     }
 }
 
@@ -473,7 +474,7 @@ suspend fun addToFavorite(event: Event) {
     val client = getClient()
     val user = getUser()
     try {
-        client.postgrest["Eventos_favoritos"].insert(mapOf("event_id" to event.id, "user_nickname" to user.nickname))
+        client.postgrest["Eventos_favoritos"].insert(FavoriteEvent(event_id = event.id, user_nickname = user.nickname))
     } catch (e: Exception) {
         Log.e("addToFavorite", "Error adding to favorites: $e")
     }
@@ -500,7 +501,7 @@ suspend fun checkIfFavorite(event: Event): Boolean {
 
     return try {
         val response = client.postgrest["Eventos_favoritos"]
-            .select() {
+            .select {
                 filter {
                     eq("event_id", event.id)
                     eq("user_nickname", user.nickname)
