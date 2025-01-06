@@ -3,6 +3,7 @@ package com.example.willgo.view.screens
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,11 +15,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.AvTimer
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -50,6 +54,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.willgo.data.Comment
 import com.example.willgo.data.Event
+import com.example.willgo.data.FavoriteEvent
 import com.example.willgo.data.SharedCar
 import com.example.willgo.data.User.User
 import com.example.willgo.data.User.UserResponse
@@ -68,6 +73,7 @@ fun EventDataScreen(
     paddingValues: PaddingValues,
     onBack: () -> Unit,
     goAlone: () -> Unit,
+    addToFavorites: () -> Unit
 ) {
 
 
@@ -78,7 +84,7 @@ fun EventDataScreen(
             .padding(paddingValues)
     ) {
         // Secciones
-        item { EventHeader(event, onBack) }
+        item { EventHeader(event, onBack, addToFavorites) }
         item { EventDetails(event) }
         item { EventCharacteristics(event) }
         item { EventDescription(event) }
@@ -91,7 +97,14 @@ fun EventDataScreen(
 
 // Encabezado con imagen del evento
 @Composable
-fun EventHeader(event: Event, onBack: () -> Unit) {
+fun EventHeader(event: Event, onBack: () -> Unit, addToFavorites: () -> Unit) {
+    val coroutineScope = rememberCoroutineScope()
+    var isFavorite by remember { mutableStateOf(false) }
+
+    LaunchedEffect(event) {
+        isFavorite = checkIfFavorite(event)
+    }
+
     Box(modifier = Modifier.fillMaxWidth()) {
         AsyncImage(
             model = event.image,
@@ -109,6 +122,29 @@ fun EventHeader(event: Event, onBack: () -> Unit) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = "Volver"
+            )
+        }
+        IconButton(
+            onClick = {
+                isFavorite = !isFavorite
+                coroutineScope.launch {
+                    if (isFavorite) {
+                        addToFavorite(event)
+                    } else {
+                        removeFromFavorite(event)
+                    }
+                }
+                      },
+
+            modifier = Modifier
+                .padding(8.dp)
+                .align(Alignment.TopEnd),
+            colors = IconButtonDefaults.iconButtonColors(Color.White)
+        ) {
+            Icon(
+                imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                contentDescription = if (isFavorite) "Remove from Favorites" else "Add to Favorites",
+                tint = if (isFavorite) Color.Red else Color.Gray
             )
         }
     }
@@ -451,4 +487,52 @@ public fun getClient(): SupabaseClient {
         install(Postgrest)
     }
 }
+
+suspend fun addToFavorite(event: Event) {
+    val client = getClient()
+    val user = getUser()
+    try {
+        client.postgrest["Eventos_favoritos"].insert(FavoriteEvent(event_id = event.id, user_nickname = user.nickname))
+    } catch (e: Exception) {
+        Log.e("addToFavorite", "Error adding to favorites: $e")
+    }
+}
+
+suspend fun removeFromFavorite(event: Event) {
+    val client = getClient()
+    val user = getUser()
+    try {
+        client.postgrest["Eventos_favoritos"].delete {
+            filter {
+                eq("event_id", event.id)
+                eq("user_nickname", user.nickname)
+            }
+        }
+    } catch (e: Exception) {
+        Log.e("removeFromFavorite", "Error removing from favorites: $e")
+    }
+}
+
+suspend fun checkIfFavorite(event: Event): Boolean {
+    val client = getClient()
+    val user = getUser()
+
+    return try {
+        val response = client.postgrest["Eventos_favoritos"]
+            .select {
+                filter {
+                    eq("event_id", event.id)
+                    eq("user_nickname", user.nickname)
+                }
+            }
+            .decodeList<FavoriteEvent>()
+
+        response.isNotEmpty() // Returns true if the event is a favorite
+    } catch (e: Exception) {
+        Log.e("checkIfFavorite", "Error checking favorite status: ${e.message}")
+        false // Default to not a favorite if there's an error
+    }
+}
+
+
 

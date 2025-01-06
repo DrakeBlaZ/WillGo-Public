@@ -54,7 +54,8 @@ fun AppNavigation() {
                     event = it,
                     paddingValues = PaddingValues(),
                     onBack = { navController.popBackStack() },
-                    goAlone = {navController.navigate("goAlone/${event.id}")}//,
+                    goAlone = {navController.navigate("goAlone/${event.id}")},
+                    addToFavorites = {}//,
                //     goCar ={navController.navigate("carListScreen/${event}")}
                 )
             }

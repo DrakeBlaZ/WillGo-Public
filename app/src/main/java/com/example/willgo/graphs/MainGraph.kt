@@ -14,6 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.willgo.data.Category
 import com.example.willgo.data.Event
+import com.example.willgo.data.FavoriteEvent
 import com.example.willgo.data.User.User
 import com.example.willgo.view.screens.CalendarScreen
 import com.example.willgo.view.screens.EventDataScreen
@@ -171,8 +172,7 @@ fun MainNavGraph(navController: NavHostController, paddingValues: PaddingValues,
             val filteredEvents = events.value.filter { it.id.toInt() == event }
             EventDataScreen(filteredEvents[0], paddingValues, onBack = { navController.popBackStack() },
                 goAlone ={navController.navigate("goAlone/${filteredEvents[0].id}")},
-
-            )
+                addToFavorites = {})
         }
 
         composable(
@@ -350,4 +350,17 @@ fun buildSearchRoute(
         type?.takeIf { it != "Todos" }?.let { append("type=$it&") }
         date?.takeIf { it != "Todos" }?.let { append("date=$it&") }
     }.removeSuffix("&")
+}
+
+suspend fun getFavoriteEventIds(): List<Long> {
+    val client = getClient()
+    return try {
+        client.postgrest["Eventos_favoritos"]
+            .select()
+            .decodeList<FavoriteEvent>()
+            .map { it.event_id }
+    } catch (e: Exception) {
+        Log.e("getFavoriteEventIds", "Error retrieving favorite event IDs: ${e.message}")
+        emptyList()
+    }
 }
